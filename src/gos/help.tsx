@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { HelpCircle, X, Play } from "lucide-react";
 import { tourKeyForPath, startTour } from "./tours";
 
-type HelpContent = {
+export type HelpContent = {
   title: string;
   purpose?: string;
   dataSource?: string;
@@ -44,6 +44,16 @@ export function useRegisterHelp(content: HelpContent | null) {
     return () => setContent(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(content)]);
+}
+
+/** Push HelpContent into the drawer and open it, from anywhere under
+ *  HelpProvider (e.g. the sidebar, on a per-item info click) without
+ *  waiting for a page to call useRegisterHelp(). */
+export function useHelpDispatch() {
+  const { setContent, setOpen } = useContext(HelpCtx);
+  return {
+    showHelp: (content: HelpContent) => { setContent(content); setOpen(true); },
+  };
 }
 
 export function HelpButton() {
@@ -149,7 +159,7 @@ export function HelpDrawer() {
 }
 
 function HelpBlock({ label, text, items, tone }: { label: string; text?: string; items?: string[]; tone?: "danger" | "accent" }) {
-  const color = tone === "danger" ? "#c1121f" : tone === "accent" ? "var(--tdia-blue)" : "var(--tdia-text)";
+  const color = tone === "danger" ? "#ff6b7a" : tone === "accent" ? "var(--tdia-blue)" : "var(--tdia-text)";
   return (
     <div className="gos-card" style={{ padding: 12 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
