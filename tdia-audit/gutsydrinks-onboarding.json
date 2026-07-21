@@ -1,0 +1,24 @@
+{
+  "client_name": "Gutsy Drinks",
+  "onboarding": {
+    "nom_entreprise": "Gutsy Drinks",
+    "site_web": "https://gutsydrinks.com/fr",
+    "industrie": "Boissons fonctionnelles fermentees (kombucha, biere de gingembre)",
+    "modele": "DTC e-commerce + distribution retail (points de vente epiceries specialisees, restaurants, fut)",
+    "marche": "Quebec / Canada francophone (site bilingue FR/EN)",
+    "produits_prix": "Kombucha+ (avec plantes/herbes) caisse 8x355ml a 30.32 CAD, biere de gingembre sans sucre meme prix, coffrets mixtes 30.32 CAD, code GUTSY5OFF 5% des 4 caisses, livraison gratuite des 3 caisses",
+    "promesse": "Boissons fermentees a partir d'ingredients biologiques entiers, sans additifs, sans conservateurs, sans aromes meme naturels. Nourrit le microbiome intestinal. Cofondatrice naturopathe (Melanie Marois) selectionne les herbes. Brasse a Montreal.",
+    "clients_actuels": "Consommateurs sante-conscients quebecois, 25-45 ans, interet pour microbiote/probiotiques, alternatives sans alcool ou low-sugar",
+    "competiteurs": "risekombucha.com (Rise, autre marque montrealaise), bukombucha.com (Bu Kombucha), gtskombucha.com (GT's Living Foods US), healthade.com (Health-Ade)",
+    "pages_facebook_competiteurs": "https://www.facebook.com/risekombucha, https://www.facebook.com/bukombucha, https://www.facebook.com/GTsKombucha",
+    "historique_marketing": "Meta Ads presence limitee, presence organique Instagram, distribution retail principale via epiceries specialisees, degustations en magasin",
+    "objectifs": "Croitre les ventes DTC directes, positionner Gutsy comme reference kombucha sante au Quebec, differencier vs Rise sur l'ingredient naturopathique",
+    "landing_pages": "https://gutsydrinks.com/fr, https://gutsydrinks.com/fr/collections/kombucha, https://gutsydrinks.com/fr/pages/notre-vision"
+  },
+  "options": {
+    "country": "CA",
+    "geo": "CA",
+    "max_reviews_per_domain": 50,
+    "reddit_posts_per_query": 6
+  }
+}

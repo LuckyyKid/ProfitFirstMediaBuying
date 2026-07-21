@@ -1,0 +1,1 @@
+ALTER TABLE public.client_progress ADD COLUMN IF NOT EXISTS callback_notified_at timestamptz;

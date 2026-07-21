@@ -1,0 +1,1 @@
+ALTER TABLE public.client_progress ADD COLUMN IF NOT EXISTS manual_contract_pdf_url TEXT;

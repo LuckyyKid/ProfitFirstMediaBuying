@@ -1,0 +1,14 @@
+
+ALTER TABLE public.gos_forecast_updates
+  ADD COLUMN IF NOT EXISTS prior_mean NUMERIC,
+  ADD COLUMN IF NOT EXISTS prior_variance NUMERIC,
+  ADD COLUMN IF NOT EXISTS likelihood_mean NUMERIC,
+  ADD COLUMN IF NOT EXISTS likelihood_variance NUMERIC,
+  ADD COLUMN IF NOT EXISTS posterior_mean NUMERIC,
+  ADD COLUMN IF NOT EXISTS posterior_variance NUMERIC,
+  ADD COLUMN IF NOT EXISTS posterior_ci_low NUMERIC,
+  ADD COLUMN IF NOT EXISTS posterior_ci_high NUMERIC,
+  ADD COLUMN IF NOT EXISTS kalman_gain NUMERIC,
+  ADD COLUMN IF NOT EXISTS drift_signal TEXT,
+  ADD COLUMN IF NOT EXISTS engine_version TEXT,
+  ADD COLUMN IF NOT EXISTS engine_output JSONB;

@@ -1,0 +1,157 @@
+/* GOS design tokens — original dark navy palette (matches :root in index.css).
+   Applied only under .gos-root to avoid affecting the rest of the app. */
+
+.gos-root {
+  --tdia-blue: hsl(210 92% 53%);
+  --tdia-blue-light: hsl(210 92% 63%);
+  --tdia-navy: hsl(220 45% 8%);
+  --tdia-navy-2: hsl(220 45% 14%);
+  --tdia-card-bg: hsl(220 45% 14%);
+  --tdia-slate: hsl(215 20% 65%);
+  --tdia-bg: hsl(220 45% 8%);
+  --tdia-card: hsl(220 45% 14%);
+  --tdia-border: hsl(220 45% 25%);
+  --tdia-text: hsl(210 40% 98%);
+  --tdia-muted: hsl(215 20% 65%);
+  --tdia-radius: 8px;
+  --tdia-shadow: none;
+
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--tdia-text);
+  background: var(--tdia-bg);
+  min-height: 100vh;
+}
+
+.gos-root .gos-card {
+  background: var(--tdia-card);
+  border: 1px solid var(--tdia-border);
+  border-radius: var(--tdia-radius);
+  box-shadow: var(--tdia-shadow);
+  padding: 16px;
+}
+
+.gos-root .gos-btn-primary {
+  background: var(--tdia-blue);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s;
+  font-size: 12px;
+}
+.gos-root .gos-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+.gos-root .gos-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.gos-root .gos-btn-secondary {
+  background: hsl(220 45% 20%);
+  color: var(--tdia-text);
+  border: 1px solid var(--tdia-border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 12px;
+}
+.gos-root .gos-btn-secondary:hover { background: hsl(220 45% 25%); }
+
+.gos-root .gos-input,
+.gos-root .gos-select,
+.gos-root .gos-textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--tdia-border);
+  border-radius: 6px;
+  background: hsl(220 45% 14%);
+  font-size: 13px;
+  color: var(--tdia-text);
+  font-family: inherit;
+}
+.gos-root .gos-input::placeholder,
+.gos-root .gos-textarea::placeholder { color: var(--tdia-muted); }
+.gos-root .gos-input:focus,
+.gos-root .gos-select:focus,
+.gos-root .gos-textarea:focus {
+  outline: 1px solid var(--tdia-blue);
+  outline-offset: -1px;
+}
+
+.gos-root .gos-label {
+  display: block;
+  font-size: 11px;
+  color: var(--tdia-muted);
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gos-root .gos-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  color: var(--tdia-text);
+}
+.gos-root .gos-table th {
+  text-align: left;
+  padding: 8px 12px;
+  color: var(--tdia-muted);
+  font-weight: 500;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--tdia-border);
+  background: hsl(220 45% 12% / 0.7);
+}
+.gos-root .gos-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--tdia-border);
+}
+.gos-root .gos-table tr:hover td { background: hsl(220 45% 20% / 0.4); }
+
+.gos-root .gos-sidebar {
+  width: 224px;
+  background: hsl(220 45% 10%);
+  border-right: 1px solid var(--tdia-border);
+  min-height: 100vh;
+  padding: 12px 8px;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+.gos-root .gos-sidebar-group {
+  margin-top: 12px;
+}
+.gos-root .gos-sidebar-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tdia-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 8px 4px;
+}
+.gos-root .gos-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--tdia-text);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 1px;
+}
+.gos-root .gos-nav-link:hover { background: hsl(220 45% 20%); }
+.gos-root .gos-nav-link.active {
+  background: hsl(210 92% 53% / 0.15);
+  color: var(--tdia-blue);
+}
+.gos-root .gos-nav-link.disabled {
+  color: hsl(215 20% 45%);
+  pointer-events: none;
+  cursor: not-allowed;
+}

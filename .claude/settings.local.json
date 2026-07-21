@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(grep -E \"\\\\.\\(tsx?|css\\)$\")",
+      "Bash(grep *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(cat)",
+      "Bash(bash /tmp/twenty_reskin.sh)",
+      "Bash(bash /tmp/twenty_reskin2.sh)",
+      "Bash(bash *)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)",
+      "Bash(du -sh twenty-main node_modules dist .env)",
+      "Bash(ls -la .env)",
+      "Read(//c/Users/bafin/Downloads/**)",
+      "Read(//c/Users/bafin/Desktop/**)"
+    ]
+  }
+}

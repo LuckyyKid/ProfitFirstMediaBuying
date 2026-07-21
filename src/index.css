@@ -1,0 +1,213 @@
+@import url("https://rsms.me/inter/inter.css");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 45% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 45% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 45% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 92% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 45% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 45% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 210 92% 53%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 45% 25%;
+    --input: 220 45% 20%;
+    --ring: 210 92% 53%;
+
+    --radius: 1rem;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(220, 45%, 8%), hsl(220, 50%, 6%));
+    --gradient-card: linear-gradient(135deg, hsl(220, 45%, 14%) 0%, hsl(220, 45%, 12%) 100%);
+    --shadow-glow: 0 0 40px hsl(210 92% 53% / 0.2);
+    --shadow-card: 0 10px 40px -10px hsl(210 92% 53% / 0.15);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 45% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 45% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 45% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 92% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 45% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 45% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 210 92% 53%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 45% 25%;
+    --input: 220 45% 20%;
+    --ring: 210 92% 53%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: var(--gradient-primary);
+    min-height: 100vh;
+  }
+}
+
+/* ============================================================
+   Admin/CRM layout scope. Applied via `.twenty-theme` wrapper.
+   Uses the original dark navy palette (matches :root).
+   Structural Twenty layout is kept; only colors reverted.
+   ============================================================ */
+.twenty-theme {
+  --background: 220 45% 8%;
+  --foreground: 210 40% 98%;
+  --card: 220 45% 14%;
+  --card-foreground: 210 40% 98%;
+  --popover: 220 45% 14%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 92% 53%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 220 45% 20%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 220 45% 20%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 210 92% 53%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 220 45% 25%;
+  --input: 220 45% 20%;
+  --ring: 210 92% 53%;
+  --radius: 0.5rem;
+  --gradient-primary: linear-gradient(135deg, hsl(220, 45%, 8%), hsl(220, 50%, 6%));
+  --gradient-card: linear-gradient(135deg, hsl(220, 45%, 14%) 0%, hsl(220, 45%, 12%) 100%);
+  --shadow-card: 0 10px 40px -10px hsl(210 92% 53% / 0.15);
+
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+.twenty-theme h1,
+.twenty-theme h2,
+.twenty-theme h3 {
+  letter-spacing: -0.01em;
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: var(--shadow-card);
+  }
+  
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+/* Static stars background */
+.stars-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.stars-bg::before,
+.stars-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, hsl(210 40% 98% / 0.25), transparent),
+    radial-gradient(1px 1px at 25% 40%, hsl(210 40% 98% / 0.15), transparent),
+    radial-gradient(1.5px 1.5px at 45% 10%, hsl(210 40% 98% / 0.3), transparent),
+    radial-gradient(1px 1px at 60% 70%, hsl(210 40% 98% / 0.2), transparent),
+    radial-gradient(1px 1px at 75% 25%, hsl(210 40% 98% / 0.15), transparent),
+    radial-gradient(1.5px 1.5px at 85% 55%, hsl(210 40% 98% / 0.25), transparent),
+    radial-gradient(1px 1px at 5% 80%, hsl(210 40% 98% / 0.2), transparent),
+    radial-gradient(1px 1px at 35% 90%, hsl(210 40% 98% / 0.15), transparent),
+    radial-gradient(1.5px 1.5px at 92% 85%, hsl(210 40% 98% / 0.2), transparent),
+    radial-gradient(1px 1px at 50% 50%, hsl(210 40% 98% / 0.1), transparent),
+    radial-gradient(1px 1px at 15% 60%, hsl(210 40% 98% / 0.18), transparent),
+    radial-gradient(1px 1px at 70% 45%, hsl(210 40% 98% / 0.12), transparent);
+}
+
+.stars-bg::after {
+  background-image:
+    radial-gradient(1px 1px at 18% 35%, hsl(210 92% 53% / 0.15), transparent),
+    radial-gradient(1px 1px at 42% 65%, hsl(210 40% 98% / 0.12), transparent),
+    radial-gradient(1.5px 1.5px at 68% 12%, hsl(210 40% 98% / 0.22), transparent),
+    radial-gradient(1px 1px at 88% 38%, hsl(210 40% 98% / 0.1), transparent),
+    radial-gradient(1px 1px at 30% 75%, hsl(210 92% 53% / 0.12), transparent),
+    radial-gradient(1px 1px at 55% 28%, hsl(210 40% 98% / 0.16), transparent),
+    radial-gradient(1.5px 1.5px at 78% 92%, hsl(210 40% 98% / 0.14), transparent),
+    radial-gradient(1px 1px at 8% 48%, hsl(210 40% 98% / 0.18), transparent),
+    radial-gradient(1px 1px at 95% 68%, hsl(210 92% 53% / 0.1), transparent),
+    radial-gradient(1px 1px at 62% 88%, hsl(210 40% 98% / 0.13), transparent);
+}

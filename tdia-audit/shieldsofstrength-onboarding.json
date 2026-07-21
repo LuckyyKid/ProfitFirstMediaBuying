@@ -1,0 +1,24 @@
+{
+  "client_name": "Shields of Strength",
+  "onboarding": {
+    "nom_entreprise": "Shields of Strength",
+    "site_web": "https://www.shieldsofstrength.com/",
+    "industrie": "Bijoux de foi chretienne (colliers, croix, dog tags gravees d'ecritures bibliques)",
+    "modele": "DTC e-commerce, US-focused (livraison gratuite sur commandes 85$+ USA)",
+    "marche": "Etats-Unis - chretiens pratiquants, militaires actifs et veterans, premiers intervenants (police/pompiers), athletes, hommes de metier",
+    "produits_prix": "Colliers croix 59.99-89.99 USD, colliers homme 69.99-89.99, colliers femme des 59.99, ligne bijoux en or fine jewelry, bracelets, coffrets cadeaux 209.99-279.99. Acier inoxydable durable + or. Garantie a vie.",
+    "promesse": "Wear Your Faith Boldly. Strength in Scripture. Chaque piece est gravee d'un verset biblique (Philippiens 4:13, Proverbes 30:5, Matthieu 4:19, Isaie 6:8, Zacharie 4:6). Fondee par Kenny Vaughan pour inspirer foi et courage. Durabilite militaire, message chretien, portee quotidienne.",
+    "clients_actuels": "Chretiens americains 25-65 ans, militaires et familles de militaires, premiers intervenants, athletes universitaires et pros, acheteurs de cadeaux religieux (bapteme, confirmation, remise de diplome, deploiement)",
+    "competiteurs": "jamesavery.com (James Avery - le geant du bijou chretien US), elevatedfaith.com (Elevated Faith - streetwear + bijoux chretiens jeunes), christianstrong.com (Christian Strong - bijoux et accessoires chretiens), soulstruck.com, ruggedcross.com",
+    "pages_facebook_competiteurs": "https://www.facebook.com/JamesAveryArtisanJewelry, https://www.facebook.com/elevatedfaith, https://www.facebook.com/christianstrong",
+    "historique_marketing": "Presence organique reseaux sociaux, storytelling founder Kenny Vaughan, distribution DTC principale, endorsements militaires et athletes, blog contenu foi",
+    "objectifs": "Croitre ventes DTC US, positionner Shields of Strength comme reference bijou chretien durable vs James Avery (plus premium/tradi), etendre segments athletes et first responders, augmenter AOV via coffrets cadeaux",
+    "landing_pages": "https://www.shieldsofstrength.com/, https://www.shieldsofstrength.com/about-us/, https://www.shieldsofstrength.com/reviews/"
+  },
+  "options": {
+    "country": "US",
+    "geo": "US",
+    "max_reviews_per_domain": 50,
+    "reddit_posts_per_query": 6
+  }
+}

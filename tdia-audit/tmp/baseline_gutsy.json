@@ -1,0 +1,16 @@
+{
+  "audit_id": "20260717-050447",
+  "reviews": 0,
+  "reddit_kept": 48,
+  "reddit_raw": 48,
+  "ads": 13,
+  "client_pages": 3,
+  "trends_kw": 0,
+  "trends_errors": 2,
+  "n_icp": 15,
+  "n_angles": 10,
+  "report_wc": 2946,
+  "verbatim_voc": {"total": 6, "missing": 0, "ratio_pct": 0, "self_cites": 0},
+  "verbatim_icp": {"total": 38, "missing": 35, "ratio_pct": 92, "self_cites": 0},
+  "verbatim_report": {"total": 40, "missing": 37, "ratio_pct": 92, "self_cites": 0}
+}

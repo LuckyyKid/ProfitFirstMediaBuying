@@ -1,0 +1,16 @@
+project_id = "gcgwcjeryahysjwfznww"
+
+[functions.gos-shopify-oauth-start]
+verify_jwt = false
+
+[functions.gos-shopify-oauth-callback]
+verify_jwt = false
+
+[functions.gos-google-oauth-start]
+verify_jwt = false
+
+[functions.gos-google-oauth-callback]
+verify_jwt = false
+
+[functions.gos-daily-digest]
+verify_jwt = false

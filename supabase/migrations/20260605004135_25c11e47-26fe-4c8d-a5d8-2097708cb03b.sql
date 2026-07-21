@@ -1,0 +1,1 @@
+UPDATE public.client_progress SET contract_signed = false, contract_completed_at = NULL, updated_at = now() WHERE contract_signed = true AND docusign_signed_at IS NULL AND docusign_pdf_url IS NULL;

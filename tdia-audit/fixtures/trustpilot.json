@@ -1,0 +1,162 @@
+[
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 5,
+  "title": "Enfin!",
+  "text": "Enfin une crème qui n'irrite pas ma peau réactive. J'ai tout essayé en pharmacie, rien marchait. Après 2 semaines mes rougeurs ont diminué.",
+  "date": "2026-05-12",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 5,
+  "title": "Livraison rapide",
+  "text": "Commandé lundi, reçu mercredi à Québec. Le sérum sent bon sans être parfumé, ma peau sensible le tolère parfaitement.",
+  "date": "2026-04-28",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 4,
+  "title": "Bon produit, cher",
+  "text": "Le produit est excellent mais 89$ pour un sérum ça fait mal au portefeuille. J'hésite à racheter même si ça marche.",
+  "date": "2026-06-02",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 2,
+  "title": "Déçue du service",
+  "text": "Ma commande a pris 12 jours et personne ne répondait à mes courriels. Le produit est correct mais le service client est inexistant.",
+  "date": "2026-03-15",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 5,
+  "title": "Fait au Québec",
+  "text": "J'achète local et c'est un gros plus pour moi. La liste d'ingrédients est courte et je comprends tout ce qu'il y a dedans.",
+  "date": "2026-05-30",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 3,
+  "title": "Résultats lents",
+  "text": "Ça fait un mois et je vois pas de différence majeure. Peut-être que je m'attendais à trop avec toutes les reviews positives.",
+  "date": "2026-06-10",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 5,
+  "title": "Peau de grossesse",
+  "text": "Enceinte, je pouvais plus utiliser mes anciens produits avec rétinol. Leur gamme est safe grossesse et ma peau est redevenue normale.",
+  "date": "2026-04-05",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 1,
+  "title": "Réaction allergique",
+  "text": "J'ai fait une réaction au bout de 3 jours. Ils m'ont remboursée rapidement au moins, mais attention si vous avez de l'eczéma.",
+  "date": "2026-02-20",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 4,
+  "title": "Bien mais pot petit",
+  "text": "Le pot de crème dure à peine 5 semaines en usage quotidien. J'aimerais un format plus gros.",
+  "date": "2026-05-18",
+  "verified": true
+ },
+ {
+  "companyDomain": "demoboutique.ca",
+  "rating": 5,
+  "title": "Ado avec acné",
+  "text": "Acheté pour ma fille de 15 ans qui a la peau sensible ET de l'acné. Premier produit qui n'empire pas ses boutons.",
+  "date": "2026-06-20",
+  "verified": true
+ },
+ {
+  "companyDomain": "attitudeliving.com",
+  "rating": 4,
+  "title": "Bonne marque",
+  "text": "Produits corrects et pas chers, disponibles partout. Par contre la texture de la crème est trop liquide à mon goût.",
+  "date": "2026-05-01",
+  "verified": true
+ },
+ {
+  "companyDomain": "attitudeliving.com",
+  "rating": 2,
+  "title": "Reformulation ratée",
+  "text": "Ils ont changé la formule de mon nettoyant préféré et maintenant ça pique les yeux. Pourquoi changer ce qui marche??",
+  "date": "2026-04-12",
+  "verified": true
+ },
+ {
+  "companyDomain": "attitudeliving.com",
+  "rating": 5,
+  "title": "Rapport qualité-prix",
+  "text": "Pour le prix en épicerie c'est imbattable. Pas de la haute cosmétique mais fait la job pour toute la famille.",
+  "date": "2026-06-05",
+  "verified": true
+ },
+ {
+  "companyDomain": "attitudeliving.com",
+  "rating": 3,
+  "title": "Emballage",
+  "text": "Le pompeux se brise toujours après la moitié du produit. Frustrant de devoir dévisser à chaque fois.",
+  "date": "2026-03-22",
+  "verified": true
+ },
+ {
+  "companyDomain": "attitudeliving.com",
+  "rating": 1,
+  "title": "Service client absent",
+  "text": "Produit reçu endommagé, 3 semaines pour avoir une réponse, jamais eu de remboursement. Plus jamais en ligne, en magasin seulement.",
+  "date": "2026-05-25",
+  "verified": true
+ },
+ {
+  "companyDomain": "oneka.ca",
+  "rating": 5,
+  "title": "Ingrédients de la forêt",
+  "text": "J'adore le concept des plantes boréales. Le shampooing est incroyable et l'entreprise est vraiment écolo, pas du greenwashing.",
+  "date": "2026-04-18",
+  "verified": true
+ },
+ {
+  "companyDomain": "oneka.ca",
+  "rating": 4,
+  "title": "Très naturel",
+  "text": "Excellents ingrédients mais l'odeur est très 'herbes' — ma coloc trouve que je sens la tisane. Moi j'aime ça.",
+  "date": "2026-05-08",
+  "verified": true
+ },
+ {
+  "companyDomain": "oneka.ca",
+  "rating": 2,
+  "title": "Pas pour peaux sèches",
+  "text": "Leur crème n'hydrate pas assez pour ma peau très sèche d'hiver québécois. Retour à ma crème de pharmacie.",
+  "date": "2026-01-30",
+  "verified": true
+ },
+ {
+  "companyDomain": "oneka.ca",
+  "rating": 5,
+  "title": "Recharges géniales",
+  "text": "Le système de recharge en vrac est génial, mon pot dure depuis 1 an. Plus de déchets plastiques!",
+  "date": "2026-06-14",
+  "verified": true
+ },
+ {
+  "companyDomain": "oneka.ca",
+  "rating": 3,
+  "title": "Cher pour la quantité",
+  "text": "Beau produit, belle histoire, mais 45$ le format voyage c'est exagéré.",
+  "date": "2026-02-11",
+  "verified": true
+ }
+]

@@ -1,0 +1,23 @@
+{
+  "client_name": "Demo Boutique",
+  "onboarding": {
+    "nom_entreprise": "Demo Boutique",
+    "site_web": "https://demoboutique.ca",
+    "industrie": "E-commerce - soins de la peau naturels",
+    "modele": "e-commerce DTC",
+    "marche": "Quebec / Canada francophone",
+    "produits_prix": "Serums et cremes 39-89 CAD, panier moyen 72 CAD",
+    "promesse": "Soins naturels formules au Quebec pour peaux sensibles",
+    "clients_actuels": "Femmes 28-55, peau sensible ou reactive",
+    "competiteurs": "attitude.com (Attitude Living), theordinary.com, oneka.ca",
+    "pages_facebook_competiteurs": "https://www.facebook.com/attitudeliving, https://www.facebook.com/onekaelements",
+    "historique_marketing": "Meta Ads 3k/mois depuis 8 mois, ROAS 1.8, quelques influenceurs",
+    "objectifs": "ROAS 3+, scaler a 15k/mois",
+    "landing_pages": "https://demoboutique.ca, https://demoboutique.ca/collections/serums"
+  },
+  "options": {
+    "country": "CA",
+    "max_reviews_per_domain": 200,
+    "reddit_posts_per_query": 6
+  }
+}

@@ -1,0 +1,4 @@
+ALTER TABLE public.client_progress
+  ADD COLUMN IF NOT EXISTS followup_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS followup_step INTEGER,
+  ADD COLUMN IF NOT EXISTS callback_due_at TIMESTAMPTZ;

@@ -1,0 +1,74 @@
+{
+ "interest_over_time": {
+  "soins peau sensible": {
+   "2025-08": 62,
+   "2025-09": 58,
+   "2025-10": 66,
+   "2025-11": 71,
+   "2025-12": 78,
+   "2026-01": 85,
+   "2026-02": 88,
+   "2026-03": 74,
+   "2026-04": 63,
+   "2026-05": 59,
+   "2026-06": 57,
+   "2026-07": 55
+  },
+  "cosmétiques québécois": {
+   "2025-08": 40,
+   "2025-09": 42,
+   "2025-10": 48,
+   "2025-11": 74,
+   "2025-12": 81,
+   "2026-01": 45,
+   "2026-02": 44,
+   "2026-03": 52,
+   "2026-04": 58,
+   "2026-05": 61,
+   "2026-06": 63,
+   "2026-07": 66
+  }
+ },
+ "related_queries": {
+  "soins peau sensible": {
+   "top": [
+    {
+     "query": "crème peau sensible visage",
+     "value": 100
+    },
+    {
+     "query": "routine peau sensible",
+     "value": 72
+    }
+   ],
+   "rising": [
+    {
+     "query": "skin barrier réparation",
+     "value": "+250%"
+    },
+    {
+     "query": "soins peau sensible grossesse",
+     "value": "+140%"
+    },
+    {
+     "query": "crème sans parfum québec",
+     "value": "+90%"
+    }
+   ]
+  },
+  "cosmétiques québécois": {
+   "top": [
+    {
+     "query": "marque québécoise cosmétique",
+     "value": 100
+    }
+   ],
+   "rising": [
+    {
+     "query": "acheter local cosmétiques",
+     "value": "+180%"
+    }
+   ]
+  }
+ }
+}

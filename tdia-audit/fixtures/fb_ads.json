@@ -1,0 +1,62 @@
+[
+ {
+  "pageName": "Demo Boutique",
+  "adText": "Peau sensible? Nos sérums formulés au Québec calment les rougeurs en 14 jours. Livraison gratuite dès 75$.",
+  "startDate": "2026-06-01",
+  "displayFormat": "video"
+ },
+ {
+  "pageName": "Demo Boutique",
+  "adText": "-20% sur la routine complète peau réactive. Offre limitée.",
+  "startDate": "2026-06-25",
+  "displayFormat": "static"
+ },
+ {
+  "pageName": "Attitude Living",
+  "adText": "EWG Verified. Des produits sains pour toute la famille, au prix de l'épicerie.",
+  "startDate": "2026-02-10",
+  "displayFormat": "static"
+ },
+ {
+  "pageName": "Attitude Living",
+  "adText": "Nouveau: gamme Oceanly sans plastique. L'hydratation en stick.",
+  "startDate": "2026-05-14",
+  "displayFormat": "video"
+ },
+ {
+  "pageName": "Attitude Living",
+  "adText": "Maman approuvé, dermatologue testé. Découvrez pourquoi 1 famille québécoise sur 3 nous fait confiance.",
+  "startDate": "2026-01-08",
+  "displayFormat": "video"
+ },
+ {
+  "pageName": "Oneka Elements",
+  "adText": "Des plantes boréales sauvages à votre douche. Cosmétiques rechargeables faits au Québec.",
+  "startDate": "2025-11-20",
+  "displayFormat": "video"
+ },
+ {
+  "pageName": "Oneka Elements",
+  "adText": "1000 recharges = 1000 bouteilles de moins dans l'océan. Trouvez votre point de recharge.",
+  "startDate": "2026-03-02",
+  "displayFormat": "carousel"
+ },
+ {
+  "pageName": "The Ordinary",
+  "adText": "Clinical formulations with integrity. Niacinamide 10% + Zinc 1% — $8.90.",
+  "startDate": "2025-09-15",
+  "displayFormat": "static"
+ },
+ {
+  "pageName": "The Ordinary",
+  "adText": "Your skincare routine doesn't need 12 steps. It needs the right 3.",
+  "startDate": "2026-04-22",
+  "displayFormat": "video"
+ },
+ {
+  "pageName": "The Ordinary",
+  "adText": "Azelaic Acid Suspension 10%. Brightens. Evens. $12.20.",
+  "startDate": "2026-02-28",
+  "displayFormat": "static"
+ }
+]

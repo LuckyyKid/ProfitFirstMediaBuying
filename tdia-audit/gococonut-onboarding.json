@@ -1,0 +1,24 @@
+{
+  "client_name": "Go Coconut",
+  "onboarding": {
+    "nom_entreprise": "Go Coconut",
+    "site_web": "https://gococonut.ca/fr",
+    "industrie": "Mobilier modulaire de jeu pour enfants (play couch, canape modulaire imagination-driven)",
+    "modele": "DTC e-commerce, fabrication artisanale au Quebec, essai 30 jours sans risque, garantie a vie",
+    "marche": "Canada (site bilingue FR/EN), focus familles quebecoises et canadiennes",
+    "produits_prix": "Le Coconut (Full Play Couch) 549 CAD, Le Demi-Coconut (version reduite), bundles Discovery/Builder/Architect, accessoires (bounce pads, housses, wedges, rockers), collection Almost-New (reconditionnes jusqu'a 30% de rabais)",
+    "promesse": "Concus pour les familles canadiennes. Fait main au Quebec par des artisans. Produits du Quebec certifies. Garantie a vie. Essai 30 jours. Programme Reloved (durabilite). Mobilier modulaire pour jeu creatif ouvert et developpement de l'imagination.",
+    "clients_actuels": "Parents canadiens 28-45 ans avec jeunes enfants (2-10 ans), conscients de developpement enfant, valorisant sustainability et local, budget moyen-haut (549+ CAD)",
+    "competiteurs": "nuggetcomfort.com (Nugget - le geant americain du play couch), figplayspace.com (Fig - concurrent US premium), barumbaplay.com (Barumba), foamnasium.com, olliekiki.com",
+    "pages_facebook_competiteurs": "https://www.facebook.com/nuggetcomfort, https://www.facebook.com/figplayspace, https://www.facebook.com/barumbaplay",
+    "historique_marketing": "Presence Instagram @gococonutplay, Facebook, Pinterest, TikTok. Couverture medias regionaux (Radio-Canada, La Presse). Marketing organique + word of mouth parents quebecois.",
+    "objectifs": "Croitre ventes DTC canadien, positionner Go Coconut comme reference play couch quebecoise vs Nugget US, capitaliser sur made-in-Quebec et garantie a vie, augmenter conversions via essai 30 jours",
+    "landing_pages": "https://gococonut.ca/fr, https://gococonut.ca/fr/pages/about-us, https://gococonut.ca/fr/products/le-coconut"
+  },
+  "options": {
+    "country": "CA",
+    "geo": "CA",
+    "max_reviews_per_domain": 50,
+    "reddit_posts_per_query": 6
+  }
+}

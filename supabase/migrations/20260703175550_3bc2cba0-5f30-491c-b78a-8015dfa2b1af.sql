@@ -1,0 +1,1 @@
+ALTER TABLE public.client_progress ADD COLUMN IF NOT EXISTS drive_folder_id TEXT, ADD COLUMN IF NOT EXISTS drive_folder_url TEXT;

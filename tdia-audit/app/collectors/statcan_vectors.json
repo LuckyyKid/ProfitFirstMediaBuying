@@ -1,0 +1,158 @@
+{
+  "44-45": {
+    "canada": {
+      "vectorId": "v1446859481",
+      "coordinate": "1.1.1.1.0.0.0.0.0.0",
+      "scian_name": "Retail trade"
+    },
+    "quebec": {
+      "vectorId": "v1446859666",
+      "coordinate": "6.1.1.1.0.0.0.0.0.0",
+      "scian_name": "Retail trade"
+    }
+  },
+  "444": {
+    "canada": {
+      "vectorId": "v1446859497",
+      "coordinate": "1.8.1.1.0.0.0.0.0.0",
+      "scian_name": "Building material and garden equipment and supplies dealers"
+    },
+    "quebec": {
+      "vectorId": "v1446859674",
+      "coordinate": "6.8.1.1.0.0.0.0.0.0",
+      "scian_name": "Building material and garden equipment and supplies dealers"
+    }
+  },
+  "445": {
+    "canada": {
+      "vectorId": "v1446859499",
+      "coordinate": "1.9.1.1.0.0.0.0.0.0",
+      "scian_name": "Food and beverage retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859675",
+      "coordinate": "6.9.1.1.0.0.0.0.0.0",
+      "scian_name": "Food and beverage retailers"
+    }
+  },
+  "4451": {
+    "canada": {
+      "vectorId": "v1446859501",
+      "coordinate": "1.10.1.1.0.0.0.0.0.0",
+      "scian_name": "Grocery and convenience retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859676",
+      "coordinate": "6.10.1.1.0.0.0.0.0.0",
+      "scian_name": "Grocery and convenience retailers"
+    }
+  },
+  "4491": {
+    "canada": {
+      "vectorId": "v1446859513",
+      "coordinate": "1.16.1.1.0.0.0.0.0.0",
+      "scian_name": "Furniture, floor covering, window treatment and other home furnishings retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859682",
+      "coordinate": "6.16.1.1.0.0.0.0.0.0",
+      "scian_name": "Furniture, floor covering, window treatment and other home furnishings retailers"
+    }
+  },
+  "4492": {
+    "canada": {
+      "vectorId": "v1446859519",
+      "coordinate": "1.19.1.1.0.0.0.0.0.0",
+      "scian_name": "Electronics and appliances retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859685",
+      "coordinate": "6.19.1.1.0.0.0.0.0.0",
+      "scian_name": "Electronics and appliances retailers"
+    }
+  },
+  "456": {
+    "canada": {
+      "vectorId": "v1446859523",
+      "coordinate": "1.21.1.1.0.0.0.0.0.0",
+      "scian_name": "Health and personal care retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859687",
+      "coordinate": "6.21.1.1.0.0.0.0.0.0",
+      "scian_name": "Health and personal care retailers"
+    }
+  },
+  "458": {
+    "canada": {
+      "vectorId": "v1446859527",
+      "coordinate": "1.23.1.1.0.0.0.0.0.0",
+      "scian_name": "Clothing, clothing accessories, shoes, jewellery, luggage and leather goods retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859689",
+      "coordinate": "6.23.1.1.0.0.0.0.0.0",
+      "scian_name": "Clothing, clothing accessories, shoes, jewellery, luggage and leather goods retailers"
+    }
+  },
+  "4581": {
+    "canada": {
+      "vectorId": "v1446859529",
+      "coordinate": "1.24.1.1.0.0.0.0.0.0",
+      "scian_name": "Clothing and clothing accessories retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859690",
+      "coordinate": "6.24.1.1.0.0.0.0.0.0",
+      "scian_name": "Clothing and clothing accessories retailers"
+    }
+  },
+  "4583": {
+    "canada": {
+      "vectorId": "v1446859533",
+      "coordinate": "1.26.1.1.0.0.0.0.0.0",
+      "scian_name": "Jewellery, luggage and leather goods retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859692",
+      "coordinate": "6.26.1.1.0.0.0.0.0.0",
+      "scian_name": "Jewellery, luggage and leather goods retailers"
+    }
+  },
+  "459A": {
+    "canada": {
+      "vectorId": "v1446859537",
+      "coordinate": "1.28.1.1.0.0.0.0.0.0",
+      "scian_name": "Sporting goods, hobby, musical instrument, book retailers and news dealers"
+    },
+    "quebec": {
+      "vectorId": "v1446859694",
+      "coordinate": "6.28.1.1.0.0.0.0.0.0",
+      "scian_name": "Sporting goods, hobby, musical instrument, book retailers and news dealers"
+    }
+  },
+  "459B": {
+    "canada": {
+      "vectorId": "v1446859539",
+      "coordinate": "1.29.1.1.0.0.0.0.0.0",
+      "scian_name": "Miscellaneous retailers"
+    },
+    "quebec": {
+      "vectorId": "v1446859695",
+      "coordinate": "6.29.1.1.0.0.0.0.0.0",
+      "scian_name": "Miscellaneous retailers"
+    }
+  },
+  "_macro": {
+    "cpi_all_items_canada": {
+      "vectorId": "v41690973",
+      "description": "CPI, all-items, Canada, monthly",
+      "table": "18-10-0004"
+    },
+    "unemployment_rate_canada": {
+      "vectorId": "v91506256",
+      "description": "Unemployment rate, 15 years and over, Canada, monthly, SA",
+      "table": "14-10-0287"
+    }
+  }
+}

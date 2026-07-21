@@ -1,0 +1,28 @@
+{
+  "client_name": "Spek Optics",
+  "onboarding": {
+    "nom_entreprise": "Spek Optics",
+    "site_web": "https://spekoptics.ca/en",
+    "industrie": "Lunettes de sport (lunettes de soleil et masques de ski) pour athlètes outdoor",
+    "modele": "DTC e-commerce (site bilingue FR/EN, expédition internationale multi-devises) + réseau de détaillants physiques (programme Spek Pro pour les retailers) + reconnaissance retail via Sports Experts au Québec",
+    "marche": "Canada principal marché (siège au Québec, marque Designed in Canada), avec site expédiant vers 28+ pays. Cible principale: Canada + États-Unis. Cible secondaire: France, UK, Australie, Europe outdoor",
+    "produits_prix": "Deux gammes principales: KOVO (nouveau modèle, wider field of view) à 150-175 CAD selon lentille (Photochromic Pro à 175, mirror/rose à 150). STRYVE II à 130-170 CAD selon lentille (Photochromic Pro à 170, versions Espresso/Olive à 140). Masques de ski en gamme séparée. Livraison gratuite dès 100 CAD. Protection colis Route à 3.49 CAD",
+    "promesse": "Eyewear pour athlètes qui s'entraînent dehors — 'Every lens is an instrument. Every detail addresses a real condition. Vision precedes performance'. Trois techs propriétaires: SPEKTRA+™ (filtration sélective pour contraste terrain), EVO+™ (verres photochromiques qui s'adaptent à la lumière ambiante), Technical Coatings (5 traitements de surface anti-buée/eau/rayures)",
+    "differentiateurs": "Designed in Canada. Garantie satisfaction 30 jours. Garantie limitée à vie. Retours gratuits. Reconnaissance médiatique canadienne: Sports Experts, Radio-Canada, Dans l'Œil du Dragon (Shark Tank canadien), Vélomag. Positionnement 'performance sport' entre les brands de masse (Oakley) et les hyper-premium (District Vision, POC)",
+    "clients_actuels": "Athlètes outdoor multi-sport: cyclisme, course à pied, trail, ski. Le site organise le catalogue par sport (Cycling / Running / Trail sunglasses). 25-50 ans probable, hommes et femmes, revenu discrétionnaire (produits 130+ CAD)",
+    "competiteurs": "Aucun compétiteur cité explicitement sur le site. Concurrents catégorie probables: Sungod (UK, DTC lunettes sport), District Vision (US, running premium), Roka (US, sport optics), POC (Suède, ski/vélo), Julbo (France, montagne), Bollé (France, classique), Smith Optics (US, ski/sport), 100% (US, cycling), Oakley (US, mass market). Au Canada: Ryders Eyewear (BC), Serengeti (via distribution)",
+    "pages_facebook_competiteurs": "À découvrir par l'agent contexte selon leur présence Meta Ads",
+    "historique_marketing": "Passage à Dans l'Œil du Dragon (télé canadienne) — signal de brand awareness média. Présence retail via Sports Experts. Site DTC opérationnel et multi-devises. Aucune info fournie sur budgets Meta Ads, cold outreach ou historique CAC/ROAS. Boutique Shopify évidente (structure d'URL / drawer panier)",
+    "objectifs": "Non spécifiés dans le brief — audit à mener pour identifier: (1) angles publicitaires vacants vs concurrents DTC (Sungod, Roka, Ombraz), (2) ICPs mal servis (femmes trail? cyclistes urbains?), (3) opportunités saisonnalité ski vs sunglasses",
+    "landing_pages": "https://spekoptics.ca/en, https://spekoptics.ca/en/collections/sunglasses, https://spekoptics.ca/en/collections/ski-goggles, https://spekoptics.ca/en/pages/spektra-technology, https://spekoptics.ca/en/pages/mission"
+  },
+  "options": {
+    "country": "CA",
+    "geo": "CA",
+    "max_reviews_per_domain": 50,
+    "reddit_posts_per_query": 15,
+    "youtube_max_videos_per_query": 5,
+    "youtube_max_comments": 30,
+    "gmaps_max_reviews": 100
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE public.client_progress ADD COLUMN IF NOT EXISTS slack_invite_url text;
