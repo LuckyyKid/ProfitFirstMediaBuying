@@ -106,7 +106,7 @@ export default function MetricTargets() {
     load();
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const isLocal = client?.business_type === "LOCAL_SERVICE";
 

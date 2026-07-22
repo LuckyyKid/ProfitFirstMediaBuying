@@ -1,57 +1,37 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SectionHeader, StatusBadge } from "@/crm/ui";
 import { Link } from "react-router-dom";
-import { Lightbulb } from "lucide-react";
-import { StatusBadge } from "@/crm/ui";
-import { useCrmGlobalList } from "@/crm/hooks";
-import {
-  TwentyPage,
-  PageHeader,
-  TwentyTableWrap,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-} from "@/components/admin-shell";
 
 export default function HypothesesGlobal() {
-  const { rows } = useCrmGlobalList("crm_hypotheses");
+  const [rows, setRows] = useState<any[]>([]);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("crm_hypotheses").select("*, crm_clients(company_name, id)").order("created_at", { ascending: false });
+      setRows(data ?? []);
+    })();
+  }, []);
   return (
-    <TwentyPage inLayout>
-      <PageHeader
-        icon={Lightbulb}
-        title="Hypotheses"
-        description="Vue globale de toutes les hypothèses"
-      />
-
-      <TwentyTableWrap>
-        <TwentyTable>
-          <TwentyThead>
-            <Th>Client</Th>
-            <Th>Hypothèse</Th>
-            <Th>Catégorie</Th>
-            <Th>Priorité suggérée</Th>
-            <Th>Statut</Th>
-          </TwentyThead>
-          <tbody>
-            {rows.length === 0 ? (
-              <EmptyRow colSpan={5} title="Aucune hypothèse" />
-            ) : rows.map((r) => (
-              <TwentyRow key={r.id}>
-                <Td>
-                  <Link className="text-primary hover:underline" to={`/admin/crm/clients/${r.crm_clients?.id}`}>
-                    {r.crm_clients?.company_name ?? "—"}
-                  </Link>
-                </Td>
-                <Td className="max-w-md truncate">{r.hypothesis}</Td>
-                <Td>{r.category ?? "—"}</Td>
-                <Td>{r.suggested_priority ?? "—"}</Td>
-                <Td><StatusBadge status={r.status} /></Td>
-              </TwentyRow>
+    <div>
+      <SectionHeader title="Hypotheses" description="Vue globale de toutes les hypothèses" />
+      <Card className="p-4">
+        <Table>
+          <TableHeader><TableRow><TableHead>Client</TableHead><TableHead>Hypothèse</TableHead><TableHead>Catégorie</TableHead><TableHead>Priorité suggérée</TableHead><TableHead>Statut</TableHead></TableRow></TableHeader>
+          <TableBody>
+            {rows.map(r => (
+              <TableRow key={r.id}>
+                <TableCell><Link className="text-primary underline" to={`/admin/crm/clients/${r.crm_clients?.id}`}>{r.crm_clients?.company_name ?? "—"}</Link></TableCell>
+                <TableCell className="max-w-md truncate">{r.hypothesis}</TableCell>
+                <TableCell>{r.category ?? "—"}</TableCell>
+                <TableCell>{r.suggested_priority ?? "—"}</TableCell>
+                <TableCell><StatusBadge status={r.status} /></TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </TwentyTable>
-      </TwentyTableWrap>
-    </TwentyPage>
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
   );
 }

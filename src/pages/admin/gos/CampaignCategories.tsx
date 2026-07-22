@@ -30,14 +30,14 @@ import {
 } from "@/gos/campaignConfiguration";
 import type { BudgetApplicationResult } from "@/gos/budgetApplicationController";
 
-const CARD = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#22c55e";
-const RED = "#ef4444";
-const YELLOW = "#eab308";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BG_DEEP = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const YELLOW = "#f5b74e";
 
 const inputStyle: CSSProperties = {
   padding: "6px 10px",
@@ -227,7 +227,7 @@ export default function CampaignCategories() {
 
             return (
               <article key={category.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: "hidden" }}>
-                <div style={{ padding: "14px 16px", background: "hsl(220 45% 25%)", display: "grid", gridTemplateColumns: "auto minmax(160px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(140px, 1fr) minmax(95px, auto) minmax(70px, auto) 34px", gap: 10, alignItems: "center", overflowX: "auto" }}>
+                <div style={{ padding: "14px 16px", background: "rgba(148, 170, 215, 0.12)", display: "grid", gridTemplateColumns: "auto minmax(160px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(140px, 1fr) minmax(95px, auto) minmax(70px, auto) 34px", gap: 10, alignItems: "center", overflowX: "auto" }}>
                   <Layers size={16} color={BLUE} />
                   <input
                     defaultValue={category.name}
@@ -290,7 +290,7 @@ export default function CampaignCategories() {
 
           {unassigned.length > 0 && (
             <section style={{ border: `1px dashed ${RED}`, borderRadius: 8, overflow: "hidden" }}>
-              <div style={{ padding: "10px 16px", background: "hsl(0 84% 96%)", color: "hsl(0 72% 42%)", fontSize: 12, fontWeight: 700, letterSpacing: "0.03em" }}>
+              <div style={{ padding: "10px 16px", background: "linear-gradient(135deg, rgba(255, 107, 107, 0.06), rgba(255, 255, 255, 0.015))", color: "#ff6b6b", fontSize: 12, fontWeight: 700, letterSpacing: "0.03em" }}>
                 {unassigned.length} CAMPAGNE(S) SANS CATEGORIE
               </div>
               <CampaignTable campaigns={unassigned} categories={categories} onUpdate={patchCampaign} onRemove={removeCampaign} />

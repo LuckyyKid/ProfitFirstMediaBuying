@@ -97,7 +97,7 @@ export default function Measurement() {
     }
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   return (
     <>
@@ -395,7 +395,7 @@ function IncrementalityV2Panel({ clientId, tests, onDone }: { clientId: string; 
           <Kpi label="IC 95% haut" value={result.ci_high.toFixed(4)} />
           <Kpi label="Statistique" value={result.test_statistic.toFixed(3)} />
           <Kpi label="Décision" value={result.winner} color={result.winner === "VARIANT" ? "#0f8a44" : result.winner === "CONTROL" ? "#c1121f" : "#a8730a"} />
-          <div style={{ gridColumn: "span 4", padding: 12, background: "hsl(220 45% 14%)", borderRadius: 8, fontSize: 13 }}>
+          <div style={{ gridColumn: "span 4", padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8, fontSize: 13 }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Recommandation</div>
             <div>{result.recommendation}</div>
             {result.risks.length > 0 && <div style={{ marginTop: 8, color: "#c1121f", fontSize: 12 }}>⚠ {result.risks.join(" · ")}</div>}
@@ -409,7 +409,7 @@ function IncrementalityV2Panel({ clientId, tests, onDone }: { clientId: string; 
 
 function Kpi({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
       <div style={{ fontSize: 16, fontWeight: 700, color: color ?? "var(--tdia-text)", marginTop: 2 }}>{value}</div>
     </div>

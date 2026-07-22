@@ -109,7 +109,7 @@ export default function GosClientMembers() {
           {members.length} membre{members.length > 1 ? "s" : ""}
         </div>
         {loading ? (
-          <div style={{ height: 100, background: "hsl(220 45% 14%)", borderRadius: 12 }} />
+          <div style={{ height: 100, background: "rgba(255, 255, 255, 0.02)", borderRadius: 12 }} />
         ) : members.length === 0 ? (
           <EmptyState title="Aucun membre" hint="Ajoute au moins un owner pour ce client." />
         ) : (

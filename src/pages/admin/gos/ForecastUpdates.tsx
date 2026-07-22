@@ -86,7 +86,7 @@ export default function ForecastUpdates() {
     load();
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   return (
     <>
@@ -115,7 +115,7 @@ export default function ForecastUpdates() {
       />
 
       {forecasts.length === 0 && (
-        <div className="gos-card" style={{ marginBottom: 20, borderColor: "hsl(43 90% 55% / 0.4)" }}>
+        <div className="gos-card" style={{ marginBottom: 20, borderColor: "rgba(245, 183, 78, 0.4)" }}>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>Aucun forecast parent</div>
           <div style={{ color: "var(--tdia-muted)", fontSize: 13 }}>
             Génère d'abord un forecast dans <b>Forecast</b> pour créer une mise à jour.
@@ -198,10 +198,10 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
 function DeltaCard({ label, prev, next, delta, money, invert }: { label: string; prev: number | null; next: number | null; delta: number | null; money?: boolean; invert?: boolean }) {
   const fmt = (v: number | null) => v == null ? "—" : money ? `${Number(v).toLocaleString()} $` : String(v);
   const positive = delta != null && (invert ? delta < 0 : delta > 0);
-  const color = delta == null ? "var(--tdia-muted)" : positive ? "#0f8a44" : "#c1121f";
+  const color = delta == null ? "var(--tdia-muted)" : positive ? "#3ddc97" : "#ff6b6b";
   const Icon = positive ? TrendingUp : TrendingDown;
   return (
-    <div style={{ padding: 12, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+    <div style={{ padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
       <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--tdia-muted)", fontWeight: 600, letterSpacing: "0.03em" }}>{label}</div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
         <div style={{ fontSize: 18, fontWeight: 600 }}>{fmt(next)}</div>
@@ -354,17 +354,17 @@ function BayesianV2Panel({ clientId, forecasts, onDone }: { clientId: string; fo
         <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
           <BKpi label={`Prior (${METRIC_LABEL[metric]})`} value={result.prior_mean.toLocaleString()} />
           <BKpi label="Vraisemblance (moy. obs)" value={result.likelihood_mean.toLocaleString()} sub={`n=${result.n_observations}`} />
-          <BKpi label="Postérieur" value={result.posterior_mean.toLocaleString()} sub={`± ${result.posterior_std.toLocaleString()}`} color="#3aa0ff" />
-          <BKpi label="Δ vs prior" value={`${result.delta_vs_prior_pct > 0 ? "+" : ""}${result.delta_vs_prior_pct}%`} color={Math.abs(result.delta_vs_prior_pct) < 10 ? "#0f8a44" : "#c1121f"} />
+          <BKpi label="Postérieur" value={result.posterior_mean.toLocaleString()} sub={`± ${result.posterior_std.toLocaleString()}`} color="#4d9fff" />
+          <BKpi label="Δ vs prior" value={`${result.delta_vs_prior_pct > 0 ? "+" : ""}${result.delta_vs_prior_pct}%`} color={Math.abs(result.delta_vs_prior_pct) < 10 ? "#3ddc97" : "#ff6b6b"} />
           <BKpi label="Gain de Kalman" value={`${(result.kalman_gain * 100).toFixed(0)}%`} sub="poids des obs" />
           <BKpi label="IC 95% bas" value={result.posterior_ci_low.toLocaleString()} />
           <BKpi label="IC 95% haut" value={result.posterior_ci_high.toLocaleString()} />
-          <BKpi label="Signal de dérive" value={result.drift_signal} color={result.drift_signal === "STABLE" ? "#0f8a44" : result.drift_signal === "MINOR_DRIFT" ? "#a8730a" : "#c1121f"} />
-          <div style={{ gridColumn: "span 4", padding: 12, background: "hsl(220 45% 14%)", borderRadius: 8, fontSize: 13 }}>
+          <BKpi label="Signal de dérive" value={result.drift_signal} color={result.drift_signal === "STABLE" ? "#3ddc97" : result.drift_signal === "MINOR_DRIFT" ? "#f5b74e" : "#ff6b6b"} />
+          <div style={{ gridColumn: "span 4", padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8, fontSize: 13 }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Recommandation</div>
             <div>{result.recommendation}</div>
-            {result.risks.length > 0 && <div style={{ marginTop: 8, color: "#c1121f", fontSize: 12 }}>⚠ {result.risks.join(" · ")}</div>}
-            {result.conditions.length > 0 && <div style={{ marginTop: 4, color: "#a8730a", fontSize: 12 }}>ⓘ {result.conditions.join(" · ")}</div>}
+            {result.risks.length > 0 && <div style={{ marginTop: 8, color: "#ff6b6b", fontSize: 12 }}>⚠ {result.risks.join(" · ")}</div>}
+            {result.conditions.length > 0 && <div style={{ marginTop: 4, color: "#f5b74e", fontSize: 12 }}>ⓘ {result.conditions.join(" · ")}</div>}
           </div>
         </div>
       )}
@@ -374,7 +374,7 @@ function BayesianV2Panel({ clientId, forecasts, onDone }: { clientId: string; fo
 
 function BKpi({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
       <div style={{ fontSize: 16, fontWeight: 700, color: color ?? "var(--tdia-text)", marginTop: 2 }}>{value}</div>
       {sub && <div style={{ fontSize: 11, color: "var(--tdia-muted)", marginTop: 2 }}>{sub}</div>}

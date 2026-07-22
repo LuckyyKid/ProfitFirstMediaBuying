@@ -185,7 +185,7 @@ export default function BudgetChangeGate() {
   };
 
   if (loading) {
-    return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+    return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   }
 
   return (
@@ -268,7 +268,7 @@ export default function BudgetChangeGate() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10, marginTop: 12 }}>
             <div style={{ display: "grid", gap: 8 }}>
               {latestCompliance.checks.map((item) => (
-                <div key={item.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, borderLeft: `3px solid ${checkColor(item.status)}` }}>
+                <div key={item.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, borderLeft: `3px solid ${checkColor(item.status)}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
                     <div style={{ fontWeight: 700 }}>{item.label}</div>
                     <Badge value={item.status} color={checkColor(item.status)} />
@@ -344,7 +344,7 @@ export default function BudgetChangeGate() {
               <CardTitle icon={<CheckCircle2 size={16} />} title="Gate checks" />
               <div style={{ display: "grid", gap: 8 }}>
                 {latestGate.checks.map((item) => (
-                  <div key={item.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, borderLeft: `3px solid ${checkColor(item.status)}` }}>
+                  <div key={item.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, borderLeft: `3px solid ${checkColor(item.status)}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
                       <div style={{ fontWeight: 700 }}>{item.label}</div>
                       <Badge value={item.status} color={checkColor(item.status)} />
@@ -369,7 +369,7 @@ export default function BudgetChangeGate() {
           <CardTitle icon={<Database size={16} />} title="Budget application audit" />
           <div style={{ display: "grid", gap: 8 }}>
             {applicationRuns.slice(0, 10).map((run) => (
-              <div key={run.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
+              <div key={run.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
                 <div style={{ fontWeight: 600 }}>{run.output_json.application.source ?? "unknown"}</div>
                 <div style={{ color: run.output_json.application.applied ? "#0f8a44" : "#c1121f", fontWeight: 700, fontSize: 12 }}>
                   {run.output_json.application.applied ? "APPLIED" : "NOT APPLIED"}
@@ -388,7 +388,7 @@ export default function BudgetChangeGate() {
           <CardTitle icon={<Database size={16} />} title="Compliance history" />
           <div style={{ display: "grid", gap: 8 }}>
             {complianceRuns.slice(0, 10).map((run) => (
-              <div key={run.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
+              <div key={run.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
                 <div style={{ fontWeight: 600 }}>{run.output_json.engine_version}</div>
                 <div style={{ color: complianceColor(run.output_json.status), fontWeight: 700, fontSize: 12 }}>{run.output_json.status}</div>
                 <div style={{ color: "var(--tdia-muted)", fontSize: 12 }}>{money(run.output_json.current_monthly_total)}</div>
@@ -404,7 +404,7 @@ export default function BudgetChangeGate() {
           <CardTitle icon={<Database size={16} />} title="Run history" />
           <div style={{ display: "grid", gap: 8 }}>
             {runs.slice(0, 10).map((run) => (
-              <div key={run.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+              <div key={run.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
                 <div style={{ fontWeight: 600 }}>{run.output_json.engine_version}</div>
                 <div style={{ color: decisionColor(run.output_json.decision), fontWeight: 700, fontSize: 12 }}>{run.output_json.decision}</div>
                 <div style={{ color: "var(--tdia-muted)", fontSize: 12 }}>{money(run.output_json.proposed_monthly_spend)}</div>
@@ -437,7 +437,7 @@ function MetricGrid({ children }: { children: ReactNode }) {
 
 function Metric({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
-    <div style={{ padding: 9, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 9, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700 }}>
         {label}
       </div>
@@ -465,7 +465,7 @@ function Badge({ value, color }: { value: string; color?: string }) {
         minHeight: 24,
         padding: "3px 8px",
         borderRadius: 6,
-        background: "hsl(220 45% 16%)",
+        background: "rgba(255, 255, 255, 0.02)",
         color: color ?? "var(--tdia-text)",
         fontSize: 11,
         fontWeight: 800,
@@ -481,7 +481,7 @@ function Badge({ value, color }: { value: string; color?: string }) {
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <div style={{ marginTop: 10, padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ marginTop: 10, padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
         {title}
       </div>

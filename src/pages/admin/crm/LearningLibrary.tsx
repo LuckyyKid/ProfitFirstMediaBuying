@@ -1,76 +1,41 @@
-import { useMemo, useState } from "react";
-import { BookOpen } from "lucide-react";
-import { useCrmGlobalList } from "@/crm/hooks";
-import {
-  TwentyPage,
-  PageHeader,
-  ViewBar,
-  TwentyTableWrap,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-} from "@/components/admin-shell";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SectionHeader } from "@/crm/ui";
 
 export default function LearningLibrary() {
-  const { rows } = useCrmGlobalList("crm_learning_library");
+  const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
-
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        (r) =>
-          !q ||
-          [r.hypothesis, r.industry, r.creative_angle, r.offer, r.decision].some((v) =>
-            (v ?? "").toLowerCase().includes(q.toLowerCase()),
-          ),
-      ),
-    [rows, q],
-  );
-
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("crm_learning_library").select("*, crm_clients(company_name)").order("created_at", { ascending: false });
+      setRows(data ?? []);
+    })();
+  }, []);
+  const filtered = rows.filter(r => !q || [r.hypothesis, r.industry, r.creative_angle, r.offer, r.decision].some(v => (v ?? "").toLowerCase().includes(q.toLowerCase())));
   return (
-    <TwentyPage inLayout>
-      <PageHeader
-        icon={BookOpen}
-        title="Learning Library"
-        description="Base de connaissances TDIA"
-      />
-
-      <ViewBar
-        search={q}
-        onSearchChange={setQ}
-        searchPlaceholder="Rechercher (hypothèse, industrie, angle, offre, décision)…"
-        total={filtered.length}
-      />
-
-      <TwentyTableWrap>
-        <TwentyTable>
-          <TwentyThead>
-            <Th>Client</Th>
-            <Th>Industrie</Th>
-            <Th>Hypothèse</Th>
-            <Th>Angle</Th>
-            <Th>Result</Th>
-            <Th>Decision</Th>
-          </TwentyThead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <EmptyRow colSpan={6} title="Aucun learning" />
-            ) : filtered.map((r) => (
-              <TwentyRow key={r.id}>
-                <Td>{r.crm_clients?.company_name ?? "—"}</Td>
-                <Td>{r.industry ?? "—"}</Td>
-                <Td className="max-w-md truncate">{r.hypothesis}</Td>
-                <Td>{r.creative_angle}</Td>
-                <Td>{r.result}</Td>
-                <Td>{r.decision}</Td>
-              </TwentyRow>
+    <div>
+      <SectionHeader title="Learning Library" description="Base de connaissances TDIA" />
+      <Card className="p-4">
+        <Input placeholder="Rechercher…" value={q} onChange={e => setQ(e.target.value)} className="mb-3 max-w-sm" />
+        <Table>
+          <TableHeader><TableRow><TableHead>Client</TableHead><TableHead>Industrie</TableHead><TableHead>Hypothèse</TableHead><TableHead>Angle</TableHead><TableHead>Result</TableHead><TableHead>Decision</TableHead></TableRow></TableHeader>
+          <TableBody>
+            {filtered.map(r => (
+              <TableRow key={r.id}>
+                <TableCell>{r.crm_clients?.company_name ?? "—"}</TableCell>
+                <TableCell>{r.industry ?? "—"}</TableCell>
+                <TableCell className="max-w-md truncate">{r.hypothesis}</TableCell>
+                <TableCell>{r.creative_angle}</TableCell>
+                <TableCell>{r.result}</TableCell>
+                <TableCell>{r.decision}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </TwentyTable>
-      </TwentyTableWrap>
-    </TwentyPage>
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
   );
 }

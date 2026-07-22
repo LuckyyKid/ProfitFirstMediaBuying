@@ -148,7 +148,7 @@ export default function SpendingPower() {
       toast.error(message);
     }
   };
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const latest = snaps[0];
 
@@ -178,7 +178,7 @@ export default function SpendingPower() {
       />
 
       {!fi && (
-        <div className="gos-card" style={{ marginBottom: 20, borderColor: "hsl(43 90% 55% / 0.4)" }}>
+        <div className="gos-card" style={{ marginBottom: 20, borderColor: "rgba(245, 183, 78, 0.4)" }}>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>Marge manquante</div>
           <div style={{ color: "var(--tdia-muted)", fontSize: 13 }}>
             Sans <b>Financial Inputs</b> (gross_margin_percent), le calcul se limite au budget cash.
@@ -198,29 +198,29 @@ export default function SpendingPower() {
       {/* ---------- Wave 10C : Regression v2 ---------- */}
       <div
         style={{
-          background: "hsl(220 45% 16%)",
-          border: "1px solid hsl(220 45% 25%)",
+          background: "rgba(255, 255, 255, 0.02)",
+          border: "1px solid rgba(148, 170, 215, 0.12)",
           borderRadius: 12,
           overflow: "hidden",
           boxShadow: "none",
           marginBottom: 20,
         }}
       >
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(220 45% 25%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(148, 170, 215, 0.12)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Sigma size={14} style={{ color: "var(--tdia-blue)" }} />
             <h2 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--tdia-blue)", margin: 0 }}>
               Moteur : Régression v2 OLS
             </h2>
           </div>
-          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "hsl(226 100% 60% / 0.12)", color: "var(--tdia-blue)", border: "1px solid hsl(226 100% 60% / 0.2)" }}>
+          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "rgba(77, 159, 255, 0.12)", color: "var(--tdia-blue)", border: "1px solid rgba(77, 159, 255, 0.2)" }}>
             Active Engine
           </span>
         </div>
 
         <div style={{ padding: 20 }}>
 
-        <div style={{ ...mono, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: "hsl(0 0% 40%)", marginBottom: 10 }}>
+        <div style={{ ...mono, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: "#8b97ad", marginBottom: 10 }}>
           Points de données historiques (≥4 pour activer la régression, sinon fallback v1)
         </div>
         <table className="gos-table" style={{ marginBottom: 12 }}>
@@ -264,7 +264,7 @@ export default function SpendingPower() {
         </div>
 
         {v2Result && (
-          <div style={{ marginTop: 16, borderTop: "1px solid hsl(220 45% 16%)", paddingTop: 16 }}>
+          <div style={{ marginTop: 16, borderTop: "1px solid rgba(148, 170, 215, 0.12)", paddingTop: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 12 }}>
               <Kpi label="Modèle" value={v2Result.model_type} accent />
               <Kpi label="Confiance" value={`${v2Result.recommended_model_confidence}/100`} />
@@ -308,15 +308,15 @@ export default function SpendingPower() {
       </div>
 
       {/* ---------- Spend Efficiency Frontier ---------- */}
-      <div style={{ background: "hsl(220 45% 16%)", border: "1px solid hsl(220 45% 25%)", borderRadius: 12, overflow: "hidden", boxShadow: "none", marginBottom: 20 }}>
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(220 45% 25%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(148, 170, 215, 0.12)", borderRadius: 12, overflow: "hidden", boxShadow: "none", marginBottom: 20 }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(148, 170, 215, 0.12)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Sigma size={14} style={{ color: "hsl(38 92% 55%)" }} />
-            <h2 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "hsl(38 92% 55%)", margin: 0 }}>
+            <Sigma size={14} style={{ color: "#f5b74e" }} />
+            <h2 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "#f5b74e", margin: 0 }}>
               Moteur : Spend Efficiency Frontier
             </h2>
           </div>
-          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "hsl(38 92% 55% / 0.12)", color: "hsl(38 92% 55%)", border: "1px solid hsl(38 92% 55% / 0.25)" }}>
+          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "rgba(245, 183, 78, 0.12)", color: "#f5b74e", border: "1px solid rgba(245, 183, 78, 0.25)" }}>
             Objectif × AMR × Contribution
           </span>
         </div>
@@ -344,7 +344,7 @@ export default function SpendingPower() {
           </div>
 
           {frontierResult && (
-            <div style={{ borderTop: "1px solid hsl(220 45% 14%)", marginTop: 16, paddingTop: 16 }}>
+            <div style={{ borderTop: "1px solid rgba(148, 170, 215, 0.12)", marginTop: 16, paddingTop: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 12 }}>
                 <Kpi label="Spend recommandé" value={`${frontierResult.recommended_spend.toLocaleString()} $`} accent />
                 <Kpi label="AMR recommandé" value={String(frontierResult.recommended_amr)} />
@@ -357,7 +357,7 @@ export default function SpendingPower() {
                   <tr>
                     <td>{frontierResult.selected.spend.toLocaleString()} $</td>
                     <td>{frontierResult.selected.new_customer_revenue.toLocaleString()} $</td>
-                    <td style={{ fontWeight: 700, color: frontierResult.selected.first_order_contribution >= 0 ? "hsl(142 71% 55%)" : "hsl(0 72% 65%)" }}>
+                    <td style={{ fontWeight: 700, color: frontierResult.selected.first_order_contribution >= 0 ? "#3ddc97" : "#ff6b6b" }}>
                       {frontierResult.selected.first_order_contribution.toLocaleString()} $
                     </td>
                     <td>{frontierResult.selected.lifetime_contribution.toLocaleString()} $</td>
@@ -383,15 +383,15 @@ export default function SpendingPower() {
       </div>
 
       {/* ---------- Profit-First Media Buying ---------- */}
-      <div style={{ background: "hsl(220 45% 16%)", border: "1px solid hsl(220 45% 25%)", borderRadius: 12, overflow: "hidden", boxShadow: "none", marginBottom: 20 }}>
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid hsl(220 45% 25%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(148, 170, 215, 0.12)", borderRadius: 12, overflow: "hidden", boxShadow: "none", marginBottom: 20 }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(148, 170, 215, 0.12)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Sigma size={14} style={{ color: "hsl(142 71% 55%)" }} />
-            <h2 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "hsl(142 71% 55%)", margin: 0 }}>
+            <Sigma size={14} style={{ color: "#3ddc97" }} />
+            <h2 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "#3ddc97", margin: 0 }}>
               Moteur : Profit-First Media Buying (Hemrock × TDIA)
             </h2>
           </div>
-          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "hsl(142 71% 45% / 0.12)", color: "hsl(142 71% 55%)", border: "1px solid hsl(142 71% 45% / 0.25)" }}>
+          <span style={{ ...mono, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", padding: "3px 10px", borderRadius: 999, background: "rgba(61, 220, 151, 0.12)", color: "#3ddc97", border: "1px solid rgba(61, 220, 151, 0.25)" }}>
             v1 · Cash × Funnel × Cohort
           </span>
         </div>
@@ -408,12 +408,12 @@ export default function SpendingPower() {
             </button>
           </div>
           {!basket && (
-            <div style={{ fontSize: 12, color: "hsl(43 96% 66%)", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "#f5b74e", marginBottom: 12 }}>
               ⚠ Aucun <b>gos_basket_economics</b> pour ce client. Ajoute aov_new, aov_repeat, cac_new, cac_repeat, conversion_rate, repeat_cycle_months, churn_per_cycle, inventory_days, payout_delay_days.
             </div>
           )}
           {pfmb && (
-            <div style={{ borderTop: "1px solid hsl(220 45% 14%)", paddingTop: 16 }}>
+            <div style={{ borderTop: "1px solid rgba(148, 170, 215, 0.12)", paddingTop: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 12 }}>
                 <Kpi label="Spend recommandé" value={`${pfmb.recommended_spend.toLocaleString()} $`} accent />
                 <Kpi label="Contrainte active" value={pfmb.binding_constraint} />
@@ -464,14 +464,14 @@ export default function SpendingPower() {
 
       <div
         style={{
-          background: "hsl(220 45% 16%)",
-          border: "1px solid hsl(220 45% 25%)",
+          background: "rgba(255, 255, 255, 0.02)",
+          border: "1px solid rgba(148, 170, 215, 0.12)",
           borderRadius: 12,
           overflow: "hidden",
         }}
       >
-        <div style={{ padding: "12px 20px", background: "hsl(220 45% 25%)", borderBottom: "1px solid hsl(220 45% 25%)" }}>
-          <h3 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "hsl(0 0% 40%)", margin: 0 }}>
+        <div style={{ padding: "12px 20px", background: "rgba(255, 255, 255, 0.04)", borderBottom: "1px solid rgba(148, 170, 215, 0.12)" }}>
+          <h3 style={{ ...mono, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", color: "#8b97ad", margin: 0 }}>
             Historique des simulations
           </h3>
         </div>
@@ -501,9 +501,9 @@ export default function SpendingPower() {
                           borderRadius: 4,
                           fontSize: 11,
                           fontWeight: 600,
-                          background: s.recommended_model_confidence >= 70 ? "hsl(142 71% 45% / 0.12)" : s.recommended_model_confidence >= 40 ? "hsl(43 96% 56% / 0.12)" : "hsl(0 72% 60% / 0.12)",
-                          color: s.recommended_model_confidence >= 70 ? "hsl(142 71% 55%)" : s.recommended_model_confidence >= 40 ? "hsl(43 96% 66%)" : "hsl(0 72% 65%)",
-                          border: `1px solid ${s.recommended_model_confidence >= 70 ? "hsl(142 71% 45% / 0.25)" : s.recommended_model_confidence >= 40 ? "hsl(43 96% 56% / 0.25)" : "hsl(0 72% 60% / 0.25)"}`,
+                          background: s.recommended_model_confidence >= 70 ? "rgba(61, 220, 151, 0.12)" : s.recommended_model_confidence >= 40 ? "rgba(245, 183, 78, 0.12)" : "rgba(255, 107, 107, 0.12)",
+                          color: s.recommended_model_confidence >= 70 ? "#3ddc97" : s.recommended_model_confidence >= 40 ? "#f5b74e" : "#ff6b6b",
+                          border: `1px solid ${s.recommended_model_confidence >= 70 ? "rgba(61, 220, 151, 0.25)" : s.recommended_model_confidence >= 40 ? "rgba(245, 183, 78, 0.25)" : "rgba(255, 107, 107, 0.25)"}`,
                         }}
                       >
                         {s.recommended_model_confidence}
@@ -535,17 +535,17 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
   return (
     <div
       style={{
-        background: "hsl(220 45% 16%)",
-        border: "1px solid hsl(220 45% 25%)",
+        background: "rgba(255, 255, 255, 0.02)",
+        border: "1px solid rgba(148, 170, 215, 0.12)",
         borderRadius: 12,
         padding: 16,
         boxShadow: "none",
       }}
     >
-      <div style={{ ...mono, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: "hsl(0 0% 40%)", fontWeight: 700, marginBottom: 4 }}>
+      <div style={{ ...mono, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: "#8b97ad", fontWeight: 700, marginBottom: 4 }}>
         {label}
       </div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: accent ? "var(--tdia-blue)" : "hsl(0 0% 20%)", letterSpacing: "-0.01em" }}>
+      <div style={{ fontSize: 24, fontWeight: 700, color: accent ? "var(--tdia-blue)" : "#eef2fa", letterSpacing: "-0.01em" }}>
         {value}
       </div>
     </div>
@@ -553,18 +553,18 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
 }
 
 function RiskChip({ label, value }: { label: string; value: "LOW" | "MEDIUM" | "HIGH" }) {
-  const color = value === "HIGH" ? "#c1121f" : value === "MEDIUM" ? "#c98a1b" : "#0f8a44";
+  const color = value === "HIGH" ? "#ff6b6b" : value === "MEDIUM" ? "#f5b74e" : "#3ddc97";
   return (
-    <span style={{ fontSize: 11, padding: "4px 10px", borderRadius: 999, background: "hsl(220 45% 14%)", border: `1px solid ${color}`, color }}>
+    <span style={{ fontSize: 11, padding: "4px 10px", borderRadius: 999, background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${color}`, color }}>
       {label}: <b>{value}</b>
     </span>
   );
 }
 
 function ToneChip({ value }: { value: "IN_SAMPLE" | "MODERATE" | "HIGH" }) {
-  const color = value === "HIGH" ? "#c1121f" : value === "MODERATE" ? "#c98a1b" : "#0f8a44";
+  const color = value === "HIGH" ? "#ff6b6b" : value === "MODERATE" ? "#f5b74e" : "#3ddc97";
   return (
-    <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 999, background: "hsl(220 45% 14%)", border: `1px solid ${color}`, color }}>
+    <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 999, background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${color}`, color }}>
       {value}
     </span>
   );

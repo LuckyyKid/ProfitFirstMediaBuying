@@ -26,14 +26,14 @@ const RISKS = ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] as const;
 const GRADES = ["A", "B", "C", "D"] as const;
 
 const riskColor = (r: string) =>
-  r === "HIGH" ? "#c1121f" : r === "MEDIUM" ? "#a8730a" : r === "LOW" ? "#0f8a44" : "#7a8ca6";
+  r === "HIGH" ? "#ff6b6b" : r === "MEDIUM" ? "#f5b74e" : r === "LOW" ? "#3ddc97" : "#8b97ad";
 const actionColor = (a: string) => {
-  if (!a) return "#7a8ca6";
-  if (a.includes("SCALE")) return "hsl(226 100% 60%)";
-  if (a.includes("LIQUIDATE")) return "#c1121f";
-  if (a.includes("BUILD")) return "#0f8a44";
-  if (a.includes("DO_NOT")) return "#c1121f";
-  return "#a8730a";
+  if (!a) return "#8b97ad";
+  if (a.includes("SCALE")) return "#4d9fff";
+  if (a.includes("LIQUIDATE")) return "#ff6b6b";
+  if (a.includes("BUILD")) return "#3ddc97";
+  if (a.includes("DO_NOT")) return "#ff6b6b";
+  return "#f5b74e";
 };
 const actionShort = (a: string) => a?.replace(/_/g, " ") || "—";
 
@@ -239,9 +239,9 @@ export default function SkuDemandPlan() {
                 fontWeight: 700,
                 letterSpacing: "0.03em",
                 textTransform: "uppercase",
-                background: source === "SHOPIFY" ? "#0f8a4422" : "#a8730a22",
-                color: source === "SHOPIFY" ? "#0f8a44" : "#a8730a",
-                border: `1px solid ${source === "SHOPIFY" ? "#0f8a4455" : "#a8730a55"}`,
+                background: source === "SHOPIFY" ? "rgba(61, 220, 151, 0.13)" : "rgba(245, 183, 78, 0.13)",
+                color: source === "SHOPIFY" ? "#3ddc97" : "#f5b74e",
+                border: `1px solid ${source === "SHOPIFY" ? "rgba(61, 220, 151, 0.33)" : "rgba(245, 183, 78, 0.33)"}`,
               }}
               title={
                 source === "SHOPIFY"
@@ -274,9 +274,9 @@ export default function SkuDemandPlan() {
       {/* KPI Ribbon */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
         <Kpi label="Total forecast units" value={fmtInt(kpis.totalForecast)} sub={`${computed.length} SKUs planifiés`} />
-        <Kpi label="Shortfall units" value={fmtInt(kpis.shortfall)} sub={kpis.shortfall > 0 ? "Exposition critique" : "Aucune exposition"} color={kpis.shortfall > 0 ? "#c1121f" : "var(--tdia-text)"} />
-        <Kpi label="SKUs at high risk" value={String(kpis.highRisk)} sub={kpis.highRisk > 0 ? "Action immédiate requise" : "Portfolio sain"} color={kpis.highRisk > 0 ? "#a8730a" : "var(--tdia-text)"} />
-        <Kpi label="Weighted GM%" value={`${kpis.weightedGm.toFixed(1)}%`} sub="Pondéré par forecast" color={kpis.weightedGm >= 40 ? "#0f8a44" : kpis.weightedGm >= 25 ? "#a8730a" : "#c1121f"} />
+        <Kpi label="Shortfall units" value={fmtInt(kpis.shortfall)} sub={kpis.shortfall > 0 ? "Exposition critique" : "Aucune exposition"} color={kpis.shortfall > 0 ? "#ff6b6b" : "var(--tdia-text)"} />
+        <Kpi label="SKUs at high risk" value={String(kpis.highRisk)} sub={kpis.highRisk > 0 ? "Action immédiate requise" : "Portfolio sain"} color={kpis.highRisk > 0 ? "#f5b74e" : "var(--tdia-text)"} />
+        <Kpi label="Weighted GM%" value={`${kpis.weightedGm.toFixed(1)}%`} sub="Pondéré par forecast" color={kpis.weightedGm >= 40 ? "#3ddc97" : kpis.weightedGm >= 25 ? "#f5b74e" : "#ff6b6b"} />
       </div>
 
       {/* War Room Grid */}
@@ -288,10 +288,10 @@ export default function SkuDemandPlan() {
             <span style={panelTitle}>Inventory risk heatmap · Grade × Risk</span>
             <div style={{ display: "flex", gap: 12, fontSize: 10, color: "var(--tdia-muted)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: "hsl(226 100% 60%)" }} /> SKU
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: "#4d9fff" }} /> SKU
               </span>
               <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: "hsl(226 100% 60%)", boxShadow: "none" }} /> High volume
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: "#4d9fff", boxShadow: "none" }} /> High volume
               </span>
             </div>
           </div>
@@ -308,7 +308,7 @@ export default function SkuDemandPlan() {
                     const cell = matrix[risk][grade];
                     const isFocus = cell.length > 0 && ((risk === "HIGH") || (risk === "MEDIUM" && grade !== "A") || (risk === "LOW" && grade === "C"));
                     const border = isFocus ? `1px solid ${riskColor(risk)}55` : "1px solid var(--tdia-border)";
-                    const bg = isFocus ? `${riskColor(risk)}14` : "hsl(220 45% 16%)";
+                    const bg = isFocus ? `${riskColor(risk)}14` : "rgba(255, 255, 255, 0.02)";
                     const maxUnits = Math.max(1, ...cell.map(c => Number(c.row.forecasted_units) || 0));
                     return (
                       <div key={`${risk}-${grade}`} style={{ border, background: bg, borderRadius: 8, padding: 8, minHeight: 74, display: "flex", flexWrap: "wrap", alignContent: "flex-start", gap: 6 }}>
@@ -323,8 +323,8 @@ export default function SkuDemandPlan() {
                                 width: 12,
                                 height: 12,
                                 borderRadius: 999,
-                                background: `hsl(226 100% 60% / ${intensity})`,
-                                boxShadow: intensity > 0.7 ? "0 0 8px hsl(226 100% 60% / 0.55)" : "none",
+                                background: `rgba(77, 159, 255, ${intensity})`,
+                                boxShadow: intensity > 0.7 ? "0 0 8px rgba(77, 159, 255, 0.55)" : "none",
                                 cursor: "pointer",
                               }}
                             />
@@ -349,7 +349,7 @@ export default function SkuDemandPlan() {
             {actionQueue.map(({ row, out }) => {
               const c = actionColor(out.paid_media_action);
               return (
-                <div key={row.id} style={{ background: "hsl(0 0% 98.8% / 0.5)", padding: 12, borderRadius: 8, borderLeft: `4px solid ${c}`, display: "flex", flexDirection: "column", gap: 4 }}>
+                <div key={row.id} style={{ background: "rgba(255, 255, 255, 0.04)", padding: 12, borderRadius: 8, borderLeft: `4px solid ${c}`, display: "flex", flexDirection: "column", gap: 4 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: c, letterSpacing: "0.03em" }}>{actionShort(out.paid_media_action)}</span>
                     <span style={{ fontSize: 10, color: "var(--tdia-muted)", fontFamily: "JetBrains Mono, monospace" }}>{row.sku || "—"}</span>
@@ -365,7 +365,7 @@ export default function SkuDemandPlan() {
               );
             })}
           </div>
-          <div style={{ padding: 12, borderTop: "1px solid var(--tdia-border)", background: "hsl(0 0% 98.8% / 0.4)", textAlign: "center", fontSize: 10, color: "var(--tdia-muted)", fontWeight: 600 }}>
+          <div style={{ padding: 12, borderTop: "1px solid var(--tdia-border)", background: "rgba(255, 255, 255, 0.02)", textAlign: "center", fontSize: 10, color: "var(--tdia-muted)", fontWeight: 600 }}>
             {Math.max(0, computed.length - actionQueue.length)} SKUs additionnels en file
           </div>
         </div>
@@ -384,9 +384,9 @@ export default function SkuDemandPlan() {
             {(["ALL", ...RISKS] as const).map(f => (
               <button key={f} onClick={() => setRiskFilter(f)} style={{
                 padding: "3px 8px", borderRadius: 4, fontSize: 10, fontWeight: 600,
-                border: `1px solid ${riskFilter === f ? (f === "ALL" ? "hsl(226 100% 60%)" : riskColor(f)) : "var(--tdia-border)"}`,
-                background: riskFilter === f ? (f === "ALL" ? "hsl(226 100% 60% / 0.15)" : `${riskColor(f)}22`) : "transparent",
-                color: riskFilter === f ? (f === "ALL" ? "hsl(226 100% 60%)" : riskColor(f)) : "var(--tdia-muted)",
+                border: `1px solid ${riskFilter === f ? (f === "ALL" ? "#4d9fff" : riskColor(f)) : "var(--tdia-border)"}`,
+                background: riskFilter === f ? (f === "ALL" ? "rgba(77, 159, 255, 0.15)" : `${riskColor(f)}22`) : "transparent",
+                color: riskFilter === f ? (f === "ALL" ? "#4d9fff" : riskColor(f)) : "var(--tdia-muted)",
                 cursor: "pointer",
               }}>{f}</button>
             ))}
@@ -397,7 +397,7 @@ export default function SkuDemandPlan() {
           <div style={{ overflowX: "auto", borderTop: "1px solid var(--tdia-border)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "hsl(220 45% 16%)", color: "var(--tdia-muted)", textAlign: "left" }}>
+                <tr style={{ background: "rgba(255, 255, 255, 0.02)", color: "var(--tdia-muted)", textAlign: "left" }}>
                   <th style={th}>SKU</th>
                   <th style={th}>Produit</th>
                   <th style={th}>Forecast</th>
@@ -425,7 +425,7 @@ export default function SkuDemandPlan() {
                       </select>
                     </td>
                     <td style={td}><input type="number" value={r.gross_margin_percent} onChange={(e) => update(r.id, "gross_margin_percent", e.target.value === "" ? "" : Number(e.target.value))} style={inpMono} /></td>
-                    <td style={{ ...tdMono, fontWeight: 600, color: (out.projected_inventory_after_plan ?? 0) < 0 ? "#c1121f" : "var(--tdia-text)" }}>{fmtInt(out.projected_inventory_after_plan)}</td>
+                    <td style={{ ...tdMono, fontWeight: 600, color: (out.projected_inventory_after_plan ?? 0) < 0 ? "#ff6b6b" : "var(--tdia-text)" }}>{fmtInt(out.projected_inventory_after_plan)}</td>
                     <td style={td}>
                       <span style={{ background: `${riskColor(out.inventory_risk)}22`, color: riskColor(out.inventory_risk), border: `1px solid ${riskColor(out.inventory_risk)}55`, padding: "2px 8px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>{out.inventory_risk}</span>
                     </td>
@@ -458,10 +458,10 @@ function Kpi({ label, value, sub, color }: { label: string; value: string; sub: 
   );
 }
 
-const panelHeader: React.CSSProperties = { padding: "12px 16px", borderBottom: "1px solid var(--tdia-border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "hsl(220 45% 16%)" };
+const panelHeader: React.CSSProperties = { padding: "12px 16px", borderBottom: "1px solid var(--tdia-border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255, 255, 255, 0.02)" };
 const panelTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--tdia-muted)" };
 const th: React.CSSProperties = { padding: "10px 8px", fontWeight: 700, fontSize: 10, letterSpacing: "0.03em", textTransform: "uppercase" };
 const td: React.CSSProperties = { padding: "6px 8px", color: "var(--tdia-text)" };
 const tdMono: React.CSSProperties = { padding: "6px 8px", color: "var(--tdia-text)", fontFamily: "JetBrains Mono, monospace", textAlign: "right" };
-const inp: React.CSSProperties = { width: "100%", padding: "4px 6px", borderRadius: 4, border: "1px solid var(--tdia-border)", fontSize: 12, background: "hsl(220 45% 14%)", color: "var(--tdia-text)" };
+const inp: React.CSSProperties = { width: "100%", padding: "4px 6px", borderRadius: 4, border: "1px solid var(--tdia-border)", fontSize: 12, background: "rgba(255, 255, 255, 0.02)", color: "var(--tdia-text)" };
 const inpMono: React.CSSProperties = { ...inp, fontFamily: "JetBrains Mono, monospace", textAlign: "right" };

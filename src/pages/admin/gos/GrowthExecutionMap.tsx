@@ -23,17 +23,17 @@ const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const STATUSES = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE", "CANCELLED"] as const;
 
 const typeColor: Record<string, string> = {
-  CREATIVE: "hsl(226 100% 60%)", OFFER: "#0f8a44", AUDIENCE: "#a8730a", LANDING: "#a855f7",
+  CREATIVE: "#4d9fff", OFFER: "#3ddc97", AUDIENCE: "#f5b74e", LANDING: "#a855f7",
   CHECKOUT: "#ec4899", EMAIL: "#06b6d4", SMS: "#f97316", SEO: "#84cc16", OTHER: "#7a8ca6",
 };
 const priorityColor = (p: string | null) =>
-  p === "CRITICAL" ? "#c1121f" : p === "HIGH" ? "#c1121f" : p === "MEDIUM" ? "#a8730a" : p === "LOW" ? "#0f8a44" : "#7a8ca6";
+  p === "CRITICAL" ? "#ff6b6b" : p === "HIGH" ? "#ff6b6b" : p === "MEDIUM" ? "#f5b74e" : p === "LOW" ? "#3ddc97" : "#7a8ca6";
 
 const statusMeta: Record<typeof STATUSES[number], { label: string; color: string }> = {
   TODO: { label: "To do", color: "#7a8ca6" },
-  IN_PROGRESS: { label: "In progress", color: "hsl(226 100% 60%)" },
-  BLOCKED: { label: "Blocked", color: "#c1121f" },
-  DONE: { label: "Done", color: "#0f8a44" },
+  IN_PROGRESS: { label: "In progress", color: "#4d9fff" },
+  BLOCKED: { label: "Blocked", color: "#ff6b6b" },
+  DONE: { label: "Done", color: "#3ddc97" },
   CANCELLED: { label: "Cancelled", color: "#5b6675" },
 };
 
@@ -162,7 +162,7 @@ export default function GrowthExecutionMap() {
   const linkedTarget = targets.find(t => t.id === current?.linked_target_id);
   const linkedDiag = diagnoses.find(d => d.id === current?.linked_diagnosis_id);
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   return (
     <>
@@ -239,25 +239,25 @@ export default function GrowthExecutionMap() {
                   onClick={() => setSelectedMap(m.id)}
                   style={{
                     flexShrink: 0, minWidth: 220, padding: "10px 14px", borderRadius: 12,
-                    background: "hsl(220 45% 16%)",
-                    border: active ? "2px solid hsl(226 100% 60%)" : "1px solid var(--tdia-border)",
-                    boxShadow: active ? "0 0 15px hsl(226 100% 60% / 0.2)" : "none",
+                    background: "rgba(255, 255, 255, 0.02)",
+                    border: active ? "2px solid #4d9fff" : "1px solid var(--tdia-border)",
+                    boxShadow: active ? "0 0 15px rgba(77, 159, 255, 0.2)" : "none",
                     opacity: active ? 1 : 0.65, cursor: "pointer", textAlign: "left",
                     display: "flex", flexDirection: "column", gap: 4, color: "var(--tdia-text)",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", fontFamily: "JetBrains Mono, monospace", color: active ? "hsl(226 100% 60%)" : "var(--tdia-muted)" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", fontFamily: "JetBrains Mono, monospace", color: active ? "#4d9fff" : "var(--tdia-muted)" }}>
                       <MapIcon size={10} style={{ display: "inline", marginRight: 6, verticalAlign: "middle" }} />
                       {m.period_label}{active ? " · active" : ""}
                     </span>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 3, background: active ? "hsl(226 100% 60%)" : "hsl(220 45% 14%)", color: active ? "white" : "var(--tdia-muted)" }}>{count}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 3, background: active ? "#4d9fff" : "rgba(255, 255, 255, 0.02)", color: active ? "white" : "var(--tdia-muted)" }}>{count}</span>
                   </div>
                   <span style={{ fontSize: 12, fontWeight: 600 }}>
                     {m.period_start && m.period_end ? `${m.period_start} → ${m.period_end}` : "Période non définie"}
                   </span>
-                  <div style={{ height: 3, background: "hsl(220 45% 14%)", borderRadius: 999, overflow: "hidden", marginTop: 4 }}>
-                    <div style={{ height: "100%", width: `${pct}%`, background: "hsl(226 100% 60%)" }} />
+                  <div style={{ height: 3, background: "rgba(255, 255, 255, 0.02)", borderRadius: 999, overflow: "hidden", marginTop: 4 }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: "#4d9fff" }} />
                   </div>
                 </button>
               );
@@ -286,15 +286,15 @@ export default function GrowthExecutionMap() {
                   <div style={{ height: 1, background: "var(--tdia-border)" }} />
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <Ctx label="Période" value={current.period_start && current.period_end ? `${current.period_start} → ${current.period_end}` : "—"} dot="hsl(226 100% 60%)" />
-                    <Ctx label="Owner" value={current.owner || "—"} dot="#a8730a" avatar={current.owner ? initials(current.owner) : undefined} />
-                    <Ctx label="Progress" value={`${columns.DONE.length} / ${currentItems.length} · ${sprintProgress}%`} dot="#0f8a44" />
+                    <Ctx label="Période" value={current.period_start && current.period_end ? `${current.period_start} → ${current.period_end}` : "—"} dot="#4d9fff" />
+                    <Ctx label="Owner" value={current.owner || "—"} dot="#f5b74e" avatar={current.owner ? initials(current.owner) : undefined} />
+                    <Ctx label="Progress" value={`${columns.DONE.length} / ${currentItems.length} · ${sprintProgress}%`} dot="#3ddc97" />
                     <Ctx label="Statut" value={current.status || "—"} dot="#7a8ca6" />
                   </div>
 
                   {(linkedTarget || linkedDiag) && (
-                    <div style={{ padding: 12, borderRadius: 8, background: "hsl(0 0% 98.8% / 0.6)", border: "1px solid var(--tdia-border)", display: "flex", flexDirection: "column", gap: 6 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, fontWeight: 700, color: "hsl(226 100% 60%)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                    <div style={{ padding: 12, borderRadius: 8, background: "rgba(11, 19, 34, 0.6)", border: "1px solid var(--tdia-border)", display: "flex", flexDirection: "column", gap: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, fontWeight: 700, color: "#4d9fff", textTransform: "uppercase", letterSpacing: "0.03em" }}>
                         <Link2 size={11} /> Linked docs
                       </div>
                       {linkedDiag && <div style={linkText}>Diagnostic · {linkedDiag.primary_bottleneck || linkedDiag.problem_type}</div>}
@@ -391,14 +391,14 @@ function KanbanCard({ item, onStatus, onDelete }: { item: Item; onStatus: (s: st
   const dueIsLate = due != null && due < 0 && !isDone;
   const dueIsToday = due === 0 && !isDone;
   const impact = (item.estimated_impact || "").trim();
-  const impactColor = impact.match(/[-−]/) ? "#c1121f" : impact.match(/\+|[1-9]/) ? "#0f8a44" : "var(--tdia-muted)";
+  const impactColor = impact.match(/[-−]/) ? "#ff6b6b" : impact.match(/\+|[1-9]/) ? "#3ddc97" : "var(--tdia-muted)";
 
   return (
     <div style={{
       padding: 14, borderRadius: 12,
-      background: "hsl(220 45% 16%)",
-      border: `1px solid ${item.status === "BLOCKED" ? "#c1121f66" : "var(--tdia-border)"}`,
-      borderLeft: item.status === "IN_PROGRESS" ? "4px solid hsl(226 100% 60%)" : undefined,
+      background: "rgba(255, 255, 255, 0.02)",
+      border: `1px solid ${item.status === "BLOCKED" ? "#ff6b6b66" : "var(--tdia-border)"}`,
+      borderLeft: item.status === "IN_PROGRESS" ? "4px solid #4d9fff" : undefined,
       filter: isDone ? "grayscale(0.4)" : undefined,
       opacity: isDone ? 0.65 : 1,
       display: "flex", flexDirection: "column", gap: 10,
@@ -425,7 +425,7 @@ function KanbanCard({ item, onStatus, onDelete }: { item: Item; onStatus: (s: st
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
         {item.owner ? (
-          <div title={item.owner} style={{ width: 24, height: 24, borderRadius: 999, background: "hsl(220 45% 14%)", border: "1px solid var(--tdia-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "var(--tdia-text)", fontFamily: "JetBrains Mono, monospace" }}>
+          <div title={item.owner} style={{ width: 24, height: 24, borderRadius: 999, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--tdia-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "var(--tdia-text)", fontFamily: "JetBrains Mono, monospace" }}>
             {initials(item.owner)}
           </div>
         ) : (
@@ -441,7 +441,7 @@ function KanbanCard({ item, onStatus, onDelete }: { item: Item; onStatus: (s: st
           )}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
             <span style={{ fontSize: 9, fontWeight: 700, color: "var(--tdia-muted)", textTransform: "uppercase", fontFamily: "JetBrains Mono, monospace" }}>Due</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: dueIsLate ? "#c1121f" : dueIsToday ? "hsl(226 100% 60%)" : "var(--tdia-text)" }}>{dueLabel(item.due_date)}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: dueIsLate ? "#ff6b6b" : dueIsToday ? "#4d9fff" : "var(--tdia-text)" }}>{dueLabel(item.due_date)}</span>
           </div>
         </div>
       </div>
@@ -469,7 +469,7 @@ function Ctx({ label, value, dot, avatar }: { label: string; value: string; dot:
         <span style={{ fontSize: 11, fontWeight: 600, color: "var(--tdia-text)" }}>{label}</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {avatar && <span style={{ width: 18, height: 18, borderRadius: 999, background: "hsl(220 45% 14%)", border: "1px solid var(--tdia-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "var(--tdia-text)" }}>{avatar}</span>}
+        {avatar && <span style={{ width: 18, height: 18, borderRadius: 999, background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--tdia-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "var(--tdia-text)" }}>{avatar}</span>}
         <span style={{ fontSize: 11, fontWeight: 600, color: "var(--tdia-text)", fontFamily: "JetBrains Mono, monospace" }}>{value}</span>
       </div>
     </div>
@@ -481,4 +481,4 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
 }
 
 const ctxLabel: React.CSSProperties = { fontSize: 10, fontWeight: 700, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontFamily: "JetBrains Mono, monospace" };
-const linkText: React.CSSProperties = { fontSize: 11, color: "hsl(226 100% 60%)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+const linkText: React.CSSProperties = { fontSize: 11, color: "#4d9fff", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };

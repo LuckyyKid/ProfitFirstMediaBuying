@@ -23,13 +23,13 @@ type Report = {
 type Roadmap = { client_id: string; status: string };
 type Wayfinder = { client_id: string; session_date: string };
 
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#22c55e";
-const RED = "#ef4444";
-const YELLOW = "#eab308";
-const MUTED = "hsl(0 0% 40%)";
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const YELLOW = "#f5b74e";
+const MUTED = "#8b97ad";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
 
 function num(v: any): number | null {
   const n = Number(v);
@@ -151,7 +151,7 @@ export default function PortfolioExecutive() {
     return { totalRev, totalSpend, blendedMer, critical, noRecent, activeTests, count: rows.length };
   }, [rows]);
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 12 }} />;
 
   return (
     <div>
@@ -177,7 +177,7 @@ export default function PortfolioExecutive() {
 
       {/* Alerts */}
       {(kpis.critical > 0 || kpis.noRecent > 0) && (
-        <div style={{ marginBottom: 20, padding: 14, background: "hsl(0 84% 96%)", border: `1px solid ${RED}`, borderRadius: 12, display: "flex", gap: 16, alignItems: "center" }}>
+        <div style={{ marginBottom: 20, padding: 14, background: "linear-gradient(135deg, rgba(255, 107, 107, 0.06), rgba(255, 255, 255, 0.015))", border: `1px solid rgba(255, 107, 107, 0.25)`, borderRadius: 12, display: "flex", gap: 16, alignItems: "center" }}>
           <AlertTriangle size={20} style={{ color: RED }} />
           <div style={{ flex: 1, fontSize: 13, color: "var(--tdia-text)" }}>
             {kpis.critical > 0 && <><strong>{kpis.critical}</strong> client{kpis.critical > 1 ? "s" : ""} en état critique. </>}
@@ -214,7 +214,7 @@ export default function PortfolioExecutive() {
         <div className="gos-card" style={{ padding: 0, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
-              <tr style={{ background: "hsl(220 45% 14%)", color: MUTED, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+              <tr style={{ background: "rgba(148, 170, 215, 0.04)", color: "#5f6b82", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.24em" }}>
                 <Th>Client</Th>
                 <Th>Santé</Th>
                 <Th>Phase</Th>
@@ -265,7 +265,7 @@ export default function PortfolioExecutive() {
                     <Td align="right">{fmt(r.mer, "x")}</Td>
                     <Td align="right">{fmt(r.cac, "€", 0)}</Td>
                     <Td align="center">
-                      <span style={{ padding: "2px 8px", borderRadius: 10, background: r.activeTests > 0 ? "hsl(226 100% 60% / 0.15)" : "transparent", color: r.activeTests > 0 ? BLUE : MUTED, fontWeight: 600 }}>
+                      <span style={{ padding: "2px 8px", borderRadius: 10, background: r.activeTests > 0 ? "rgba(77, 159, 255, 0.14)" : "transparent", color: r.activeTests > 0 ? BLUE : MUTED, fontWeight: 600 }}>
                         {r.activeTests}
                       </span>
                     </Td>

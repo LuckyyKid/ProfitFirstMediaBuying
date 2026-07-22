@@ -240,8 +240,8 @@ export default function FinancialConsolidated() {
                           <td>{c.period_start} → {c.period_end}</td>
                           <td>{c.granularity}</td>
                           <td>{money(c.opening_cash)}</td>
-                          <td style={{ color: "#16a34a" }}>{money(c.cash_in)}</td>
-                          <td style={{ color: "#dc2626" }}>{money(out)}</td>
+                          <td style={{ color: "#3ddc97" }}>{money(c.cash_in)}</td>
+                          <td style={{ color: "#ff6b6b" }}>{money(out)}</td>
                           <td style={{ fontWeight: 600 }}>{money(c.closing_cash)}</td>
                           <td>{c.runway_weeks ?? "—"}</td>
                           <td><button className="gos-btn-secondary" onClick={() => del("gos_cashflow_snapshots", c.id)}><Trash2 size={12} /></button></td>
@@ -304,7 +304,7 @@ export default function FinancialConsolidated() {
                         <td>{l.horizon_months}m</td>
                         <td>{money(l.cac)}</td>
                         <td>{money(l.predicted_ltv)}</td>
-                        <td style={{ color: Number(l.ltv_cac_ratio) >= 3 ? "#16a34a" : Number(l.ltv_cac_ratio) >= 1.5 ? "#d97706" : "#dc2626", fontWeight: 600 }}>
+                        <td style={{ color: Number(l.ltv_cac_ratio) >= 3 ? "#3ddc97" : Number(l.ltv_cac_ratio) >= 1.5 ? "#d97706" : "#ff6b6b", fontWeight: 600 }}>
                           {Number(l.ltv_cac_ratio ?? 0).toFixed(2)}
                         </td>
                         <td>{Number(l.payback_months ?? 0).toFixed(1)}m</td>
@@ -324,7 +324,7 @@ export default function FinancialConsolidated() {
 }
 
 function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone?: "ok" | "warn" | "bad" }) {
-  const color = tone === "ok" ? "#16a34a" : tone === "warn" ? "#d97706" : tone === "bad" ? "#dc2626" : "var(--tdia-text)";
+  const color = tone === "ok" ? "#3ddc97" : tone === "warn" ? "#d97706" : tone === "bad" ? "#ff6b6b" : "var(--tdia-text)";
   return (
     <div className="gos-card" style={{ padding: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--tdia-muted)", fontSize: 12 }}>{icon} {label}</div>
@@ -347,7 +347,7 @@ function NumInput({ v, set }: { v: number; set: (n: number) => void }) {
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" | "bad" }) {
-  const color = tone === "ok" ? "#16a34a" : tone === "warn" ? "#d97706" : tone === "bad" ? "#dc2626" : "var(--tdia-text)";
+  const color = tone === "ok" ? "#3ddc97" : tone === "warn" ? "#d97706" : tone === "bad" ? "#ff6b6b" : "var(--tdia-text)";
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--tdia-muted)" }}>{label}</div>

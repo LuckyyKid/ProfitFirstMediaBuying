@@ -13,14 +13,14 @@ import {
   type CreativeDemandRunRow,
 } from "@/gos/creativeDemandController";
 
-const BG = "hsl(220 45% 14%)";
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#0f8a44";
-const RED = "#c1121f";
-const AMBER = "#a8730a";
+const BG = "rgba(255, 255, 255, 0.02)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const AMBER = "#f5b74e";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
 
 const fmtInt = (n: number) => n.toLocaleString("fr-FR");
@@ -208,7 +208,7 @@ export default function CreativeDemand() {
 
       {/* Runs ledger */}
       <div style={{ borderRadius: 12, border: `1px solid ${BORDER}`, background: CARD, overflow: "hidden" }}>
-        <div style={{ padding: "12px 20px", background: "hsl(220 45% 12%)", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ padding: "12px 20px", background: "rgba(255, 255, 255, 0.02)", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${BORDER}` }}>
           <h3 style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>
             Historique des simulations
           </h3>

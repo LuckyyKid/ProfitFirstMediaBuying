@@ -210,8 +210,8 @@ export default function GosNewClient() {
         style={{
           padding: 20,
           marginBottom: 20,
-          background: "linear-gradient(135deg, hsl(220 45% 14%) 0%, hsl(220 45% 14%) 100%)",
-          border: "1px solid hsl(220 45% 16%)",
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.02) 100%)",
+          border: "1px solid rgba(255, 255, 255, 0.02)",
         }}
       >
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${STEPS.length}, 1fr)`, gap: 12, alignItems: "start" }}>
@@ -234,7 +234,7 @@ export default function GosNewClient() {
                   alignItems: "center",
                   padding: 10,
                   borderRadius: 10,
-                  background: current ? "hsl(226 100% 60% / 0.08)" : "transparent",
+                  background: current ? "rgba(77, 159, 255, 0.08)" : "transparent",
                   border: `1px solid ${current ? "var(--tdia-blue)" : "transparent"}`,
                   transition: "all .2s ease",
                 }}
@@ -243,9 +243,9 @@ export default function GosNewClient() {
                   style={{
                     width: 36, height: 36, borderRadius: 10,
                     display: "grid", placeItems: "center",
-                    background: done || current ? "var(--tdia-blue)" : "hsl(220 45% 16%)",
-                    color: done || current ? "hsl(220 45% 14%)" : "var(--tdia-muted)",
-                    border: `2px solid ${done || current ? "var(--tdia-blue)" : "hsl(220 45% 25%)"}`,
+                    background: done || current ? "var(--tdia-blue)" : "rgba(255, 255, 255, 0.02)",
+                    color: done || current ? "rgba(255, 255, 255, 0.02)" : "var(--tdia-muted)",
+                    border: `2px solid ${done || current ? "var(--tdia-blue)" : "rgba(148, 170, 215, 0.12)"}`,
                   }}
                 >
                   {done ? <Check size={18} strokeWidth={3} /> : <Icon size={16} />}
@@ -262,11 +262,11 @@ export default function GosNewClient() {
             );
           })}
         </div>
-        <div style={{ marginTop: 14, height: 4, background: "hsl(220 45% 16%)", borderRadius: 4, overflow: "hidden" }}>
+        <div style={{ marginTop: 14, height: 4, background: "rgba(255, 255, 255, 0.02)", borderRadius: 4, overflow: "hidden" }}>
           <div
             style={{
               width: `${pct}%`, height: "100%",
-              background: "linear-gradient(90deg, var(--tdia-blue), hsl(226 100% 68%))",
+              background: "linear-gradient(90deg, var(--tdia-blue), #7ab7ff)",
               transition: "width .3s ease",
             }}
           />
@@ -315,7 +315,7 @@ export default function GosNewClient() {
             </div>
           )}
           {selectedKey && (
-            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "hsl(226 100% 60% / 0.08)", border: "1px solid hsl(226 100% 60% / 0.25)", color: "var(--tdia-text)", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(77, 159, 255, 0.08)", border: "1px solid rgba(77, 159, 255, 0.25)", color: "var(--tdia-text)", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
               <Check size={14} color="var(--tdia-blue)" />
               Préremplissage appliqué — passe à l'étape suivante pour vérifier.
             </div>
@@ -405,7 +405,7 @@ export default function GosNewClient() {
                 ["Deal", form.deal_value ? `${form.deal_value} €` : "—"],
                 ["Rétainer", form.monthly_retainer ? `${form.monthly_retainer} €/mois` : "—"],
               ].map(([k, v]) => (
-                <div key={k as string} style={{ padding: 10, borderRadius: 8, background: "hsl(220 45% 14%)", border: "1px solid hsl(220 45% 16%)" }}>
+                <div key={k as string} style={{ padding: 10, borderRadius: 8, background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.02)" }}>
                   <div style={{ fontSize: 10, color: "var(--tdia-muted)", fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase" }}>{k}</div>
                   <div style={{ color: "var(--tdia-text)", marginTop: 4, fontWeight: 500 }}>{v}</div>
                 </div>
@@ -423,7 +423,7 @@ export default function GosNewClient() {
           padding: "14px 18px", marginTop: 8,
           background: "hsl(0 0% 98.8% / 0.92)",
           backdropFilter: "blur(8px)",
-          border: "1px solid hsl(220 45% 16%)",
+          border: "1px solid rgba(255, 255, 255, 0.02)",
           borderRadius: 12,
         }}
       >

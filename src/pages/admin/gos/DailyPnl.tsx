@@ -53,12 +53,12 @@ const PRESET_LABELS: Record<WeightPresetKey, string> = {
 };
 
 const MONO: CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const CARD = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
-const BORDER = "hsl(220 45% 25%)";
-const BORDER_SOFT = "hsl(220 45% 12%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BG_DEEP = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const BORDER_SOFT = "rgba(255, 255, 255, 0.02)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
 const GREEN = "#0f8a44";
 const RED = "#c1121f";
 const DOW_LABELS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -529,7 +529,7 @@ const dateCellStyle: CSSProperties = {
 
 const auditPanelStyle: CSSProperties = {
   borderTop: `1px solid ${BORDER}`,
-  background: "hsl(220 45% 14%)",
+  background: "rgba(255, 255, 255, 0.02)",
   padding: "14px 20px",
 };
 

@@ -1,38 +1,35 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BellRing, ExternalLink, Mail, MailCheck, RefreshCcw, Send } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ArrowLeft, ExternalLink, Mail, MailCheck, RefreshCcw, Search, Send } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminClients } from "@/hooks/useAdminClients";
-import { ONBOARDING_STEPS, currentStepIndex, timeAgo } from "@/lib/onboardingHelpers";
+import {
+  ONBOARDING_STEPS,
+  currentStepIndex,
+  timeAgo,
+} from "@/lib/onboardingHelpers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import {
-  TwentyPage,
-  PageHeader,
-  NavPill,
-  NavDivider,
-  InsightStrip,
-  StatPill,
-  ViewBar,
-  FilterChipBar,
-  TwentyTableWrap,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-  LoadingRow,
-} from "@/components/admin-shell";
 
 type Tab = "all" | "callback_due" | "followup_sent";
-
-const TABS = [
-  { key: "all", label: "Tous (en suivi)" },
-  { key: "callback_due", label: "À rappeler" },
-  { key: "followup_sent", label: "Suivi envoyé" },
-] as const;
 
 const hoursSince = (iso?: string | null) => {
   if (!iso) return null;
@@ -64,6 +61,7 @@ const FollowUps = () => {
         return hay.includes(q);
       })
       .sort((a, b) => {
+        // À rappeler first, then most recent follow-up
         const aCallback = a.callback_due_at ? 1 : 0;
         const bCallback = b.callback_due_at ? 1 : 0;
         if (aCallback !== bCallback) return bCallback - aCallback;
@@ -123,158 +121,179 @@ const FollowUps = () => {
     else toast.message("Aucun email envoyé");
   };
 
-  const activeTabLabel = TABS.find((t) => t.key === tab)?.label ?? "";
-  const chips = [
-    ...(tab !== "all" ? [{ key: "tab", label: activeTabLabel, onRemove: () => setTab("all") }] : []),
-    ...(search.trim() ? [{ key: "search", label: <>Recherche: {search}</>, onRemove: () => setSearch("") }] : []),
-  ];
-
   return (
-    <TwentyPage>
-      <PageHeader
-        icon={BellRing}
-        title="Suivi des clients"
-        description="Emails de relance, callbacks et statut de suivi"
-        actions={
-          <>
-            <NavPill to="/admin" icon={ArrowLeft}>Dashboard</NavPill>
-            <NavDivider />
-            <Button variant="ghost" size="sm" onClick={runChecks} disabled={running} className="h-7 px-2 text-xs hover:bg-muted">
-              <RefreshCcw className={`h-3.5 w-3.5 mr-1 ${running ? "animate-spin" : ""}`} />
-              Cycle de suivi
+    <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" />Dashboard</Link>
             </Button>
-          </>
-        }
-      />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Suivi des clients</h1>
+              <p className="text-sm text-muted-foreground">
+                Qui a reçu un email de relance, depuis combien de temps, et qui doit être rappelé.
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={runChecks} disabled={running}>
+            <RefreshCcw className={`h-4 w-4 mr-2 ${running ? "animate-spin" : ""}`} />
+            Lancer un cycle de suivi
+          </Button>
+        </header>
 
-      <InsightStrip>
-        <StatPill label="À rappeler" value={counts.callback} tone="amber" onClick={() => setTab("callback_due")} active={tab === "callback_due"} />
-        <StatPill label="Suivi envoyé" value={counts.sent} tone="blue" onClick={() => setTab("followup_sent")} active={tab === "followup_sent"} />
-        <StatPill label="Total en suivi" value={counts.total} onClick={() => setTab("all")} active={tab === "all"} />
-      </InsightStrip>
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard label="À rappeler" value={counts.callback} tone="amber" active={tab === "callback_due"} onClick={() => setTab("callback_due")} />
+          <StatCard label="Suivi envoyé" value={counts.sent} tone="sky" active={tab === "followup_sent"} onClick={() => setTab("followup_sent")} />
+          <StatCard label="Total en suivi" value={counts.total} active={tab === "all"} onClick={() => setTab("all")} />
+        </div>
 
-      <ViewBar
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Rechercher (nom, entreprise, email, code)…"
-        filters={TABS}
-        activeFilter={tab}
-        onFilterChange={(k) => setTab(k as Tab)}
-        total={rows.length}
-      />
+        <Card className="p-4 space-y-4 glass-card">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[240px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher (nom, entreprise, email, code)…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={tab} onValueChange={(v) => setTab(v as Tab)}>
+              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous (en suivi)</SelectItem>
+                <SelectItem value="callback_due">À rappeler</SelectItem>
+                <SelectItem value="followup_sent">Suivi envoyé</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="text-xs text-muted-foreground">{rows.length} client{rows.length > 1 ? "s" : ""}</div>
+          </div>
 
-      <FilterChipBar chips={chips} onReset={() => { setTab("all"); setSearch(""); }} />
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Entreprise</TableHead>
+                  <TableHead>Étape bloquée</TableHead>
+                  <TableHead>Statut suivi</TableHead>
+                  <TableHead>Email envoyé</TableHead>
+                  <TableHead>Relances</TableHead>
+                  <TableHead>À rappeler depuis</TableHead>
+                  <TableHead>Dernière activité</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                ) : rows.length === 0 ? (
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucun client en suivi</TableCell></TableRow>
+                ) : rows.map((c) => {
+                  const detailRef = c.client_id || c.client_code;
+                  const stepIdx = c.followup_step != null ? c.followup_step : currentStepIndex(c);
+                  const stepLabel = ONBOARDING_STEPS[stepIdx]?.label ?? "—";
+                  const callbackHours = hoursSince(c.callback_due_at);
+                  const sentHours = hoursSince(c.followup_sent_at);
+                  const callback = !!c.callback_due_at;
+                  return (
+                    <TableRow key={detailRef} className={callback ? "bg-amber-500/5" : ""}>
+                      <TableCell>
+                        <div className="font-medium">{c.client_name || "—"}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{c.client_code}</div>
+                        <div className="text-xs text-muted-foreground">{c.email || ""}</div>
+                      </TableCell>
+                      <TableCell>{c.company_name || c.brand_name || "—"}</TableCell>
+                      <TableCell className="text-sm">
+                        <div>Étape {stepIdx + 1}</div>
+                        <div className="text-xs text-muted-foreground">{stepLabel}</div>
+                      </TableCell>
+                      <TableCell>
+                        {callback ? (
+                          <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-amber-500/40 bg-amber-500/10 text-amber-300 font-medium">
+                            📞 À rappeler
+                          </span>
+                        ) : (
+                          <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-sky-500/40 bg-sky-500/10 text-sky-300">
+                            ✉️ Suivi envoyé
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {c.followup_sent_at ? (
+                          <>
+                            <div>il y a {timeAgo(c.followup_sent_at)}</div>
+                            <div className="text-xs text-muted-foreground">{sentHours}h</div>
+                          </>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">{c.followup_count || 0}×</TableCell>
+                      <TableCell className="text-sm">
+                        {callback ? (
+                          <span className={callbackHours && callbackHours >= 24 ? "text-amber-300 font-medium" : ""}>
+                            {timeAgo(c.callback_due_at)} ({callbackHours}h)
+                          </span>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{timeAgo(c.last_activity_at)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => sendWelcome(c)}
+                            disabled={!c.email}
+                            title={c.welcome_sent_at ? "Renvoyer email de bienvenue" : "Envoyer email de bienvenue"}
+                          >
+                            {c.welcome_sent_at ? <MailCheck className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => sendFollowNow(c)}
+                            disabled={!c.email}
+                            title={c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
 
-      <TwentyTableWrap>
-        <TwentyTable>
-          <TwentyThead>
-            <Th>Client</Th>
-            <Th>Entreprise</Th>
-            <Th>Étape bloquée</Th>
-            <Th>Statut suivi</Th>
-            <Th>Email envoyé</Th>
-            <Th>Relances</Th>
-            <Th>À rappeler depuis</Th>
-            <Th>Dernière activité</Th>
-            <Th className="w-24"></Th>
-          </TwentyThead>
-          <tbody>
-            {loading ? (
-              <LoadingRow colSpan={9} />
-            ) : rows.length === 0 ? (
-              <EmptyRow colSpan={9} title="Aucun client en suivi" />
-            ) : rows.map((c) => {
-              const detailRef = c.client_id || c.client_code;
-              const stepIdx = c.followup_step != null ? c.followup_step : currentStepIndex(c);
-              const stepLabel = ONBOARDING_STEPS[stepIdx]?.label ?? "—";
-              const callbackHours = hoursSince(c.callback_due_at);
-              const sentHours = hoursSince(c.followup_sent_at);
-              const callback = !!c.callback_due_at;
-              return (
-                <TwentyRow key={detailRef} className={callback ? "bg-amber-50/50" : ""}>
-                  <Td>
-                    <div className="font-medium text-foreground">{c.client_name || "—"}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono">{c.client_code}</div>
-                    <div className="text-[10px] text-muted-foreground">{c.email || ""}</div>
-                  </Td>
-                  <Td>{c.company_name || c.brand_name || "—"}</Td>
-                  <Td>
-                    <div>Étape {stepIdx + 1}</div>
-                    <div className="text-[10px] text-muted-foreground">{stepLabel}</div>
-                  </Td>
-                  <Td>
-                    {callback ? (
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border border-amber-200 bg-amber-50 text-amber-700">
-                        À rappeler
-                      </span>
-                    ) : (
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border border-sky-200 bg-sky-50 text-sky-700">
-                        Suivi envoyé
-                      </span>
-                    )}
-                  </Td>
-                  <Td>
-                    {c.followup_sent_at ? (
-                      <>
-                        <div>il y a {timeAgo(c.followup_sent_at)}</div>
-                        <div className="text-[10px] text-muted-foreground">{sentHours}h</div>
-                      </>
-                    ) : "—"}
-                  </Td>
-                  <Td className="tabular-nums">{c.followup_count || 0}×</Td>
-                  <Td>
-                    {callback ? (
-                      <span className={callbackHours && callbackHours >= 24 ? "text-amber-700 font-medium" : ""}>
-                        {timeAgo(c.callback_due_at)} ({callbackHours}h)
-                      </span>
-                    ) : "—"}
-                  </Td>
-                  <Td className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(c.last_activity_at)}</Td>
-                  <Td>
-                    <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => sendWelcome(c)}
-                        disabled={!c.email}
-                        title={c.welcome_sent_at ? "Renvoyer bienvenue" : "Envoyer bienvenue"}
-                        className="h-6 w-6 hover:bg-background"
-                      >
-                        {c.welcome_sent_at ? <MailCheck className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => sendFollowNow(c)}
-                        disabled={!c.email}
-                        title={c.followup_sent_at ? "Renvoyer suivi" : "Envoyer suivi"}
-                        className="h-6 w-6 hover:bg-background"
-                      >
-                        <Send className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button asChild size="icon" variant="ghost" className="h-6 w-6 hover:bg-background">
-                        <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </Td>
-                </TwentyRow>
-              );
-            })}
-          </tbody>
-        </TwentyTable>
-      </TwentyTableWrap>
-
-      <div className="px-4 md:px-6 py-3 border-t border-border bg-secondary/40 text-[11px] text-muted-foreground shrink-0 space-y-0.5">
-        <div className="font-medium text-foreground text-xs mb-1">Comment ça marche</div>
-        <div>1. Un client bloqué &gt; 24h sur une étape reçoit automatiquement un email de relance.</div>
-        <div>2. Si 24h après le suivi l'étape n'a toujours pas bougé, le statut passe à « À rappeler ».</div>
-        <div>3. À ce stade, l'admin prend le relais (appel, Slack) puis fait avancer le client.</div>
-        <div>4. Quand le client avance d'étape, le compteur de suivi se réinitialise automatiquement.</div>
+        <Card className="p-4 glass-card text-xs text-muted-foreground space-y-1">
+          <div className="font-medium text-foreground">Comment ça marche</div>
+          <div>1. Un client bloqué &gt; 24h sur une étape reçoit automatiquement un email de relance (✉️ Suivi envoyé).</div>
+          <div>2. Si 24h après le suivi l'étape n'a toujours pas bougé, le statut passe à 📞 À rappeler.</div>
+          <div>3. À ce stade, l'admin prend le relais (appel, message Slack) puis fait avancer le client.</div>
+          <div>4. Quand le client avance d'étape, le compteur de suivi se réinitialise automatiquement.</div>
+        </Card>
       </div>
-    </TwentyPage>
+    </div>
   );
 };
+
+const StatCard = ({ label, value, tone, active, onClick }: { label: string; value: number; tone?: "amber" | "sky"; active?: boolean; onClick?: () => void }) => (
+  <Card
+    onClick={onClick}
+    className={`p-4 glass-card cursor-pointer transition ${active ? "ring-2 ring-primary/60" : "hover:ring-1 hover:ring-primary/40"}`}
+  >
+    <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+    <div className={`text-2xl font-bold mt-1 ${tone === "amber" ? "text-amber-400" : tone === "sky" ? "text-sky-400" : ""}`}>
+      {value}
+    </div>
+  </Card>
+);
 
 export default FollowUps;

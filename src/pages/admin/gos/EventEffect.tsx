@@ -40,7 +40,7 @@ const monoLabel: React.CSSProperties = {
   fontFamily: MONO,
   fontSize: 10,
   fontWeight: 700,
-  color: "hsl(0 0% 40%)",
+  color: "#8b97ad",
   textTransform: "uppercase",
   letterSpacing: "0.03em",
 };
@@ -66,8 +66,8 @@ function EnginePulse() {
         gap: 8,
         padding: "5px 12px",
         borderRadius: 999,
-        background: "hsl(226 100% 60% / 0.1)",
-        border: "1px solid hsl(226 100% 60% / 0.25)",
+        background: "rgba(77, 159, 255, 0.1)",
+        border: "1px solid rgba(77, 159, 255, 0.25)",
       }}
     >
       <span
@@ -88,7 +88,7 @@ function EnginePulse() {
 function StatusPill({ status }: { status: string | null | undefined }) {
   const s = (status ?? "PLANNED").toUpperCase();
   const map: Record<string, { c: string; b: string }> = {
-    PLANNED:   { c: "#60a5fa", b: "hsl(226 100% 60% / 0.25)" },
+    PLANNED:   { c: "#60a5fa", b: "rgba(77, 159, 255, 0.25)" },
     MEASURED:  { c: "#0f8a44", b: "hsl(160 84% 45% / 0.35)" },
     ACTIVE:    { c: "#0f8a44", b: "hsl(160 84% 45% / 0.35)" },
     CANCELLED: { c: "#c1121f", b: "hsl(0 84% 65% / 0.35)" },
@@ -160,7 +160,7 @@ export default function EventEffect() {
     }
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   void client;
 
   return (
@@ -237,7 +237,7 @@ export default function EventEffect() {
       {/* EVENT LEDGER */}
       <div
         style={{
-          background: "hsl(220 45% 16%)",
+          background: "rgba(255, 255, 255, 0.02)",
           border: "1px solid var(--tdia-border)",
           borderRadius: 12,
           overflow: "hidden",
@@ -246,8 +246,8 @@ export default function EventEffect() {
         }}
       >
         <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--tdia-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ ...monoLabel, color: "hsl(0 0% 40%)" }}>Registre des événements</span>
-          <span style={{ ...monoLabel, color: "hsl(226 100% 60% / 0.7)" }}>{events.length} entries</span>
+          <span style={{ ...monoLabel, color: "#8b97ad" }}>Registre des événements</span>
+          <span style={{ ...monoLabel, color: "rgba(77, 159, 255, 0.7)" }}>{events.length} entries</span>
         </div>
         {events.length === 0 ? (
           <div style={{ padding: 24 }}>
@@ -263,7 +263,7 @@ export default function EventEffect() {
                 <th style={{ ...thStyle, textAlign: "right" }}>Lift estimé</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>Δ Revenu est.</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>Lift réel</th>
-                <th style={{ ...thStyle, textAlign: "center", color: "hsl(226 100% 60% / 0.7)" }}>Confiance</th>
+                <th style={{ ...thStyle, textAlign: "center", color: "rgba(77, 159, 255, 0.7)" }}>Confiance</th>
                 <th style={{ ...thStyle, textAlign: "center" }}>Statut</th>
               </tr>
             </thead>
@@ -272,16 +272,16 @@ export default function EventEffect() {
                 <tr
                   key={e.id}
                   style={{ transition: "background 0.15s" }}
-                  onMouseEnter={(el) => (el.currentTarget.style.background = "hsl(226 100% 60% / 0.04)")}
+                  onMouseEnter={(el) => (el.currentTarget.style.background = "rgba(77, 159, 255, 0.04)")}
                   onMouseLeave={(el) => (el.currentTarget.style.background = "transparent")}
                 >
                   <td style={{ ...tdStyle, color: "var(--tdia-text)", fontWeight: 600 }}>{e.event_name}</td>
-                  <td style={{ ...tdStyle, fontFamily: MONO, fontSize: 11, color: "hsl(226 100% 60% / 0.85)" }}>{e.event_type ?? "—"}</td>
+                  <td style={{ ...tdStyle, fontFamily: MONO, fontSize: 11, color: "rgba(77, 159, 255, 0.85)" }}>{e.event_type ?? "—"}</td>
                   <td style={{ ...tdStyle, fontFamily: MONO, fontSize: 12 }}>{e.start_date} <span style={{ color: "var(--tdia-blue)" }}>→</span> {e.end_date}</td>
-                  <td style={{ ...tdStyle, textAlign: "right", fontFamily: MONO, color: e.expected_lift_pct != null ? "#0f8a44" : "hsl(0 0% 40%)" }}>
+                  <td style={{ ...tdStyle, textAlign: "right", fontFamily: MONO, color: e.expected_lift_pct != null ? "#0f8a44" : "#8b97ad" }}>
                     {e.expected_lift_pct != null ? `+${e.expected_lift_pct}%` : "—"}
                   </td>
-                  <td style={{ ...tdStyle, textAlign: "right", fontFamily: MONO, color: e.expected_revenue_delta != null ? "#0f8a44" : "hsl(0 0% 40%)" }}>
+                  <td style={{ ...tdStyle, textAlign: "right", fontFamily: MONO, color: e.expected_revenue_delta != null ? "#0f8a44" : "#8b97ad" }}>
                     {e.expected_revenue_delta != null ? `+${Number(e.expected_revenue_delta).toLocaleString()} $` : "—"}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right", fontFamily: MONO }}>
@@ -313,7 +313,7 @@ const thStyle: React.CSSProperties = {
   fontFamily: MONO,
   fontSize: 10,
   fontWeight: 700,
-  color: "hsl(0 0% 40%)",
+  color: "#8b97ad",
   textTransform: "uppercase",
   letterSpacing: "0.03em",
   padding: "12px 20px",
@@ -324,7 +324,7 @@ const tdStyle: React.CSSProperties = {
   padding: "14px 20px",
   fontSize: 13,
   color: "var(--tdia-muted)",
-  borderBottom: "1px solid hsl(220 45% 16%)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.02)",
 };
 
 function ConfidenceBar({ value }: { value: string | null | undefined }) {
@@ -333,7 +333,7 @@ function ConfidenceBar({ value }: { value: string | null | undefined }) {
   if (!pct) return <span style={{ fontFamily: MONO, color: "hsl(0 0% 50%)", fontSize: 11 }}>N/A</span>;
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-      <div style={{ width: 60, height: 4, background: "hsl(220 45% 25%)", borderRadius: 999, overflow: "hidden" }}>
+      <div style={{ width: 60, height: 4, background: "rgba(148, 170, 215, 0.12)", borderRadius: 999, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, height: "100%", background: "var(--tdia-blue)" }} />
       </div>
       <span style={{ fontFamily: MONO, fontSize: 10, color: "var(--tdia-text)" }}>{pct}%</span>
@@ -422,7 +422,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
       {/* CONFIG PANEL */}
       <div
         style={{
-          background: "hsl(220 45% 16%)",
+          background: "rgba(255, 255, 255, 0.02)",
           border: "1px solid var(--tdia-border)",
           borderRadius: 12,
           padding: 24,
@@ -431,7 +431,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ padding: 8, background: "hsl(226 100% 60% / 0.15)", border: "1px solid hsl(226 100% 60% / 0.25)", borderRadius: 8, display: "flex" }}>
+            <div style={{ padding: 8, background: "rgba(77, 159, 255, 0.15)", border: "1px solid rgba(77, 159, 255, 0.25)", borderRadius: 8, display: "flex" }}>
               <BarChart3 size={18} color="var(--tdia-blue-light, #60a5fa)" />
             </div>
             <div>
@@ -455,7 +455,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
             <SeriesTextarea label="Pré" value={preTxt} onChange={setPreTxt} placeholder="1000, 1050, 980, 1020, 1010" accent />
             <SeriesTextarea label="Post" value={postTxt} onChange={setPostTxt} placeholder="1200, 1250, 1230, 1210" accent />
           </SeriesColumn>
-          <SeriesColumn accent="hsl(0 0% 40%)" title="Série contrôle (optionnel · active DiD)">
+          <SeriesColumn accent="#8b97ad" title="Série contrôle (optionnel · active DiD)">
             <SeriesTextarea label="Pré" value={ctrlPreTxt} onChange={setCtrlPreTxt} placeholder="800, 810, 795, 820" />
             <SeriesTextarea label="Post" value={ctrlPostTxt} onChange={setCtrlPostTxt} placeholder="820, 830, 825, 815" />
           </SeriesColumn>
@@ -514,14 +514,14 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
           }}
         >
           <div style={{ position: "absolute", top: 12, right: 12, opacity: 0.1, fontSize: 90, lineHeight: 1, fontWeight: 900 }}>Σ</div>
-          <div style={{ ...monoLabel, color: "hsl(226 100% 60%)", fontWeight: 700 }}>
+          <div style={{ ...monoLabel, color: "#4d9fff", fontWeight: 700 }}>
             {result ? `Lift estimé (${result.method})` : "En attente d'exécution"}
           </div>
           <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: "-0.03em", marginTop: 8, lineHeight: 1 }}>
             {result ? `${result.causal_lift_pct > 0 ? "+" : ""}${result.causal_lift_pct}` : "—"}
             {result && <span style={{ fontSize: 22, fontWeight: 700, marginLeft: 4 }}>%</span>}
           </div>
-          <div style={{ fontSize: 14, marginTop: 6, color: "hsl(226 100% 60%)", fontWeight: 500 }}>
+          <div style={{ fontSize: 14, marginTop: 6, color: "#4d9fff", fontWeight: 500 }}>
             {result && deltaRevenue != null
               ? `${deltaRevenue > 0 ? "+" : ""}${deltaRevenue.toLocaleString()} $ Revenue`
               : "Colle les séries et calcule"}
@@ -529,7 +529,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
 
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid hsl(0 0% 92.2% / 0.3)", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
             <div>
-              <div style={{ ...monoLabel, color: "hsl(226 100% 60%)" }}>Confiance</div>
+              <div style={{ ...monoLabel, color: "#4d9fff" }}>Confiance</div>
               <div style={{ fontFamily: MONO, fontSize: 14, fontWeight: 700, marginTop: 4 }}>
                 {result ? `${confidencePct}%` : "—"}
               </div>
@@ -564,7 +564,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
         {/* Model details */}
         <div
           style={{
-            background: "hsl(220 45% 16%)",
+            background: "rgba(255, 255, 255, 0.02)",
             border: "1px solid var(--tdia-border)",
             borderRadius: 12,
             padding: 20,
@@ -580,7 +580,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
             <DetailRow k="Contrefactuel" v={result ? result.counterfactual_mean.toLocaleString() : "—"} />
             <DetailRow k="p-value" v={result ? result.p_value.toFixed(4) : "—"} color={result?.significant ? "#0f8a44" : "#a8730a"} />
             <DetailRow k="IC 95%" v={result ? `[${result.ci_low.toFixed(1)}, ${result.ci_high.toFixed(1)}]` : "—"} />
-            <div style={{ paddingTop: 10, borderTop: "1px solid hsl(220 45% 16%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ paddingTop: 10, borderTop: "1px solid rgba(255, 255, 255, 0.02)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ color: "var(--tdia-muted)", fontSize: 12 }}>Statut p-value</span>
               <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, color: result?.significant ? "#0f8a44" : "#a8730a" }}>
                 {result ? (result.significant ? "SIGNIFICATIF" : "NON SIGNIFICATIF") : "—"}
@@ -592,7 +592,7 @@ function CausalImpactV2Panel({ clientId, events, onDone }: { clientId: string; e
         {result && (
           <div
             style={{
-              background: "hsl(220 45% 16%)",
+              background: "rgba(255, 255, 255, 0.02)",
               border: "1px solid var(--tdia-border)",
               borderRadius: 12,
               padding: 16,
@@ -627,7 +627,7 @@ function SeriesColumn({ title, accent, children }: { title: string; accent: stri
 function SeriesTextarea({ label, value, onChange, placeholder, accent }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; accent?: boolean }) {
   return (
     <div>
-      <div style={{ ...monoLabel, fontSize: 9, marginBottom: 4, color: accent ? "hsl(226 100% 60% / 0.7)" : "hsl(0 0% 50%)" }}>{label}</div>
+      <div style={{ ...monoLabel, fontSize: 9, marginBottom: 4, color: accent ? "rgba(77, 159, 255, 0.7)" : "hsl(0 0% 50%)" }}>{label}</div>
       <textarea
         rows={3}
         value={value}
@@ -635,13 +635,13 @@ function SeriesTextarea({ label, value, onChange, placeholder, accent }: { label
         placeholder={placeholder}
         style={{
           width: "100%",
-          background: "hsl(220 45% 14%)",
+          background: "rgba(255, 255, 255, 0.02)",
           border: "1px solid var(--tdia-border)",
           borderRadius: 8,
           padding: 12,
           fontFamily: MONO,
           fontSize: 12,
-          color: accent ? "hsl(226 100% 60%)" : "hsl(0 0% 40%)",
+          color: accent ? "#4d9fff" : "#8b97ad",
           resize: "vertical",
           outline: "none",
           boxShadow: "inset 0 2px 4px rgba(0,0,0,0.2)",

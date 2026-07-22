@@ -16,12 +16,12 @@ import {
 } from "@/gos/weeklyPnlController";
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const BG = "hsl(220 45% 14%)";
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#0f8a44";
-const RED = "#c1121f";
+const BG = "rgba(255, 255, 255, 0.02)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
 
 const fmt = (n: number | null | undefined) => n == null ? "—" : Number(n).toLocaleString();
 const shortDate = (s: string) => {
@@ -31,7 +31,7 @@ const shortDate = (s: string) => {
 };
 
 function varColor(v: number | null, invert = false) {
-  if (v == null) return "hsl(0 0% 45%)";
+  if (v == null) return "#8b97ad";
   const positive = invert ? v <= 0 : v >= 0;
   return positive ? GREEN : RED;
 }
@@ -112,13 +112,13 @@ export default function WeeklyPnl() {
           padding: 24,
           boxShadow: "none",
         }}>
-          <h2 style={{ fontSize: 11, letterSpacing: "0.03em", fontWeight: 700, color: "hsl(0 0% 45%)", textTransform: "uppercase", margin: "0 0 24px 0" }}>
+          <h2 style={{ fontSize: 11, letterSpacing: "0.03em", fontWeight: 700, color: "#8b97ad", textTransform: "uppercase", margin: "0 0 24px 0" }}>
             Générateur de semaines
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <label style={{ fontSize: 10, color: "hsl(0 0% 45%)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Cible parente</label>
+              <label style={{ fontSize: 10, color: "#8b97ad", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Cible parente</label>
               <select
                 value={selectedTarget}
                 onChange={(e) => setSelectedTarget(e.target.value)}
@@ -131,11 +131,11 @@ export default function WeeklyPnl() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <label style={{ fontSize: 10, color: "hsl(0 0% 45%)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Semaines</label>
+                <label style={{ fontSize: 10, color: "#8b97ad", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Semaines</label>
                 <input type="number" min={1} max={26} value={numWeeks} onChange={(e) => setNumWeeks(Number(e.target.value))} style={inputStyle} />
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <label style={{ fontSize: 10, color: "hsl(0 0% 45%)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Début</label>
+                <label style={{ fontSize: 10, color: "#8b97ad", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>Début</label>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
               </div>
             </div>
@@ -188,8 +188,8 @@ export default function WeeklyPnl() {
           {/* Header */}
           <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <h1 style={{ fontSize: 16, fontWeight: 700, color: "hsl(0 0% 20%)", margin: 0, letterSpacing: "0.02em" }}>Objectifs P&L hebdo</h1>
-              <div style={{ fontSize: 10, color: "hsl(0 0% 45%)", textTransform: "uppercase", letterSpacing: "0.03em", marginTop: 4, fontWeight: 700 }}>
+              <h1 style={{ fontSize: 16, fontWeight: 700, color: "#eef2fa", margin: 0, letterSpacing: "0.02em" }}>Objectifs P&L hebdo</h1>
+              <div style={{ fontSize: 10, color: "#8b97ad", textTransform: "uppercase", letterSpacing: "0.03em", marginTop: 4, fontWeight: 700 }}>
                 {weeks.length} semaines · planifié vs réel
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function WeeklyPnl() {
                 background: "rgba(51,65,85,0.3)",
                 border: `1px solid ${BORDER}`,
                 borderRadius: 8,
-                color: "hsl(0 0% 35%)",
+                color: "#8b97ad",
                 fontSize: 10,
                 fontWeight: 700,
                 textTransform: "uppercase",
@@ -297,7 +297,7 @@ export default function WeeklyPnl() {
                           ) : isPast ? (
                             <Badge color={RED}>MANQUANT</Badge>
                           ) : (
-                            <span style={{ color: "hsl(0 0% 45%)", fontStyle: "italic", fontSize: 10 }}>À venir</span>
+                            <span style={{ color: "#8b97ad", fontStyle: "italic", fontSize: 10 }}>À venir</span>
                           )}
                         </Td>
                       </tr>
@@ -310,10 +310,10 @@ export default function WeeklyPnl() {
 
           {/* Footer */}
           <div style={{ padding: "14px 24px", background: "rgba(30,41,59,0.1)", borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ fontSize: 10, color: "hsl(0 0% 45%)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            <div style={{ fontSize: 10, color: "#8b97ad", textTransform: "uppercase", letterSpacing: "0.03em" }}>
               Δ% Revenue/Orders : vert = au-dessus · Δ% Spend : vert = sous-budget
             </div>
-            <div style={{ fontSize: 10, color: "hsl(0 0% 45%)", fontStyle: "italic" }}>
+            <div style={{ fontSize: 10, color: "#8b97ad", fontStyle: "italic" }}>
               Saisie sauvegardée automatiquement au blur
             </div>
           </div>
@@ -331,7 +331,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: "8px 12px",
   fontSize: 13,
-  color: "hsl(0 0% 25%)",
+  color: "#eef2fa",
   outline: "none",
 };
 
@@ -345,7 +345,7 @@ function ThGroup({ children, rowSpan, colSpan, center, width }: { children: Reac
         textAlign: center ? "center" : "left",
         fontSize: 10,
         fontWeight: 700,
-        color: "hsl(0 0% 45%)",
+        color: "#8b97ad",
         textTransform: "uppercase",
         letterSpacing: "0.03em",
         borderRight: `1px solid ${BORDER}`,
@@ -365,7 +365,7 @@ function ThSub({ children, border }: { children: React.ReactNode; border?: boole
       textAlign: "right",
       fontSize: 9,
       fontWeight: 400,
-      color: "hsl(0 0% 45%)",
+      color: "#8b97ad",
       textTransform: "uppercase",
       letterSpacing: "0.03em",
       borderRight: border ? `1px solid ${BORDER}` : undefined,
@@ -384,7 +384,7 @@ function Td({ children, bold, muted, right, center, border, color, compact, styl
       padding: compact ? "8px 8px" : "14px 12px",
       textAlign: right ? "right" : center ? "center" : "left",
       fontWeight: bold ? 700 : 400,
-      color: color ?? (muted ? "hsl(0 0% 45%)" : "hsl(0 0% 25%)"),
+      color: color ?? (muted ? "#8b97ad" : "#eef2fa"),
       borderRight: border ? `1px solid ${BORDER}` : undefined,
       ...style,
     }}>
@@ -409,7 +409,7 @@ function NumInput({ defaultValue, onBlur, width = 72 }: { defaultValue: number |
         padding: "6px 8px",
         fontSize: 12,
         textAlign: "right",
-        color: "hsl(0 0% 25%)",
+        color: "#eef2fa",
         outline: "none",
       }}
       onFocus={(e) => { e.currentTarget.style.borderColor = BLUE; }}

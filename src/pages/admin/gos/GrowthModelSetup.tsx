@@ -83,7 +83,7 @@ export default function GrowthModelSetup() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [clientId]);
 
-  if (loading || !client) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading || !client) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const isEcom = client.business_type === "ECOMMERCE" || client.business_type === "HYBRID";
   const isLocal = client.business_type === "LOCAL_SERVICE" || client.business_type === "HYBRID";
@@ -143,7 +143,7 @@ export default function GrowthModelSetup() {
               <span>Progression</span>
               <span>{completed} / {totalBlocks}</span>
             </div>
-            <div style={{ height: 6, borderRadius: 999, background: "hsl(220 45% 25%)", overflow: "hidden" }}>
+            <div style={{ height: 6, borderRadius: 999, background: "rgba(148, 170, 215, 0.12)", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${(completed / totalBlocks) * 100}%`, background: "var(--tdia-primary, #4f8cff)", transition: "width .3s" }} />
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function GrowthModelSetup() {
           </div>
           <div style={{ position: "relative" }}>
             {/* Vertical line */}
-            <div style={{ position: "absolute", left: 19, top: 16, bottom: 16, width: 2, background: "hsl(220 45% 25%)", zIndex: 0 }} />
+            <div style={{ position: "absolute", left: 19, top: 16, bottom: 16, width: 2, background: "rgba(148, 170, 215, 0.12)", zIndex: 0 }} />
             {ordered.map((k, idx) => {
               const status = blockStatuses[k];
               const done = isDone(status);
@@ -183,23 +183,23 @@ export default function GrowthModelSetup() {
                     width: "100%",
                     padding: "10px 10px",
                     marginBottom: idx === ordered.length - 1 ? 0 : 4,
-                    background: isCurrent ? "hsl(220 45% 16%)" : "transparent",
-                    border: isCurrent ? "1px solid hsl(220 45% 25%)" : "1px solid transparent",
+                    background: isCurrent ? "rgba(255, 255, 255, 0.02)" : "transparent",
+                    border: isCurrent ? "1px solid rgba(148, 170, 215, 0.12)" : "1px solid transparent",
                     borderRadius: 10,
                     cursor: "pointer",
                     textAlign: "left",
                     transition: "background .15s",
                   }}
-                  onMouseEnter={(e) => { if (!isCurrent) (e.currentTarget as HTMLElement).style.background = "hsl(220 45% 16%)"; }}
+                  onMouseEnter={(e) => { if (!isCurrent) (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.04)"; }}
                   onMouseLeave={(e) => { if (!isCurrent) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                 >
                   <div style={{
                     width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontWeight: 700, fontSize: 14,
-                    background: done ? "var(--tdia-primary, #4f8cff)" : isCurrent ? "hsl(220 45% 25%)" : "hsl(220 45% 14%)",
+                    background: done ? "var(--tdia-primary, #4f8cff)" : isCurrent ? "rgba(148, 170, 215, 0.12)" : "rgba(255, 255, 255, 0.02)",
                     color: done ? "#fff" : "var(--tdia-text)",
-                    border: `2px solid ${done ? "var(--tdia-primary, #4f8cff)" : isCurrent ? "var(--tdia-primary, #4f8cff)" : "hsl(220 45% 25%)"}`,
+                    border: `2px solid ${done ? "var(--tdia-primary, #4f8cff)" : isCurrent ? "var(--tdia-primary, #4f8cff)" : "rgba(148, 170, 215, 0.12)"}`,
                   }}>
                     {done ? "✓" : letters[idx]}
                   </div>
@@ -309,7 +309,7 @@ function MultiProductSelect({ value, onChange, products, placeholder }: { value:
     );
   }
   return (
-    <div style={{ maxHeight: 160, overflowY: "auto", border: "1px solid hsl(220 45% 25%)", borderRadius: 8, padding: 8, background: "hsl(220 45% 14%)" }}>
+    <div style={{ maxHeight: 160, overflowY: "auto", border: "1px solid rgba(148, 170, 215, 0.12)", borderRadius: 8, padding: 8, background: "rgba(255, 255, 255, 0.02)" }}>
       {products.map((p) => {
         const name = p.product_name || p.sku;
         const checked = selected.includes(name);
@@ -491,12 +491,12 @@ function FinancialInputsForm({ clientId, businessType, row, onSaved }: any) {
             </button>
           </div>
           {derived && !derived.has_data && (
-            <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "hsl(220 45% 14%)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "rgba(255, 255, 255, 0.02)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
               Aucune donnée Shopify détectée. Connecte l'intégration et lance une synchro pour auto-remplir AOV, marge et % de traitement.
             </div>
           )}
           {derived && derived.has_data && (
-            <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "hsl(220 45% 14%)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "rgba(255, 255, 255, 0.02)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
               Shopify 30j : {derived.revenue_30d ?? 0} € revenue · {derived.orders_30d ?? 0} commandes · AOV {derived.aov ?? "—"} · Marge {derived.gross_margin_percent ?? "n/a (pas de product_cost)"} %
             </div>
           )}
@@ -824,7 +824,7 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
           <button className="gos-btn-secondary" type="button" onClick={autofill} style={{ fontSize: 12 }}>⟳ Auto-remplir depuis Shopify</button>
         </div>
         {derived && derived.has_data && (
-          <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "hsl(220 45% 14%)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "rgba(255, 255, 255, 0.02)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
             Shopify 30j : revenue {derived.revenue_30d ?? 0} · orders {derived.orders_30d ?? 0} · AOV {derived.aov ?? "—"}. Ad spend reste manuel jusqu'à connexion Meta/Google.
           </div>
         )}

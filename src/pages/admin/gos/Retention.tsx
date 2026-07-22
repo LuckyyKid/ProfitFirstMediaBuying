@@ -28,7 +28,7 @@ type ActivityFormKey = "new_customers" | "reactivated_customers" | "active_custo
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" };
 
 function heatBg(value: number, max: number): string {
-  if (!value || value <= 0 || max <= 0) return "hsl(220 45% 25%)";
+  if (!value || value <= 0 || max <= 0) return "rgba(148, 170, 215, 0.12)";
   const r = Math.min(1, value / max);
   // blue-900 → blue-300 gradient via opacity + hue lightness
   const alpha = 0.15 + r * 0.55;
@@ -37,9 +37,9 @@ function heatBg(value: number, max: number): string {
 }
 
 function heatText(value: number, max: number): string {
-  if (!value || max <= 0) return "hsl(0 0% 40%)";
+  if (!value || max <= 0) return "#8b97ad";
   const r = value / max;
-  return r > 0.55 ? "hsl(0 0% 20%)" : "hsl(0 0% 40%)";
+  return r > 0.55 ? "hsl(0 0% 20%)" : "#8b97ad";
 }
 
 function pct(n?: number | null) {
@@ -202,13 +202,13 @@ export default function Retention() {
     }
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const latest = snaps[0];
   const qualityColor =
     cohort.quality === "HIGH" ? "hsl(142 71% 55%)" :
     cohort.quality === "LOW" ? "hsl(0 72% 65%)" :
-    cohort.quality === "MEDIUM" ? "hsl(38 92% 60%)" : "hsl(0 0% 40%)";
+    cohort.quality === "MEDIUM" ? "hsl(38 92% 60%)" : "#8b97ad";
   const riskColor = cohort.risks.length === 0 ? "hsl(142 71% 55%)" : cohort.risks.length > 2 ? "hsl(0 72% 65%)" : "hsl(38 92% 60%)";
   const txMetricMax = Math.max(
     1,
@@ -270,13 +270,13 @@ export default function Retention() {
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 300px", gap: 18 }}>
           <div style={{ overflowX: "auto" }}>
             {transactionCohort.acquisition_cohorts.length === 0 ? (
-              <div style={{ padding: 24, textAlign: "center", color: "var(--tdia-muted)", border: "1px dashed hsl(220 45% 12%)", borderRadius: 4 }}>
+              <div style={{ padding: 24, textAlign: "center", color: "var(--tdia-muted)", border: "1px dashed rgba(255, 255, 255, 0.02)", borderRadius: 4 }}>
                 Aucune transaction valide. Ajoute customer_id + transaction_date ou laisse une integration alimenter la table.
               </div>
             ) : (
               <table style={{ width: "100%", borderCollapse: "collapse", ...mono, fontSize: 12 }}>
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(220 45% 25%)" }}>
+                  <tr style={{ borderBottom: "1px solid rgba(148, 170, 215, 0.12)" }}>
                     <Th>Cohort</Th>
                     <Th center>Acq.</Th>
                     {transactionCohort.age_columns.map((age) => <Th key={age} center>M{age}</Th>)}
@@ -284,8 +284,8 @@ export default function Retention() {
                 </thead>
                 <tbody>
                   {transactionCohort.acquisition_cohorts.map((row) => (
-                    <tr key={row.acquisition_cohort} style={{ borderBottom: "1px solid hsl(220 45% 25%)" }}>
-                      <td style={{ padding: "10px 8px", color: "hsl(0 0% 40%)", fontWeight: 700 }}>
+                    <tr key={row.acquisition_cohort} style={{ borderBottom: "1px solid rgba(148, 170, 215, 0.12)" }}>
+                      <td style={{ padding: "10px 8px", color: "#8b97ad", fontWeight: 700 }}>
                         {row.acquisition_cohort}
                       </td>
                       <td style={{ padding: "10px 8px", textAlign: "center", color: "var(--tdia-blue)", fontWeight: 700 }}>
@@ -318,7 +318,7 @@ export default function Retention() {
             )}
 
             {(transactionCohort.conditions.length > 0 || transactionCohort.risks.length > 0) && (
-              <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 11, color: "hsl(0 0% 40%)" }}>
+              <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 11, color: "#8b97ad" }}>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
                   {transactionCohort.conditions.map((condition) => <li key={condition}>{condition}</li>)}
                 </ul>
@@ -329,7 +329,7 @@ export default function Retention() {
             )}
           </div>
 
-          <div style={{ borderLeft: "1px solid hsl(220 45% 25%)", paddingLeft: 18 }}>
+          <div style={{ borderLeft: "1px solid rgba(148, 170, 215, 0.12)", paddingLeft: 18 }}>
             <div style={{ ...mono, fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: 10 }}>
               Manual transaction
             </div>
@@ -353,7 +353,7 @@ export default function Retention() {
                 </div>
                 <div style={{ display: "grid", gap: 5 }}>
                   {recentTransactions.map((tx) => (
-                    <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, ...mono, fontSize: 10, color: "hsl(0 0% 40%)" }}>
+                    <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, ...mono, fontSize: 10, color: "#8b97ad" }}>
                       <span>{tx.customer_id}</span>
                       <span>{tx.transaction_date}</span>
                       <span>{tx.revenue ?? "-"}</span>
@@ -372,7 +372,7 @@ export default function Retention() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div
             style={{
-              background: "hsl(220 45% 25%)",
+              background: "rgba(148, 170, 215, 0.12)",
               borderLeft: "2px solid var(--tdia-blue)",
               padding: 18,
               borderRadius: "0 4px 4px 0",
@@ -404,7 +404,7 @@ export default function Retention() {
               <StatCell label="QUALITÉ" value={cohort.quality || "—"} color={qualityColor} />
               <StatCell label="RISQUES" value={cohort.risks.length ? `${cohort.risks.length}` : "0"} color={riskColor} />
               <StatCell label="BACKTEST" value={cohort.backtest_error_percent != null ? `${cohort.backtest_error_percent}%` : "V2.1"} color="var(--tdia-blue)" />
-              <StatCell label="COND" value={cohort.conditions.length ? `${cohort.conditions.length}` : "AUTO"} color="hsl(0 0% 40%)" />
+              <StatCell label="COND" value={cohort.conditions.length ? `${cohort.conditions.length}` : "AUTO"} color="#8b97ad" />
             </div>
           </div>
 
@@ -415,7 +415,7 @@ export default function Retention() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 320, overflowY: "auto" }}>
               {snaps.length === 0 ? (
-                <div style={{ padding: 12, fontSize: 11, color: "var(--tdia-muted)", border: "1px dashed hsl(220 45% 25%)", borderRadius: 4, textAlign: "center" }}>
+                <div style={{ padding: 12, fontSize: 11, color: "var(--tdia-muted)", border: "1px dashed rgba(148, 170, 215, 0.12)", borderRadius: 4, textAlign: "center" }}>
                   Aucun snapshot
                 </div>
               ) : snaps.map((s) => (
@@ -426,8 +426,8 @@ export default function Retention() {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "10px 12px",
-                    background: "hsl(220 45% 25%)",
-                    border: "1px solid hsl(220 45% 25%)",
+                    background: "rgba(148, 170, 215, 0.12)",
+                    border: "1px solid rgba(148, 170, 215, 0.12)",
                     borderRadius: 3,
                     cursor: "default",
                   }}
@@ -453,8 +453,8 @@ export default function Retention() {
         <div
           style={{
             position: "relative",
-            background: "hsl(220 45% 25%)",
-            border: "1px solid hsl(220 45% 25%)",
+            background: "rgba(148, 170, 215, 0.12)",
+            border: "1px solid rgba(148, 170, 215, 0.12)",
             padding: 24,
             borderRadius: 4,
             overflow: "hidden",
@@ -472,7 +472,7 @@ export default function Retention() {
             <div style={{ display: "flex", gap: 12, ...mono, fontSize: 10, color: "var(--tdia-muted)" }}>
               <LegendSwatch color="hsl(226 100% 25% / 0.4)" label="LOW" />
               <LegendSwatch color="hsl(226 100% 45% / 0.5)" label="MED" />
-              <LegendSwatch color="hsl(226 100% 60% / 0.65)" label="HIGH" />
+              <LegendSwatch color="rgba(77, 159, 255, 0.65)" label="HIGH" />
               <LegendSwatch color="hsl(226 100% 70% / 0.75)" label="PEAK" />
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function Retention() {
           <div style={{ overflowX: "auto", position: "relative", zIndex: 1 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", ...mono, fontSize: 12 }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid hsl(220 45% 25%)" }}>
+                <tr style={{ borderBottom: "1px solid rgba(148, 170, 215, 0.12)" }}>
                   <Th>Cohort</Th>
                   <Th center>New</Th>
                   <Th center>Active</Th>
@@ -500,17 +500,17 @@ export default function Retention() {
                   </tr>
                 )}
                 {cohort.rows.map((r: ActivityDerived, i: number) => (
-                  <tr key={activity[i]?.id ?? i} style={{ borderBottom: "1px solid hsl(220 45% 25%)" }}>
-                    <td style={{ padding: "10px 8px", color: "hsl(0 0% 40%)", fontWeight: 700, textTransform: "uppercase" }}>
+                  <tr key={activity[i]?.id ?? i} style={{ borderBottom: "1px solid rgba(148, 170, 215, 0.12)" }}>
+                    <td style={{ padding: "10px 8px", color: "#8b97ad", fontWeight: 700, textTransform: "uppercase" }}>
                       {String(r.snapshot_month).slice(0, 7)}
                     </td>
                     <HeatCell v={r.new_customers} max={maxes.new_customers} />
                     <HeatCell v={r.active_customers} max={maxes.active_customers} />
                     <HeatCell v={r.reactivated_customers} max={maxes.reactivated_customers} />
-                    <td style={{ padding: "10px 8px", textAlign: "center", background: "hsl(220 45% 25%)", color: "hsl(0 0% 40%)" }}>
+                    <td style={{ padding: "10px 8px", textAlign: "center", background: "rgba(148, 170, 215, 0.12)", color: "#8b97ad" }}>
                       {r.lapsed_customers}
                     </td>
-                    <td style={{ padding: "10px 8px", textAlign: "center", borderLeft: "1px solid hsl(220 45% 25%)", fontWeight: 700, color: r.net_active_customer_change >= 0 ? "hsl(142 71% 55%)" : "hsl(0 72% 65%)" }}>
+                    <td style={{ padding: "10px 8px", textAlign: "center", borderLeft: "1px solid rgba(148, 170, 215, 0.12)", fontWeight: 700, color: r.net_active_customer_change >= 0 ? "hsl(142 71% 55%)" : "hsl(0 72% 65%)" }}>
                       {r.net_active_customer_change >= 0 ? "+" : ""}{r.net_active_customer_change}
                     </td>
                     <td style={{ padding: "10px 8px", textAlign: "center", color: "var(--tdia-blue)" }}>
@@ -524,7 +524,7 @@ export default function Retention() {
                   </tr>
                 ))}
                 {/* Inline add row */}
-                <tr style={{ background: "hsl(226 100% 60% / 0.04)" }}>
+                <tr style={{ background: "rgba(77, 159, 255, 0.04)" }}>
                   <td style={{ padding: "8px" }}>
                     <input className="gos-input" style={{ width: "100%", padding: "4px 6px", ...mono, fontSize: 11 }} type="date" value={act.snapshot_month} onChange={(e) => setAct({ ...act, snapshot_month: e.target.value })} />
                   </td>
@@ -545,12 +545,12 @@ export default function Retention() {
           </div>
 
           {activity.length > 0 && (
-            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(220 45% 25%)", display: "grid", gridTemplateColumns: cohort.risks.length || cohort.conditions.length ? "1fr 1fr" : "1fr", gap: 16, position: "relative", zIndex: 1 }}>
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid rgba(148, 170, 215, 0.12)", display: "grid", gridTemplateColumns: cohort.risks.length || cohort.conditions.length ? "1fr 1fr" : "1fr", gap: 16, position: "relative", zIndex: 1 }}>
               <div>
                 <div style={{ ...mono, fontSize: 10, fontWeight: 700, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: 6 }}>
                   Diagnostic
                 </div>
-                <div style={{ fontSize: 12, color: "hsl(0 0% 40%)" }}>{cohort.quality_reason}</div>
+                <div style={{ fontSize: 12, color: "#8b97ad" }}>{cohort.quality_reason}</div>
                 {cohort.summary && (
                   <div style={{ marginTop: 8, fontSize: 11, color: "var(--tdia-muted)", fontStyle: "italic" }}>{cohort.summary}</div>
                 )}
@@ -562,7 +562,7 @@ export default function Retention() {
                       <div style={{ ...mono, fontSize: 10, fontWeight: 700, color: "hsl(0 72% 65%)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
                         Risques
                       </div>
-                      <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 11, color: "hsl(0 0% 40%)" }}>
+                      <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 11, color: "#8b97ad" }}>
                         {cohort.risks.map((r, i) => <li key={i}>{r}</li>)}
                       </ul>
                     </div>
@@ -572,7 +572,7 @@ export default function Retention() {
                       <div style={{ ...mono, fontSize: 10, fontWeight: 700, color: "hsl(38 92% 60%)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
                         Conditions
                       </div>
-                      <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 11, color: "hsl(0 0% 40%)" }}>
+                      <ul style={{ margin: "4px 0 0", paddingLeft: 18, fontSize: 11, color: "#8b97ad" }}>
                         {cohort.conditions.map((c, i) => <li key={i}>{c}</li>)}
                       </ul>
                     </div>
@@ -631,21 +631,21 @@ function KpiTile({ label, value, suffix, progress, tone }: { label: string; valu
   return (
     <div
       style={{
-        background: "hsl(220 45% 25%)",
-        border: "1px solid hsl(220 45% 25%)",
+        background: "rgba(148, 170, 215, 0.12)",
+        border: "1px solid rgba(148, 170, 215, 0.12)",
         padding: 16,
         borderRadius: 3,
-        boxShadow: "inset 0 1px 0 hsl(220 45% 25%)",
+        boxShadow: "inset 0 1px 0 rgba(148, 170, 215, 0.12)",
       }}
     >
       <div style={{ ...mono, fontSize: 10, fontWeight: 700, color: "var(--tdia-blue)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: 6 }}>
         {label}
       </div>
       <div style={{ fontSize: 28, fontWeight: 300, color: "hsl(0 0% 20%)", lineHeight: 1 }}>
-        {value}{suffix && <span style={{ fontSize: 13, color: "hsl(0 0% 40%)", marginLeft: 3 }}>{suffix}</span>}
+        {value}{suffix && <span style={{ fontSize: 13, color: "#8b97ad", marginLeft: 3 }}>{suffix}</span>}
       </div>
       {progress != null && progress > 0 && (
-        <div style={{ marginTop: 10, height: 3, background: "hsl(220 45% 25%)", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ marginTop: 10, height: 3, background: "rgba(148, 170, 215, 0.12)", borderRadius: 2, overflow: "hidden" }}>
           <div style={{ height: "100%", background: "var(--tdia-blue)", width: `${Math.min(100, progress)}%` }} />
         </div>
       )}
@@ -658,7 +658,7 @@ function KpiTile({ label, value, suffix, progress, tone }: { label: string; valu
 
 function StatCell({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ padding: "6px 8px", background: "hsl(220 45% 25%)", border: "1px solid hsl(220 45% 25%)" }}>
+    <div style={{ padding: "6px 8px", background: "rgba(148, 170, 215, 0.12)", border: "1px solid rgba(148, 170, 215, 0.12)" }}>
       <div style={{ color: "hsl(0 0% 50%)", fontSize: 9 }}>{label}</div>
       <div style={{ color, fontWeight: 700, marginTop: 2 }}>{value}</div>
     </div>
@@ -677,7 +677,7 @@ function Th({ children, center, leftBorder }: { children?: React.ReactNode; cent
         textTransform: "uppercase",
         letterSpacing: "0.03em",
         textAlign: center ? "center" : "left",
-        borderLeft: leftBorder ? "1px solid hsl(220 45% 25%)" : undefined,
+        borderLeft: leftBorder ? "1px solid rgba(148, 170, 215, 0.12)" : undefined,
       }}
     >
       {children}
@@ -705,7 +705,7 @@ function HeatCell({ v, max }: { v: number; max: number }) {
 function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <div style={{ width: 10, height: 10, background: color, border: "1px solid hsl(220 45% 25%)" }} />
+      <div style={{ width: 10, height: 10, background: color, border: "1px solid rgba(148, 170, 215, 0.12)" }} />
       <span>{label}</span>
     </div>
   );

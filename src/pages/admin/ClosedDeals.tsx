@@ -18,25 +18,18 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronDown, CreditCard, Download, ExternalLink, FileSignature, Handshake, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
-import {
-  TwentyPage,
-  PageHeader,
-  NavPill,
-  NavDivider,
-  InsightStrip,
-  StatPill,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-  LoadingRow,
-} from "@/components/admin-shell";
+import { ArrowLeft, ChevronDown, CreditCard, Download, ExternalLink, FileSignature, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
 
 type Deal = {
   id: string;
@@ -528,36 +521,32 @@ const ClosedDeals = () => {
   }, [deals]);
 
   return (
-    <TwentyPage>
-      <PageHeader
-        icon={Handshake}
-        title="Deals closés"
-        description="Historique des deals signés et création manuelle"
-        actions={
-          <>
-            <NavPill to="/admin" icon={ArrowLeft}>Dashboard</NavPill>
-            <NavDivider />
-            <Button
-              size="sm"
-              onClick={() => setShowForm((v) => !v)}
-              className="h-7 px-2 text-xs"
-            >
-              <Plus className="h-3.5 w-3.5 mr-1" />
-              {showForm ? "Annuler" : "Nouveau deal"}
-            </Button>
-          </>
-        }
-      />
+    <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Retour</Link>
+              </Button>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Deals closés</h1>
+            <p className="text-sm text-muted-foreground">Ajoute manuellement un nouveau deal signé.</p>
+          </div>
+          <Button onClick={() => setShowForm((v) => !v)} variant="hero">
+            <Plus className="h-4 w-4 mr-2" />
+            {showForm ? "Annuler" : "Nouveau deal"}
+          </Button>
+        </header>
 
-      <InsightStrip>
-        <StatPill label="Total deals" value={totals.count} />
-        <StatPill label="Paiements uniques" value={`${totals.oneTime.toLocaleString()} $`} />
-        <StatPill label="MRR récurrent" value={`${totals.mrr.toLocaleString()} $/mo`} tone="blue" />
-      </InsightStrip>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <Stat label="Total deals" value={String(totals.count)} />
+          <Stat label="Paiements uniques" value={`${totals.oneTime.toLocaleString()} $`} />
+          <Stat label="MRR récurrent" value={`${totals.mrr.toLocaleString()} $/mo`} />
+        </div>
 
-      <div className="flex-1 overflow-auto">
         {showForm && (
-          <Card className="mx-4 md:mx-6 my-4 p-6 space-y-6 border border-border shadow-none">
+          <Card className="p-6 space-y-6 glass-card">
             <Section title="🏢 Entreprise / Signataire">
               <Field label="Nom de l'entreprise *">
                 <Input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
@@ -757,157 +746,145 @@ const ClosedDeals = () => {
           </Card>
         )}
 
-        <TwentyTable>
-          <TwentyThead>
-            <Th>Date</Th>
-            <Th>Entreprise / Client</Th>
-            <Th>Owner</Th>
-            <Th>Type</Th>
-            <Th>Montant</Th>
-            <Th>Caller</Th>
-            <Th>Risque</Th>
-            <Th>Contrat</Th>
-            <Th className="text-right">Actions</Th>
-          </TwentyThead>
-          <tbody>
-            {loading ? (
-              <LoadingRow colSpan={9} />
-            ) : visibleDeals.length === 0 ? (
-              <EmptyRow colSpan={9} title="Aucun deal pour le moment" />
-            ) : visibleDeals.map((d) => (
-              <TwentyRow key={d.id}>
-                <Td className="whitespace-nowrap">{d.closing_date}</Td>
-                <Td>
-                  <div className="font-medium text-foreground flex items-center gap-2">
-                    {d.company_name}
-                    <span
-                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${
-                        d.business_type === "local_service"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-blue-50 text-blue-700 border-blue-200"
-                      }`}
-                    >
-                      {d.business_type === "local_service" ? "Local Service" : "E-commerce"}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">{d.contact_name || ""}</div>
-                  {d.client_code && (
-                    <div className="text-[10px] font-mono text-primary/80 mt-0.5">{d.client_code}</div>
-                  )}
-                </Td>
-                <Td>
-                  <div>{d.owner_name || "—"}</div>
-                  <div className="text-[10px] text-muted-foreground">{d.owner_email || ""}</div>
-                </Td>
-                <Td>{d.payment_type === "one_time" ? "Unique" : "Récurrent"}</Td>
-                <Td className="tabular-nums whitespace-nowrap">
-                  {d.payment_type === "one_time"
-                    ? `${(d.contract_value || 0).toLocaleString()} $${d.additional_monthly ? ` + ${d.additional_monthly}/mo` : ""}`
-                    : `${(d.monthly_amount || 0).toLocaleString()} $/mo`}
-                </Td>
-                <Td>{d.closer_name}</Td>
-                <Td>
-                  {d.risk_level ? (
-                    <span
-                      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                        d.risk_level === "High"
-                          ? "bg-red-50 text-red-700 border-red-200"
-                          : d.risk_level === "Medium"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      }`}
-                    >
-                      {d.risk_level}
-                    </span>
-                  ) : (
-                    "—"
-                  )}
-                </Td>
-                <Td>
-                  {d.contract_pdf_path ? (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => downloadPdf(d.contract_pdf_path!)}
-                      className="h-6 px-1.5 text-[10px]"
-                    >
-                      <Download className="h-3 w-3 mr-1" /> PDF
-                    </Button>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </Td>
-                <Td>
-                  <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {d.client_code && (
-                      <>
-                        <Button asChild size="icon" variant="ghost" title="Ouvrir l'onboarding" className="h-6 w-6 hover:bg-background">
-                          <Link to={`/admin/clients/${encodeURIComponent(d.client_code)}`}>
-                            <ExternalLink className="h-3 w-3" />
-                          </Link>
+        <Card className="p-4 glass-card">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Entreprise / Client</TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Montant</TableHead>
+                  <TableHead>Caller</TableHead>
+                  <TableHead>Risque</TableHead>
+                  <TableHead>Contrat</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                ) : visibleDeals.length === 0 ? (
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucun deal pour le moment</TableCell></TableRow>
+                ) : visibleDeals.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="text-sm">{d.closing_date}</TableCell>
+                    <TableCell>
+                      <div className="font-medium flex items-center gap-2">
+                        {d.company_name}
+                        <span
+                          className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                            d.business_type === "local_service"
+                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                              : "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                          }`}
+                        >
+                          {d.business_type === "local_service" ? "Local Service" : "E-commerce"}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">{d.contact_name || ""}</div>
+                      {d.client_code && (
+                        <div className="text-[11px] font-mono text-primary/80 mt-0.5">{d.client_code}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <div>{d.owner_name || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{d.owner_email || ""}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {d.payment_type === "one_time" ? "Unique" : "Récurrent"}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {d.payment_type === "one_time"
+                        ? `${(d.contract_value || 0).toLocaleString()} $${d.additional_monthly ? ` + ${d.additional_monthly}/mo` : ""}`
+                        : `${(d.monthly_amount || 0).toLocaleString()} $/mo`}
+                    </TableCell>
+                    <TableCell className="text-sm">{d.closer_name}</TableCell>
+                    <TableCell className="text-xs">{d.risk_level || "—"}</TableCell>
+                    <TableCell>
+                      {d.contract_pdf_path ? (
+                        <Button size="sm" variant="outline" onClick={() => downloadPdf(d.contract_pdf_path!)}>
+                          <Download className="h-3 w-3 mr-1" /> PDF
                         </Button>
-                        <Button asChild size="icon" variant="ghost" title="Générer un contrat" className="h-6 w-6 hover:bg-background">
-                          <Link to={`/admin/contract-creator?deal=${d.id}`}>
-                            <FileSignature className="h-3 w-3" />
-                          </Link>
-                        </Button>
-                      </>
-                    )}
-                    {d.stripe_payment_url ? (
-                      <Button
-                        asChild
-                        size="icon"
-                        variant="ghost"
-                        title={`Lien Stripe ${d.stripe_payment_type === "recurring" ? "récurrent" : "unique"}`}
-                        className="h-6 w-6 hover:bg-background"
-                      >
-                        <a href={d.stripe_payment_url} target="_blank" rel="noreferrer">
-                          <CreditCard className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        disabled={generatingStripeId === d.id}
-                        onClick={() => generateStripeLink(d)}
-                        title="Générer le lien Stripe"
-                        className="h-6 w-6 hover:bg-background"
-                      >
-                        {generatingStripeId === d.id ? (
-                          <RefreshCw className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <CreditCard className="h-3 w-3" />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        {d.client_code && (
+                          <>
+                            <Button asChild size="sm" variant="outline" title="Ouvrir l'onboarding du client">
+                              <Link to={`/admin/clients/${encodeURIComponent(d.client_code)}`}>
+                                <ExternalLink className="h-3 w-3 mr-1" /> Onboarding
+                              </Link>
+                            </Button>
+                            <Button asChild size="sm" variant="outline" title="Générer un contrat pré-rempli">
+                              <Link to={`/admin/contract-creator?deal=${d.id}`}>
+                                <FileSignature className="h-3 w-3 mr-1" /> Contrat
+                              </Link>
+                            </Button>
+                          </>
                         )}
-                      </Button>
-                    )}
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => removeDeal(d.id)}
-                      title="Supprimer"
-                      className="h-6 w-6 hover:bg-background text-red-600"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </Td>
-              </TwentyRow>
-            ))}
-          </tbody>
-        </TwentyTable>
-
-        {!loading && deals.length > visibleDeals.length && (
-          <div className="flex justify-center py-3 border-t border-border">
-            <Button variant="ghost" size="sm" onClick={() => setVisibleDealsCount((n) => n + 10)} className="h-7 px-2 text-xs">
-              Voir plus ({deals.length - visibleDeals.length} restants)
-            </Button>
+                        {d.stripe_payment_url ? (
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            title={`Lien Stripe ${d.stripe_payment_type === "recurring" ? "récurrent" : "unique"}`}
+                          >
+                            <a href={d.stripe_payment_url} target="_blank" rel="noreferrer">
+                              <CreditCard className="h-3 w-3 mr-1" /> Stripe
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={generatingStripeId === d.id}
+                            onClick={() => generateStripeLink(d)}
+                            title="Générer le lien Stripe"
+                          >
+                            {generatingStripeId === d.id ? (
+                              <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <CreditCard className="h-3 w-3 mr-1" />
+                            )}
+                            Générer Stripe
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" onClick={() => removeDeal(d.id)} title="Supprimer">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        )}
+
+          {!loading && deals.length > visibleDeals.length && (
+            <div className="flex justify-center pt-3">
+              <Button variant="outline" size="sm" onClick={() => setVisibleDealsCount((n) => n + 10)}>
+                Voir plus ({deals.length - visibleDeals.length} restants)
+              </Button>
+            </div>
+          )}
+
+        </Card>
       </div>
-    </TwentyPage>
+    </div>
   );
 };
+
+const Stat = ({ label, value }: { label: string; value: string }) => (
+  <Card className="p-4 glass-card">
+    <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+    <div className="text-2xl font-bold mt-1">{value}</div>
+  </Card>
+);
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div>

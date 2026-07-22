@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { BookOpen } from "lucide-react";
-import { TwentyPage, PageHeader } from "@/components/admin-shell";
+import { SectionHeader } from "@/crm/ui";
 
 const DOCS = [
   { title: "TDIA Hierarchy of Metrics", body: "Business metrics > platform metrics. Never decide from ROAS alone. Always tie channel performance back to client goal, margin, CAC, MER, and contribution margin proxy." },
@@ -30,22 +29,16 @@ const DOCS = [
 
 export default function Methodology() {
   return (
-    <TwentyPage inLayout>
-      <PageHeader
-        icon={BookOpen}
-        title="Methodology"
-        description="Règles TDIA — lecture seule"
-      />
-      <div className="flex-1 overflow-auto p-4 md:p-6">
-        <div className="grid gap-3">
-          {DOCS.map(d => (
-            <Card key={d.title} className="p-4 border-border shadow-none">
-              <h3 className="text-sm font-semibold text-foreground mb-1.5">{d.title}</h3>
-              <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">{d.body}</p>
-            </Card>
-          ))}
-        </div>
+    <div>
+      <SectionHeader title="Methodology" description="Règles TDIA — lecture seule" />
+      <div className="grid gap-4">
+        {DOCS.map(d => (
+          <Card key={d.title} className="p-5">
+            <h3 className="font-semibold mb-2">{d.title}</h3>
+            <p className="text-sm text-muted-foreground whitespace-pre-line">{d.body}</p>
+          </Card>
+        ))}
       </div>
-    </TwentyPage>
+    </div>
   );
 }

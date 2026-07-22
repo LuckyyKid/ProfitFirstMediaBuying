@@ -37,13 +37,13 @@ type Segment = {
   priority: string;
 };
 
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#0f8a44";
-const RED = "#c1121f";
-const AMBER = "#a8730a";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const AMBER = "#f5b74e";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
 
 const PRESET_SEGMENTS = [
@@ -264,7 +264,7 @@ export default function RetentionLtvWorkspace() {
 
       {/* Cohorts table */}
       <div style={{ borderRadius: 12, border: `1px solid ${BORDER}`, background: CARD, overflow: "hidden", marginBottom: 24 }}>
-        <div style={{ padding: "12px 20px", background: "hsl(220 45% 12%)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
+        <div style={{ padding: "12px 20px", background: "rgba(255, 255, 255, 0.02)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>Cohortes</span>
           <span style={{ fontFamily: MONO, fontSize: 11, color: MUTED }}>{cohorts.length} cohortes</span>
         </div>
@@ -321,7 +321,7 @@ export default function RetentionLtvWorkspace() {
           {PRESET_SEGMENTS.map((p) => (
             <button key={p.name} onClick={() => addSegment(p)}
               style={{ textAlign: "left", padding: 12, borderRadius: 8, border: `1px solid ${BORDER}`,
-                background: "hsl(220 45% 14%)", color: "var(--tdia-text)", cursor: "pointer" }}>
+                background: "rgba(255, 255, 255, 0.02)", color: "var(--tdia-text)", cursor: "pointer" }}>
               <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>+ {p.name}</div>
               <div style={{ fontSize: 11, color: MUTED }}>{p.criteria}</div>
             </button>
@@ -349,7 +349,7 @@ export default function RetentionLtvWorkspace() {
 
       {/* Segments table */}
       <div style={{ borderRadius: 12, border: `1px solid ${BORDER}`, background: CARD, overflow: "hidden" }}>
-        <div style={{ padding: "12px 20px", background: "hsl(220 45% 12%)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
+        <div style={{ padding: "12px 20px", background: "rgba(255, 255, 255, 0.02)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>Segments actifs</span>
           <span style={{ fontFamily: MONO, fontSize: 11, color: MUTED }}>{segments.length} segments</span>
         </div>
@@ -394,7 +394,7 @@ export default function RetentionLtvWorkspace() {
 }
 
 function inputStyle(): React.CSSProperties {
-  return { width: "100%", background: "hsl(220 45% 14%)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 10px", fontFamily: MONO, fontSize: 12, color: "var(--tdia-text)", outline: "none", height: 36 };
+  return { width: "100%", background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 10px", fontFamily: MONO, fontSize: 12, color: "var(--tdia-text)", outline: "none", height: 36 };
 }
 function btnPrimaryStyle(): React.CSSProperties {
   return { height: 36, padding: "0 14px", background: BLUE, color: "white", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 11, letterSpacing: "0.03em", textTransform: "uppercase", cursor: "pointer", fontFamily: MONO, width: "100%" };
@@ -437,6 +437,6 @@ function Kpi({ label, value, icon: Icon, color }: { label: string; value: string
   );
 }
 function PriorityChip({ p }: { p: string }) {
-  const bg = p === "high" ? RED : p === "low" ? "hsl(0 0% 60%)" : AMBER;
+  const bg = p === "high" ? RED : p === "low" ? "#8b97ad" : AMBER;
   return <span style={{ fontFamily: MONO, fontSize: 10, padding: "2px 8px", borderRadius: 4, background: bg, color: "white", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.03em" }}>{p}</span>;
 }

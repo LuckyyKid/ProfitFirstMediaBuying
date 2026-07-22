@@ -87,8 +87,8 @@ export default function PlanningPrediction() {
                     display: "grid",
                     placeItems: "center",
                     color: "var(--tdia-blue)",
-                    background: "hsl(220 45% 14%)",
-                    border: "1px solid hsl(220 45% 12%)",
+                    background: "rgba(255, 255, 255, 0.02)",
+                    border: "1px solid rgba(255, 255, 255, 0.02)",
                   }}
                 >
                   <Icon size={17} />
@@ -105,7 +105,7 @@ export default function PlanningPrediction() {
                 {card.description}
               </p>
 
-              <div style={{ fontSize: 12, color: "hsl(0 0% 40%)", borderTop: "1px solid hsl(220 45% 25%)", paddingTop: 12 }}>
+              <div style={{ fontSize: 12, color: "#8b97ad", borderTop: "1px solid rgba(148, 170, 215, 0.12)", paddingTop: 12 }}>
                 {card.tableSummary}
               </div>
 

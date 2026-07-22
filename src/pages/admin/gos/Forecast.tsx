@@ -57,13 +57,13 @@ type Forecast = {
 };
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const BG = "hsl(220 45% 14%)";
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#0f8a44";
-const RED = "#c1121f";
-const AMBER = "#a8730a";
+const BG = "rgba(255, 255, 255, 0.02)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const AMBER = "#f5b74e";
 
 function toSelectedClient(row: ClientRecord): SelectedClientRecord {
   return {
@@ -193,7 +193,7 @@ export default function Forecast() {
       {/* Terminal Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: `1px solid ${BORDER}`, background: CARD, gap: 16, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-          <h1 style={{ ...MONO, color: "hsl(0 0% 20%)", fontSize: 13, letterSpacing: "0.03em", fontWeight: 700, textTransform: "uppercase", margin: 0 }}>PRÉVISIONS</h1>
+          <h1 style={{ ...MONO, color: "#eef2fa", fontSize: 13, letterSpacing: "0.03em", fontWeight: 700, textTransform: "uppercase", margin: 0 }}>PRÉVISIONS</h1>
           <div style={{ height: 16, width: 1, background: BORDER }} />
           <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", padding: 4, borderRadius: 6, gap: 2 }} data-tour="forecast-horizon">
             {[7, 30, 90, 180].map((d) => {
@@ -207,8 +207,8 @@ export default function Forecast() {
                     padding: "5px 12px",
                     fontSize: 10,
                     fontWeight: 700,
-                    color: active ? BLUE : "hsl(0 0% 45%)",
-                    background: active ? "hsl(226 100% 60% / 0.15)" : "transparent",
+                    color: active ? BLUE : "#8b97ad",
+                    background: active ? "rgba(77, 159, 255, 0.15)" : "transparent",
                     border: "none",
                     borderRadius: 4,
                     cursor: "pointer",
@@ -220,7 +220,7 @@ export default function Forecast() {
               );
             })}
           </div>
-          <div style={{ ...MONO, fontSize: 10, color: "hsl(0 0% 45%)", letterSpacing: "0.03em" }}>
+          <div style={{ ...MONO, fontSize: 10, color: "#8b97ad", letterSpacing: "0.03em" }}>
             CLIENT · {client?.name?.toUpperCase() ?? "—"}
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function Forecast() {
           <MarkBlockDoneButton clientId={clientId} blockKey="planning" label="Marquer planification terminée" />
           <button
             onClick={load}
-            style={{ ...MONO, padding: "8px 14px", border: `1px solid ${BORDER}`, background: "transparent", color: "hsl(0 0% 35%)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+            style={{ ...MONO, padding: "8px 14px", border: `1px solid ${BORDER}`, background: "transparent", color: "#8b97ad", fontSize: 11, fontWeight: 700, textTransform: "uppercase", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
           >
             <RefreshCw size={12} /> Actualiser
           </button>
@@ -248,17 +248,17 @@ export default function Forecast() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: AMBER, letterSpacing: "0.03em", textTransform: "uppercase" }}>SOURCE DES DONNÉES</span>
           <span style={{ ...MONO, padding: "3px 8px", background: AMBER, color: "#000", fontSize: 9, fontWeight: 700, borderRadius: 3, letterSpacing: "0.03em" }}>{dm}</span>
-          {warn && <span style={{ fontSize: 11, color: "hsl(0 0% 35%)" }}>{warn}</span>}
+          {warn && <span style={{ fontSize: 11, color: "#8b97ad" }}>{warn}</span>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ ...MONO, fontSize: 10, color: "hsl(0 0% 45%)", fontWeight: 700, textTransform: "uppercase" }}>DQS</span>
-            <div style={{ width: 64, height: 4, background: "hsl(220 45% 25%)", borderRadius: 999, overflow: "hidden" }}>
+            <span style={{ ...MONO, fontSize: 10, color: "#8b97ad", fontWeight: 700, textTransform: "uppercase" }}>DQS</span>
+            <div style={{ width: 64, height: 4, background: "rgba(148, 170, 215, 0.12)", borderRadius: 999, overflow: "hidden" }}>
               <div style={{ width: `${dqs ?? 0}%`, height: "100%", background: (dqs ?? 0) >= 70 ? GREEN : (dqs ?? 0) >= 40 ? AMBER : RED }} />
             </div>
-            <span style={{ ...MONO, fontSize: 10, color: "hsl(0 0% 25%)", fontWeight: 700 }}>{dqs ?? "—"}%</span>
+            <span style={{ ...MONO, fontSize: 10, color: "#eef2fa", fontWeight: 700 }}>{dqs ?? "—"}%</span>
           </div>
-          <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "hsl(0 0% 25%)", letterSpacing: "0.03em" }}>
+          <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "#eef2fa", letterSpacing: "0.03em" }}>
             CONFIANCE PLAFONNÉE À {dmMeta.confidenceCap}%
           </span>
         </div>
@@ -282,12 +282,12 @@ export default function Forecast() {
           badge={{ text: `${downPct >= 0 ? "+" : ""}${downPct.toFixed(1)}%`, color: RED }}
         />
         <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 6, borderLeft: `1px solid ${BORDER}` }}>
-          <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "hsl(0 0% 45%)", letterSpacing: "0.03em", textTransform: "uppercase" }}>INDICE DE CONFIANCE</span>
+          <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "#8b97ad", letterSpacing: "0.03em", textTransform: "uppercase" }}>INDICE DE CONFIANCE</span>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ ...MONO, fontSize: 22, fontWeight: 700, color: "hsl(0 0% 25%)", letterSpacing: "-0.02em" }}>{globalConf.toFixed(1)}%</span>
+            <span style={{ ...MONO, fontSize: 22, fontWeight: 700, color: "#eef2fa", letterSpacing: "-0.02em" }}>{globalConf.toFixed(1)}%</span>
             <div style={{ display: "flex", gap: 2 }}>
               {[0,1,2,3].map(i => (
-                <div key={i} style={{ width: 4, height: 12, background: i < confBars ? confColor(globalConf) : "hsl(220 45% 25%)" }} />
+                <div key={i} style={{ width: 4, height: 12, background: i < confBars ? confColor(globalConf) : "rgba(148, 170, 215, 0.12)" }} />
               ))}
             </div>
           </div>
@@ -338,7 +338,7 @@ export default function Forecast() {
                   ? "M0 5 L10 8 L20 10 L30 14 L40 12 L50 16 L60 14 L70 18 L80 15 L90 19 L100 17"
                   : "M0 15 L10 12 L20 14 L30 8 L40 10 L50 4 L60 7 L70 2 L80 5 L90 1 L100 3";
                 return (
-                  <tr key={f.id} style={{ borderBottom: `1px solid ${BORDER}`, background: idx % 2 === 1 ? "hsl(220 45% 14%)" : "transparent" }}>
+                  <tr key={f.id} style={{ borderBottom: `1px solid ${BORDER}`, background: idx % 2 === 1 ? "rgba(255, 255, 255, 0.02)" : "transparent" }}>
                     <Td first muted>{fmtDate(f.created_at)}</Td>
                     <Td>
                       <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -356,7 +356,7 @@ export default function Forecast() {
                     <Td>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ color: confColor(confPct), ...MONO, fontWeight: 700 }}>{confPct}%</span>
-                        <div style={{ height: 4, width: 48, background: "hsl(220 45% 25%)", borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ height: 4, width: 48, background: "rgba(148, 170, 215, 0.12)", borderRadius: 999, overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${confPct}%`, background: confColor(confPct) }} />
                         </div>
                       </div>
@@ -375,9 +375,9 @@ export default function Forecast() {
       </div>
 
       {/* Bottom Simulation Controls */}
-      <div style={{ padding: "14px 20px", borderTop: `1px solid ${BORDER}`, background: "hsl(220 45% 14%)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+      <div style={{ padding: "14px 20px", borderTop: `1px solid ${BORDER}`, background: "rgba(255, 255, 255, 0.02)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ ...MONO, fontSize: 9, fontWeight: 700, color: "hsl(0 0% 45%)", letterSpacing: "0.03em", textTransform: "uppercase" }}>
+          <span style={{ ...MONO, fontSize: 9, fontWeight: 700, color: "#8b97ad", letterSpacing: "0.03em", textTransform: "uppercase" }}>
             FACTEURS DÉTERMINISTES
           </span>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
@@ -386,7 +386,7 @@ export default function Forecast() {
             <FactorDot color={RED} label="DOWNSIDE = 0.8" />
           </div>
         </div>
-        <span style={{ ...MONO, fontSize: 10, color: "hsl(0 0% 45%)", fontStyle: "italic" }}>
+        <span style={{ ...MONO, fontSize: 10, color: "#8b97ad", fontStyle: "italic" }}>
           Prévision conditionnelle, pas une garantie
         </span>
       </div>
@@ -397,7 +397,7 @@ export default function Forecast() {
 function KpiCell({ label, value, valueColor, tint, badge }: { label: string; value: string; valueColor: string; tint?: string; badge?: { text: string; color: string } }) {
   return (
     <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 6, borderLeft: `1px solid ${BORDER}`, background: tint ?? "transparent" }}>
-      <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "hsl(0 0% 45%)", letterSpacing: "0.03em", textTransform: "uppercase" }}>{label}</span>
+      <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: "#8b97ad", letterSpacing: "0.03em", textTransform: "uppercase" }}>{label}</span>
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
         <span style={{ ...MONO, fontSize: 22, fontWeight: 700, color: valueColor, letterSpacing: "-0.02em" }}>{value}</span>
         {badge && (
@@ -410,7 +410,7 @@ function KpiCell({ label, value, valueColor, tint, badge }: { label: string; val
 
 function Th({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
-    <th style={{ ...MONO, padding: "12px 14px", fontSize: 10, fontWeight: 700, color: "hsl(0 0% 45%)", textTransform: "uppercase", letterSpacing: "0.03em", borderRight: `1px solid ${BORDER}`, borderLeft: first ? "none" : undefined }}>
+    <th style={{ ...MONO, padding: "12px 14px", fontSize: 10, fontWeight: 700, color: "#8b97ad", textTransform: "uppercase", letterSpacing: "0.03em", borderRight: `1px solid ${BORDER}`, borderLeft: first ? "none" : undefined }}>
       {children}
     </th>
   );
@@ -418,7 +418,7 @@ function Th({ children, first }: { children: React.ReactNode; first?: boolean })
 
 function Td({ children, muted, strong, first, style }: { children: React.ReactNode; muted?: boolean; strong?: boolean; first?: boolean; style?: React.CSSProperties }) {
   return (
-    <td style={{ padding: "10px 14px", color: muted ? "hsl(0 0% 45%)" : "hsl(0 0% 25%)", fontWeight: strong ? 700 : 500, borderRight: first ? `1px solid ${BORDER}` : undefined, ...style }}>
+    <td style={{ padding: "10px 14px", color: muted ? "#8b97ad" : "#eef2fa", fontWeight: strong ? 700 : 500, borderRight: first ? `1px solid ${BORDER}` : undefined, ...style }}>
       {children}
     </td>
   );
@@ -428,7 +428,7 @@ function FactorDot({ color, label }: { color: string; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <div style={{ width: 8, height: 8, borderRadius: 999, background: color }} />
-      <span style={{ ...MONO, fontSize: 11, color: "hsl(0 0% 35%)", fontWeight: 500 }}>{label}</span>
+      <span style={{ ...MONO, fontSize: 11, color: "#8b97ad", fontWeight: 500 }}>{label}</span>
     </div>
   );
 }

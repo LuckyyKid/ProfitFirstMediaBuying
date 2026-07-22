@@ -94,7 +94,7 @@ export default function LearningLoop() {
 
   const filtered = filter === "ALL" ? entries : entries.filter(e => e.category === filter);
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   return (
     <>
@@ -210,6 +210,6 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   );
 }
 function Tag({ children, tone = "default" }: { children: React.ReactNode; tone?: "default" | "success" | "muted" }) {
-  const bg = tone === "success" ? "hsl(140 45% 30% / 0.35)" : tone === "muted" ? "hsl(220 45% 20%)" : "hsl(220 45% 25%)";
+  const bg = tone === "success" ? "rgba(61, 220, 151, 0.18)" : tone === "muted" ? "rgba(255, 255, 255, 0.04)" : "rgba(148, 170, 215, 0.12)";
   return <span style={{ background: bg, padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 600, letterSpacing: "0.03em" }}>{children}</span>;
 }

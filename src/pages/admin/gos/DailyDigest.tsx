@@ -25,12 +25,12 @@ type SendLog = {
   created_at: string;
 };
 
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#22c55e";
-const RED = "#ef4444";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
 
 export default function DailyDigest() {
   const { clientId } = useParams();
@@ -112,12 +112,12 @@ export default function DailyDigest() {
           <input
             type="email" placeholder="email@example.com" value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            style={{ flex: "1 1 240px", padding: "8px 12px", background: "hsl(220 45% 14%)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
+            style={{ flex: "1 1 240px", padding: "8px 12px", background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
           />
           <input
             type="text" placeholder="Rôle (ex. CEO, Media Buyer)" value={newRole}
             onChange={(e) => setNewRole(e.target.value)}
-            style={{ flex: "1 1 200px", padding: "8px 12px", background: "hsl(220 45% 14%)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
+            style={{ flex: "1 1 200px", padding: "8px 12px", background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
           />
           <button onClick={add} style={{ padding: "8px 16px", background: BLUE, color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
             <Plus size={14} /> Ajouter
@@ -173,7 +173,7 @@ export default function DailyDigest() {
           <input
             type="email" placeholder="Override → email de test (vide = envoie aux destinataires actifs)" value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
-            style={{ flex: "1 1 320px", padding: "8px 12px", background: "hsl(220 45% 14%)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
+            style={{ flex: "1 1 320px", padding: "8px 12px", background: "rgba(255, 255, 255, 0.02)", border: `1px solid ${BORDER}`, color: "var(--tdia-text)", borderRadius: 8, fontSize: 13 }}
           />
           <button onClick={sendTest} disabled={sending} style={{ padding: "8px 16px", background: sending ? MUTED : BLUE, color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: sending ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 6 }}>
             <Send size={14} /> {sending ? "Envoi…" : "Envoyer maintenant"}

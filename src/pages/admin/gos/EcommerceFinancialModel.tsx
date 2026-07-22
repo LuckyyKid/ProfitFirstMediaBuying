@@ -13,11 +13,11 @@ import {
 type NumInput = number | "";
 const n = (v: NumInput): number | null => (v === "" || Number.isNaN(v) ? null : Number(v));
 
-const BG = "hsl(220 45% 14%)";
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
+const BG = "rgba(255, 255, 255, 0.02)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
 const GREEN = "#0f8a44";
 const RED = "#c1121f";
 const AMBER = "#a8730a";
@@ -483,7 +483,7 @@ export default function EcommerceFinancialModel() {
             </span>
           ))}
           {autoloadInfo.empty.map((k) => (
-            <span key={`ko-${k}`} style={{ padding: "2px 8px", borderRadius: 4, background: "hsl(220 45% 16%)", color: MUTED, border: `1px solid ${BORDER}` }}>
+            <span key={`ko-${k}`} style={{ padding: "2px 8px", borderRadius: 4, background: "rgba(255, 255, 255, 0.02)", color: MUTED, border: `1px solid ${BORDER}` }}>
               ○ {k}
             </span>
           ))}

@@ -101,7 +101,7 @@ export default function ManualChecklist() {
     load();
   };
 
-  if (loading || !client) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading || !client) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const list = checklistFor(client.business_type);
   const meta = DATA_MODE_META[mode];
@@ -210,8 +210,8 @@ export default function ManualChecklist() {
                     <td>
                       <span style={{
                         padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-                        background: ok ? "#e3f7ec" : (f.required ? "#ffe3e3" : "#eef1f5"),
-                        color: ok ? "#0f8a44" : (f.required ? "#c1121f" : "#6C7F93"),
+                        background: ok ? "rgba(61, 220, 151, 0.15)" : (f.required ? "rgba(255, 107, 107, 0.15)" : "rgba(148, 170, 215, 0.12)"),
+                        color: ok ? "#3ddc97" : (f.required ? "#ff6b6b" : "#8b97ad"),
                       }}>
                         {ok ? "REMPLI" : (f.required ? "MANQUANT" : "—")}
                       </span>
@@ -235,7 +235,7 @@ export default function ManualChecklist() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700 }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4 }}>{value}</div>
     </div>

@@ -71,10 +71,10 @@ const PRESETS: {
   },
 ];
 
-const CARD = "hsl(220 45% 16%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
 
 export default function AiAutomationHub() {
@@ -175,7 +175,7 @@ export default function AiAutomationHub() {
                 padding: 14,
                 borderRadius: 10,
                 border: `1px solid ${active ? BLUE : BORDER}`,
-                background: active ? "hsl(226 100% 60% / 0.08)" : CARD,
+                background: active ? "rgba(77, 159, 255, 0.08)" : CARD,
                 cursor: "pointer",
                 color: "var(--tdia-text)",
               }}
@@ -204,7 +204,7 @@ export default function AiAutomationHub() {
             width: "100%",
             marginTop: 8,
             padding: 12,
-            background: "hsl(220 45% 14%)",
+            background: "rgba(255, 255, 255, 0.02)",
             border: `1px solid ${BORDER}`,
             borderRadius: 8,
             color: "var(--tdia-text)",
@@ -221,7 +221,7 @@ export default function AiAutomationHub() {
             disabled={running}
             style={{
               padding: "10px 20px",
-              background: running ? "hsl(0 0% 60%)" : BLUE,
+              background: running ? "#8b97ad" : BLUE,
               border: "none",
               borderRadius: 8,
               color: "var(--tdia-text)",
@@ -241,7 +241,7 @@ export default function AiAutomationHub() {
 
       {/* Last output */}
       {lastOutput !== null && (
-        <div style={{ padding: 20, borderRadius: 12, border: `1px solid ${BLUE}`, background: "hsl(226 100% 60% / 0.05)", marginBottom: 16 }}>
+        <div style={{ padding: 20, borderRadius: 12, border: `1px solid ${BLUE}`, background: "rgba(77, 159, 255, 0.05)", marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
             <Sparkles size={16} color={BLUE} />
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase", color: BLUE }}>
@@ -254,7 +254,7 @@ export default function AiAutomationHub() {
 
       {/* History */}
       <div style={{ borderRadius: 12, border: `1px solid ${BORDER}`, background: CARD, overflow: "hidden" }}>
-        <div style={{ padding: "12px 20px", background: "hsl(220 45% 12%)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
+        <div style={{ padding: "12px 20px", background: "rgba(255, 255, 255, 0.02)", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>
             Historique des exécutions
           </span>
@@ -270,8 +270,8 @@ export default function AiAutomationHub() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{
                       fontFamily: MONO, fontSize: 10, padding: "2px 8px", borderRadius: 4,
-                      background: r.status === "completed" ? "hsl(140 60% 92%)" : r.status === "error" ? "hsl(0 84% 92%)" : "hsl(45 90% 88%)",
-                      color: r.status === "completed" ? "hsl(140 60% 25%)" : r.status === "error" ? "hsl(0 72% 42%)" : "hsl(45 90% 30%)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700,
+                      background: r.status === "completed" ? "rgba(61, 220, 151, 0.15)" : r.status === "error" ? "rgba(255, 107, 107, 0.15)" : "rgba(245, 183, 78, 0.15)",
+                      color: r.status === "completed" ? "#3ddc97" : r.status === "error" ? "#ff6b6b" : "#f5b74e", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700,
                     }}>{r.status}</span>
                     <span style={{ fontSize: 13, color: "var(--tdia-text)", fontWeight: 600 }}>{r.title ?? r.automation_type}</span>
                   </div>
@@ -282,12 +282,12 @@ export default function AiAutomationHub() {
                   </span>
                 </div>
                 {r.error && (
-                  <div style={{ fontSize: 12, color: "#c1121f", marginTop: 4 }}>Erreur : {r.error}</div>
+                  <div style={{ fontSize: 12, color: "#ff6b6b", marginTop: 4 }}>Erreur : {r.error}</div>
                 )}
                 {r.output_text && (
                   <details style={{ marginTop: 8 }}>
                     <summary style={{ cursor: "pointer", fontSize: 12, color: MUTED }}>Voir la sortie</summary>
-                    <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.55, color: "var(--tdia-text)", marginTop: 8, padding: 12, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+                    <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.55, color: "var(--tdia-text)", marginTop: 8, padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
                       {r.output_text}
                     </div>
                   </details>

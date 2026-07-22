@@ -17,17 +17,17 @@ type Review = {
 };
 
 const VERDICT_COLOR: Record<string, string> = {
-  ON_TRACK: "#0f8a44", SLIGHTLY_OFF: "#a8730a", AT_RISK: "#c1121f", OFF_TRACK: "#c1121f", CRISIS: "#c1121f",
+  ON_TRACK: "#3ddc97", SLIGHTLY_OFF: "#f5b74e", AT_RISK: "#ff6b6b", OFF_TRACK: "#ff6b6b", CRISIS: "#ff6b6b",
 };
 const VERDICT_SHORT: Record<string, string> = {
   ON_TRACK: "OK", SLIGHTLY_OFF: "OFF-5", AT_RISK: "RISK", OFF_TRACK: "OFF", CRISIS: "CRIT",
 };
 
 const MONO: React.CSSProperties = { fontFamily: "JetBrains Mono, monospace", fontVariantNumeric: "tabular-nums" };
-const MUTED = "hsl(0 0% 40%)";
-const BORDER = "hsl(220 45% 25%)";
-const SURFACE = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
+const MUTED = "#8b97ad";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const SURFACE = "rgba(255, 255, 255, 0.02)";
+const BG_DEEP = "rgba(11, 19, 34, 0.6)";
 
 const fmtInt = (n: number | null) => n == null ? "—" : Math.round(Number(n)).toLocaleString();
 const fmtDec = (n: number | null, d = 2) => n == null ? "—" : Number(n).toFixed(d);
@@ -47,13 +47,13 @@ function classifyProblem(r: Review, target: any): { type: string; color: string;
   const merBad = merVar != null && merVar < -0.15;
   const trackingSuspect = rev != null && spend != null && mer != null && cac != null && Math.abs((Number(rev) / Number(spend)) - Number(mer)) > 0.5;
   const flags = [revOff, cacBad || merBad, spendUnder, trackingSuspect].filter(Boolean).length;
-  if (flags >= 3) return { type: "MIXTE", color: "#c1121f", explain: "Signaux multiples — volume, efficacité et structure tous sous cible.", action: "Escalade au lead strategist ; pause du scaling et re-diagnostic." };
-  if (trackingSuspect) return { type: "TRACKING", color: "#a8730a", explain: "Le MER remonté ne colle pas au revenu/dépense — attribution ou pixel probablement cassé.", action: "Audite pixel, GA4, revenu backend et ROAS plateforme avant toute décision budget." };
-  if (spendUnder && revOff) return { type: "VOLUME", color: "#5b8def", explain: "Sous-dépense vs plan → sous-livraison de revenu.", action: "Scale la dépense sur les campagnes gagnantes en tenant les garde-fous CAC." };
-  if ((cacBad || merBad) && !spendUnder) return { type: "EFFICACITÉ", color: "#e07a2b", explain: "La dépense est dans le plan mais CAC/MER sont hors cible — fatigue créative ou audience.", action: "Rafraîchis les créatifs, coupe les angles fatigués, resserre les audiences." };
-  if (spendUnder && !revOff) return { type: "CONTRAINTE", color: "#7dc242", explain: "Plafond budget ou capacité qui limite la dépense — revenu tient.", action: "Augmente le cap quotidien ou débloque la contrainte stock/capacité." };
-  if (revOff) return { type: "VOLUME", color: "#5b8def", explain: "Revenu sous cible avec efficacité qui tient.", action: "Augmente la portée / nouveaux angles / élargis le top-of-funnel." };
-  return { type: "DANS LES TEMPS", color: "#0f8a44", explain: "Aucun problème structurel détecté sur la période.", action: "Maintiens le rythme et continue à tester." };
+  if (flags >= 3) return { type: "MIXTE", color: "#ff6b6b", explain: "Signaux multiples — volume, efficacité et structure tous sous cible.", action: "Escalade au lead strategist ; pause du scaling et re-diagnostic." };
+  if (trackingSuspect) return { type: "TRACKING", color: "#f5b74e", explain: "Le MER remonté ne colle pas au revenu/dépense — attribution ou pixel probablement cassé.", action: "Audite pixel, GA4, revenu backend et ROAS plateforme avant toute décision budget." };
+  if (spendUnder && revOff) return { type: "VOLUME", color: "#4d9fff", explain: "Sous-dépense vs plan → sous-livraison de revenu.", action: "Scale la dépense sur les campagnes gagnantes en tenant les garde-fous CAC." };
+  if ((cacBad || merBad) && !spendUnder) return { type: "EFFICACITÉ", color: "#f5b74e", explain: "La dépense est dans le plan mais CAC/MER sont hors cible — fatigue créative ou audience.", action: "Rafraîchis les créatifs, coupe les angles fatigués, resserre les audiences." };
+  if (spendUnder && !revOff) return { type: "CONTRAINTE", color: "#3ddc97", explain: "Plafond budget ou capacité qui limite la dépense — revenu tient.", action: "Augmente le cap quotidien ou débloque la contrainte stock/capacité." };
+  if (revOff) return { type: "VOLUME", color: "#4d9fff", explain: "Revenu sous cible avec efficacité qui tient.", action: "Augmente la portée / nouveaux angles / élargis le top-of-funnel." };
+  return { type: "DANS LES TEMPS", color: "#3ddc97", explain: "Aucun problème structurel détecté sur la période.", action: "Maintiens le rythme et continue à tester." };
 }
 
 export default function LiveOptimization() {
@@ -188,15 +188,15 @@ export default function LiveOptimization() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
         <Kpi label="Revues (30j)" value={String(kpis.count30)} />
         <Kpi label="% ON_TRACK (30j)" value={kpis.onTrackPct != null ? `${kpis.onTrackPct}%` : "—"}
-             color={kpis.onTrackPct == null ? undefined : kpis.onTrackPct >= 70 ? "#0f8a44" : kpis.onTrackPct >= 40 ? "#a8730a" : "#c1121f"} />
+             color={kpis.onTrackPct == null ? undefined : kpis.onTrackPct >= 70 ? "#3ddc97" : kpis.onTrackPct >= 40 ? "#f5b74e" : "#ff6b6b"} />
         <Kpi label="Variance moy. (30j)" value={kpis.avgVar != null ? `${kpis.avgVar > 0 ? "+" : ""}${kpis.avgVar.toFixed(1)}%` : "—"}
-             color={kpis.avgVar == null ? undefined : kpis.avgVar >= 0 ? "#0f8a44" : kpis.avgVar >= -10 ? "#a8730a" : "#c1121f"} />
-        <Kpi label="Alertes actives" value={String(kpis.alertsOpen)} color={kpis.alertsOpen > 0 ? "#c1121f" : undefined} />
+             color={kpis.avgVar == null ? undefined : kpis.avgVar >= 0 ? "#3ddc97" : kpis.avgVar >= -10 ? "#f5b74e" : "#ff6b6b"} />
+        <Kpi label="Alertes actives" value={String(kpis.alertsOpen)} color={kpis.alertsOpen > 0 ? "#ff6b6b" : undefined} />
       </div>
 
       {!latestTarget && (
-        <div className="gos-card" style={{ marginBottom: 16, borderColor: "hsl(43 90% 55% / 0.4)", display: "flex", gap: 10, alignItems: "center" }}>
-          <AlertTriangle size={16} color="#a8730a" />
+        <div className="gos-card" style={{ marginBottom: 16, borderColor: "rgba(245, 183, 78, 0.4)", display: "flex", gap: 10, alignItems: "center" }}>
+          <AlertTriangle size={16} color="#f5b74e" />
           <div>
             <div style={{ fontWeight: 600, fontSize: 13 }}>Aucune cible active</div>
             <div style={{ color: MUTED, fontSize: 12 }}>Crée une cible dans <b>Objectifs de métriques</b> pour calculer la variance et le verdict santé.</div>
@@ -269,7 +269,7 @@ export default function LiveOptimization() {
                     gap: 0, padding: "10px 12px", cursor: "pointer",
                     borderBottom: `1px solid ${BORDER}`,
                     borderLeft: `3px solid ${isSel ? vColor : "transparent"}`,
-                    background: isSel ? "hsl(226 100% 60% / 0.08)" : "transparent",
+                    background: isSel ? "rgba(77, 159, 255, 0.08)" : "transparent",
                     fontSize: 12,
                   }}>
                     <div style={MONO}>{r.review_date}</div>
@@ -279,7 +279,7 @@ export default function LiveOptimization() {
                         {VERDICT_SHORT[r.health_verdict ?? "ON_TRACK"] ?? "—"}
                       </span>
                     </div>
-                    <div style={{ ...MONO, textAlign: "right", fontWeight: 600, color: varN == null ? MUTED : varN < 0 ? "#c1121f" : "#0f8a44" }}>
+                    <div style={{ ...MONO, textAlign: "right", fontWeight: 600, color: varN == null ? MUTED : varN < 0 ? "#ff6b6b" : "#3ddc97" }}>
                       {varN != null ? `${varN > 0 ? "+" : ""}${varN}%` : "—"}
                     </div>
                     <div style={{ ...MONO, textAlign: "right" }}>{fmtInt(r.actual_revenue)}</div>
@@ -342,7 +342,7 @@ function Inspector({ r, target, onClone, onDelete }: { r: Review; target: any; o
       </div>
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-        <div style={{ ...MONO, fontSize: 32, fontWeight: 700, color: varN == null ? MUTED : varN < 0 ? "#c1121f" : "#0f8a44" }}>
+        <div style={{ ...MONO, fontSize: 32, fontWeight: 700, color: varN == null ? MUTED : varN < 0 ? "#ff6b6b" : "#3ddc97" }}>
           {varN != null ? `${varN > 0 ? "+" : ""}${varN}%` : "—"}
         </div>
         <div style={{ fontSize: 11, color: MUTED }}>vs cible</div>
@@ -365,7 +365,7 @@ function Inspector({ r, target, onClone, onDelete }: { r: Review; target: any; o
 
       {Array.isArray(r.actions_taken) && r.actions_taken.length > 0 && <BlockList label="Actions prises" items={r.actions_taken} />}
       {Array.isArray(r.next_actions) && r.next_actions.length > 0 && <BlockList label="Prochaines actions" items={r.next_actions} />}
-      {Array.isArray(r.alerts) && r.alerts.length > 0 && <BlockList label="Alertes" items={r.alerts} color="#c1121f" />}
+      {Array.isArray(r.alerts) && r.alerts.length > 0 && <BlockList label="Alertes" items={r.alerts} color="#ff6b6b" />}
       {r.notes && (
         <div style={{ marginTop: 10 }}>
           <div className="gos-label">Notes</div>
@@ -377,7 +377,7 @@ function Inspector({ r, target, onClone, onDelete }: { r: Review; target: any; o
         <button className="gos-btn-secondary" onClick={onClone} style={{ flex: 1 }}>
           <Copy size={12} style={{ verticalAlign: "middle", marginRight: 6 }} /> Cloner
         </button>
-        <button className="gos-btn-secondary" onClick={onDelete} style={{ color: "#c1121f" }}>
+        <button className="gos-btn-secondary" onClick={onDelete} style={{ color: "#ff6b6b" }}>
           <Trash2 size={12} />
         </button>
       </div>

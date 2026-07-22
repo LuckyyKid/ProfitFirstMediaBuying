@@ -46,7 +46,7 @@ export default function GosWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   if (!client) return <EmptyState title="Client introuvable." />;
 
   const statusFor = (b: typeof BLOCKS[number]) => {
@@ -104,8 +104,8 @@ export default function GosWorkspace() {
         style={{
           marginBottom: 28,
           padding: 24,
-          background: "linear-gradient(135deg, hsl(220 45% 14%) 0%, hsl(220 45% 14%) 100%)",
-          border: "1px solid hsl(220 45% 16%)",
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.02) 100%)",
+          border: "1px solid rgba(148, 170, 215, 0.12)",
           borderLeft: "4px solid var(--tdia-blue)",
           display: "grid",
           gridTemplateColumns: "1fr auto",
@@ -140,7 +140,7 @@ export default function GosWorkspace() {
         {/* Progress ring */}
         <div style={{ position: "relative", width: 96, height: 96 }}>
           <svg width="96" height="96" viewBox="0 0 96 96" style={{ transform: "rotate(-90deg)" }}>
-            <circle cx="48" cy="48" r="40" fill="none" stroke="hsl(220 45% 16%)" strokeWidth="8" />
+            <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(148, 170, 215, 0.12)" strokeWidth="8" />
             <circle
               cx="48"
               cy="48"
@@ -170,9 +170,9 @@ export default function GosWorkspace() {
           const last = i === BLOCKS.length - 1;
           const Icon = b.Icon;
 
-          const nodeColor = done ? "var(--tdia-blue)" : current ? "var(--tdia-blue)" : "hsl(220 45% 25%)";
-          const nodeBg = done ? "var(--tdia-blue)" : "hsl(220 45% 14%)";
-          const nodeText = done ? "hsl(220 45% 14%)" : current ? "var(--tdia-blue)" : "var(--tdia-muted)";
+          const nodeColor = done ? "var(--tdia-blue)" : current ? "var(--tdia-blue)" : "rgba(148, 170, 215, 0.12)";
+          const nodeBg = done ? "var(--tdia-blue)" : "rgba(255, 255, 255, 0.02)";
+          const nodeText = done ? "rgba(11, 19, 34, 0.6)" : current ? "var(--tdia-blue)" : "var(--tdia-muted)";
 
           return (
             <div key={b.key} style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 20, position: "relative", paddingBottom: last ? 0 : 20 }}>
@@ -188,7 +188,7 @@ export default function GosWorkspace() {
                     display: "grid",
                     placeItems: "center",
                     color: nodeText,
-                    boxShadow: current ? "0 0 0 4px hsl(226 100% 60% / 0.12)" : "none",
+                    boxShadow: current ? "0 0 0 4px rgba(77, 159, 255, 0.12)" : "none",
                     zIndex: 2,
                     transition: "all .2s ease",
                   }}
@@ -201,7 +201,7 @@ export default function GosWorkspace() {
                       flex: 1,
                       width: 2,
                       marginTop: 4,
-                      background: done ? "var(--tdia-blue)" : "hsl(220 45% 16%)",
+                      background: done ? "var(--tdia-blue)" : "rgba(148, 170, 215, 0.12)",
                       minHeight: 40,
                     }}
                   />
@@ -215,7 +215,7 @@ export default function GosWorkspace() {
                   opacity: locked ? 0.55 : 1,
                   padding: 18,
                   borderColor: current ? "var(--tdia-blue)" : undefined,
-                  boxShadow: current ? "0 0 0 1px var(--tdia-blue), 0 8px 24px hsl(226 100% 60% / 0.08)" : undefined,
+                  boxShadow: current ? "0 0 0 1px var(--tdia-blue), 0 8px 24px rgba(77, 159, 255, 0.08)" : undefined,
                   transition: "all .2s ease",
                 }}
               >

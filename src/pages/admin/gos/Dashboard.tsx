@@ -1,36 +1,24 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { RiskBadge, PhaseBadge } from "@/gos/ui";
-import {
-  RefreshCw,
-  ExternalLink,
-  Users,
-  AlertTriangle,
-  AlertCircle,
-  Settings,
-  LineChart,
-  LayoutDashboard,
-} from "lucide-react";
-import { useSelectedClient } from "@/gos/context";
-import { Button } from "@/components/ui/button";
-import {
-  TwentyPage,
-  PageHeader,
-  NavDivider,
-  InsightStrip,
-  StatPill,
-  TwentyTableWrap,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-  LoadingRow,
-} from "@/components/admin-shell";
+// "Ma Journée" — GOS home screen (Premium Dark).
+//
+// Design rules applied:
+//   #1 one next action per screen           → HeroAction (PROCHAINE ACTION)
+//   #4 no bare numbers                       → progress "X/N" + microlabels
+//   #7 routine list, one row per client      → ClientRoutineRow
+//   #8 missing_data is a state, not an error → blocked row w/ unblock CTA
+//   #10 sidebar reduced to 3-5 entries       → handled in Sidebar.tsx
+//
+// The heavy AM cockpit that used to live here (attention queue, KPI grid,
+// full client table) moved to /admin/gos/portfolio.
 
-type Client = {
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useSelectedClient } from "@/gos/context";
+import { HeroAction } from "@/gos/premium/HeroAction";
+import { ClientRoutineRow, type RoutineStep } from "@/gos/premium/ClientRoutineRow";
+import { MicroLabel, StatusDot, type Status } from "@/gos/premium/primitives";
+
+type ClientRow = {
   id: string;
   client_code: string;
   company_name: string;
@@ -41,28 +29,105 @@ type Client = {
   industry: string | null;
 };
 
+type RoutineClient = {
+  client: ClientRow;
+  ready: boolean;
+  status: Status;
+  progress: { done: number; total: number };
+  steps: RoutineStep[];
+  blocked: { reason: string; actionLabel: string } | null;
+};
+
+const ROUTINE_STEP_LABELS = [
+  "Digest 7h",
+  "Walkdown",
+  "Buyer",
+  "Créa",
+  "Budget",
+  "Debrief",
+];
+
 function initials(name: string) {
   return name
     .split(/\s+/)
     .map((s) => s[0])
     .filter(Boolean)
-    .slice(0, 2)
+    .slice(0, 1)
     .join("")
     .toUpperCase();
 }
 
+function greetingByHour(): string {
+  const h = new Date().getHours();
+  if (h < 5) return "Bonne nuit";
+  if (h < 12) return "Bonjour";
+  if (h < 18) return "Bon après-midi";
+  return "Bonsoir";
+}
+
+function frenchDate(d: Date): string {
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
+function buildRoutine(client: ClientRow, ready: boolean): RoutineClient {
+  const highRisk = ["HIGH", "CRITICAL"].includes(client.risk_level);
+  const status: Status = !ready ? "missing" : highRisk ? "bad" : "good";
+
+  if (!ready) {
+    return {
+      client,
+      ready,
+      status,
+      progress: { done: 0, total: ROUTINE_STEP_LABELS.length },
+      steps: [],
+      blocked: {
+        reason: `Configuration du modèle incomplète pour ${client.company_name} — la routine ne peut pas démarrer.`,
+        actionLabel: "Compléter la configuration",
+      },
+    };
+  }
+
+  // Heuristic while the real routine-engine isn't wired: high-risk = active step
+  // is Walkdown (step 2), otherwise Digest done + Walkdown active. Enough to
+  // populate the visual until the runtime feeds real per-client state.
+  const activeIndex = highRisk ? 1 : 0;
+  const steps: RoutineStep[] = ROUTINE_STEP_LABELS.map((label, i) => ({
+    id: `${client.id}-${i}`,
+    label,
+    state: i < activeIndex ? "done" : i === activeIndex ? "active" : "future",
+  }));
+
+  return {
+    client,
+    ready,
+    status,
+    progress: { done: activeIndex, total: steps.length },
+    steps,
+    blocked: null,
+  };
+}
+
 export default function GosDashboard() {
+  const [clients, setClients] = useState<ClientRow[]>([]);
+  const [readySet, setReadySet] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [ready, setReady] = useState<Set<string>>(new Set());
-  const [hasForecast, setHasForecast] = useState<Set<string>>(new Set());
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [userName, setUserName] = useState<string>("");
+
   const nav = useNavigate();
-  const { setSelectedClient, workflowMode, setWorkflowMode } = useSelectedClient();
-  const workflowModes = [
-    { key: "new-client" as const, label: "Nouveau client" },
-    { key: "active-client" as const, label: "Client actif" },
-  ];
+  const { setSelectedClient } = useSelectedClient();
+
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.auth.getUser();
+      const email = s.user?.email ?? "";
+      setUserName(email ? email.split("@")[0] : "");
+    })();
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -70,7 +135,10 @@ export default function GosDashboard() {
       .from("gos_clients")
       .select("*")
       .order("created_at", { ascending: false });
-    setClients((cs as any) ?? []);
+
+    const list = (cs as ClientRow[] | null) ?? [];
+    setClients(list);
+
     const [{ data: bc }, { data: fi }, { data: qb }] = await Promise.all([
       supabase.from("gos_business_contexts").select("client_id,status"),
       supabase.from("gos_financial_inputs").select("client_id,status"),
@@ -79,19 +147,19 @@ export default function GosDashboard() {
     const bcs = new Map((bc ?? []).map((r) => [r.client_id, r.status]));
     const fis = new Map((fi ?? []).map((r) => [r.client_id, r.status]));
     const qbs = new Map((qb ?? []).map((r) => [r.client_id, r.status]));
-    const readySet = new Set<string>();
-    (cs ?? []).forEach((c: any) => {
-      const ok = ["PRÊT", "APPROVED"];
+    const ok = ["PRÊT", "APPROVED"];
+
+    const ready = new Set<string>();
+    list.forEach((c) => {
       if (
         ok.includes(bcs.get(c.id) ?? "") &&
         ok.includes(fis.get(c.id) ?? "") &&
         ok.includes(qbs.get(c.id) ?? "")
       ) {
-        readySet.add(c.id);
+        ready.add(c.id);
       }
     });
-    setReady(readySet);
-    setHasForecast(new Set());
+    setReadySet(ready);
     setLoading(false);
     setLastRefresh(new Date());
   };
@@ -100,286 +168,185 @@ export default function GosDashboard() {
     load();
   }, []);
 
-  const totalClients = clients.length;
-  const atRisk = clients.filter(
-    (c) => ["HIGH", "CRITICAL"].includes(c.risk_level) || c.current_phase === "AT_RISK"
-  ).length;
-  const missingSetup = clients.filter((c) => !ready.has(c.id)).length;
-  const needAttention = clients.filter(
-    (c) => ["HIGH", "CRITICAL"].includes(c.risk_level) || !ready.has(c.id)
-  ).length;
-  const missingForecast = clients.filter((c) => !hasForecast.has(c.id)).length;
+  const routines = useMemo<RoutineClient[]>(
+    () => clients.map((c) => buildRoutine(c, readySet.has(c.id))),
+    [clients, readySet],
+  );
 
-  const setupPct =
-    totalClients > 0 ? Math.round(((totalClients - missingSetup) / totalClients) * 100) : 0;
+  const alertCount = routines.filter((r) => r.status === "bad" || r.status === "missing").length;
+  const doneCount = routines.filter((r) => r.progress.done >= r.progress.total).length;
+  const totalRoutines = routines.length;
 
-  const attention = clients
-    .filter(
-      (c) =>
-        ["HIGH", "CRITICAL"].includes(c.risk_level) ||
-        c.current_phase === "AT_RISK" ||
-        !ready.has(c.id)
-    )
-    .slice(0, 5);
+  // Pick the "prochaine action" — first blocked client, else first high-risk,
+  // else the first client whose walkdown is due.
+  const nextTarget: RoutineClient | undefined =
+    routines.find((r) => r.blocked) ??
+    routines.find((r) => r.status === "bad") ??
+    routines[0];
 
-  const goToClient = (
-    c: Client,
-    path: "workspace" | "intelligence" | "profit-first-workspace" = "workspace"
-  ) => {
-    setSelectedClient(c);
-    nav(`/admin/gos/clients/${c.id}/${path}`);
+  const openWalkdown = (r: RoutineClient) => {
+    setSelectedClient({
+      id: r.client.id,
+      client_code: r.client.client_code,
+      company_name: r.client.company_name,
+      business_type: r.client.business_type,
+      current_phase: r.client.current_phase,
+      risk_level: r.client.risk_level,
+      industry: r.client.industry,
+      am_owner: r.client.am_owner,
+    });
+    nav(`/admin/gos/clients/${r.client.id}/walkdown`);
   };
 
-  const timeStr = lastRefresh.toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const openSetup = (r: RoutineClient) => {
+    setSelectedClient({
+      id: r.client.id,
+      client_code: r.client.client_code,
+      company_name: r.client.company_name,
+      business_type: r.client.business_type,
+      current_phase: r.client.current_phase,
+      risk_level: r.client.risk_level,
+      industry: r.client.industry,
+      am_owner: r.client.am_owner,
+    });
+    nav(`/admin/gos/clients/${r.client.id}/growth-model-setup`);
+  };
+
+  const now = new Date();
+  const dateStr = frenchDate(now);
+  const timeStr = lastRefresh.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <TwentyPage inLayout>
-      <PageHeader
-        icon={LayoutDashboard}
-        title="Tableau de bord TDIA Intelligence"
-        description="Cockpit AM global — risque, progression et prochaines actions"
-        actions={
-          <>
-            <div className="hidden md:flex items-center bg-secondary rounded-md p-0.5">
-              {workflowModes.map((mode) => {
-                const active = workflowMode === mode.key;
-                return (
-                  <button
-                    key={mode.key}
-                    type="button"
-                    onClick={() => setWorkflowMode(mode.key)}
-                    className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                      active
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {mode.label}
-                  </button>
-                );
-              })}
-            </div>
-            <NavDivider />
-            <Button size="sm" variant="ghost" onClick={load} className="h-7 px-2 text-xs hover:bg-muted">
-              <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
-            </Button>
-            <Button asChild size="sm" className="h-7 px-2 text-xs">
-              <Link to="/admin/gos/clients/new">New Client</Link>
-            </Button>
-          </>
-        }
-      />
-
-      <InsightStrip>
-        <StatPill label="Total clients" value={totalClients} tone="blue" />
-        <StatPill label="Nécessitent attention" value={needAttention} tone="amber" />
-        <StatPill label="À risque" value={atRisk} tone="red" />
-        <StatPill label="Config manquante" value={missingSetup} />
-        <StatPill label="Prévision manquante" value={missingForecast} />
-      </InsightStrip>
-
-      <div className="flex-1 overflow-auto">
-        {/* Attention Queue */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 40, maxWidth: 1240 }}>
+      {/* ── Greeting + top-right progress ─────────────────────────────── */}
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 24, flexWrap: "wrap" }}>
         <div>
-          <div className="px-4 md:px-6 py-2 flex items-center justify-between border-b border-border bg-amber-500/10">
-            <div>
-              <div className="text-xs font-semibold text-foreground">Attention Queue</div>
-              <div className="text-[10px] text-muted-foreground">Top 5 clients triés par urgence</div>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              <span>MAJ {timeStr}</span>
-              <Link to="/admin/gos/clients" className="text-primary hover:underline">
-                Voir tout
-              </Link>
-            </div>
-          </div>
-          <TwentyTable>
-            <TwentyThead>
-              <Th>Client</Th>
-              <Th>Risk</Th>
-              <Th>Phase</Th>
-              <Th>Problème</Th>
-              <Th>Next Action</Th>
-              <Th className="w-32"></Th>
-            </TwentyThead>
-            <tbody>
-              {loading ? (
-                <LoadingRow colSpan={6} />
-              ) : attention.length === 0 ? (
-                <EmptyRow colSpan={6} title="Tout va bien — aucun client urgent" />
-              ) : attention.map((c) => {
-                const problem = !ready.has(c.id)
-                  ? "Configuration du modèle incomplète"
-                  : "Flag haut risque";
-                const next = !ready.has(c.id)
-                  ? "Compléter la configuration"
-                  : "Revoir l'espace";
-                return (
-                  <TwentyRow key={c.id}>
-                    <Td className="font-medium text-foreground">{c.company_name}</Td>
-                    <Td><RiskBadge level={c.risk_level} /></Td>
-                    <Td><PhaseBadge phase={c.current_phase} /></Td>
-                    <Td className="text-muted-foreground">{problem}</Td>
-                    <Td className="text-muted-foreground">{next}</Td>
-                    <Td>
-                      <div className="flex justify-end">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => goToClient(c, "profit-first-workspace")}
-                          className="h-6 px-2 text-[10px] hover:bg-muted"
-                        >
-                          Profit Plan
-                        </Button>
-                      </div>
-                    </Td>
-                  </TwentyRow>
-                );
-              })}
-            </tbody>
-          </TwentyTable>
+          <MicroLabel style={{ marginBottom: 12 }}>{dateStr.toUpperCase()}</MicroLabel>
+          <h1 style={{
+            margin: 0, fontSize: 34, fontWeight: 500, letterSpacing: "-0.02em",
+            color: "#eef2fa", lineHeight: 1.15,
+          }}>
+            {greetingByHour()}
+            {userName && <>, <span className="font-accent" style={{ fontWeight: 400 }}>{userName}</span></>}
+            <span style={{ color: "#4d9fff" }}> —</span>
+          </h1>
+          <p style={{ margin: 0, marginTop: 8, color: "#8b97ad", fontSize: 14 }}>
+            Voici ta routine du jour. Une action à la fois.
+          </p>
         </div>
 
-        {/* Client Overview */}
-        <div className="border-t border-border">
-          <div className="px-4 md:px-6 py-2 flex items-center justify-between border-b border-border">
-            <div className="text-xs font-semibold text-foreground">Client Overview</div>
-            <Link to="/admin/gos/clients" className="text-[10px] text-primary hover:underline">
-              Voir tout
-            </Link>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8,
+          minWidth: 200,
+        }}>
+          <MicroLabel>ROUTINE GLOBALE</MicroLabel>
+          <div className="font-data" style={{
+            fontSize: 28, fontWeight: 300, color: "#eef2fa", letterSpacing: "-0.01em",
+          }}>
+            {doneCount}<span style={{ color: "#5f6b82" }}>/{totalRoutines}</span>
           </div>
-          <TwentyTable>
-            <TwentyThead>
-              <Th>Client</Th>
-              <Th>Business Type</Th>
-              <Th>Phase</Th>
-              <Th>Growth Setup</Th>
-              <Th>AM Owner</Th>
-              <Th>Next Action</Th>
-              <Th className="w-40"></Th>
-            </TwentyThead>
-            <tbody>
-              {loading ? (
-                <LoadingRow colSpan={7} />
-              ) : clients.length === 0 ? (
-                <EmptyRow colSpan={7} title="Aucun client — crée ton premier client pour démarrer" />
-              ) : clients.map((c) => {
-                const isReady = ready.has(c.id);
-                return (
-                  <TwentyRow key={c.id}>
-                    <Td className="font-medium text-foreground">{c.company_name}</Td>
-                    <Td className="text-muted-foreground">{c.business_type.replace("_", " ")}</Td>
-                    <Td><PhaseBadge phase={c.current_phase} /></Td>
-                    <Td>
-                      <span
-                        className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                          isReady
-                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
-                            : "bg-amber-500/15 text-amber-300 border-amber-500/40"
-                        }`}
-                      >
-                        {isReady ? "PRÊT" : "INCOMPLET"}
-                      </span>
-                    </Td>
-                    <Td className="text-muted-foreground">{c.am_owner ?? "—"}</Td>
-                    <Td className="text-muted-foreground">
-                      {isReady ? "Lancer le diagnostic" : "Compléter la configuration"}
-                    </Td>
-                    <Td>
-                      <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => goToClient(c, "profit-first-workspace")}
-                          title="Profit Plan"
-                          className="h-6 w-6 hover:bg-background"
-                        >
-                          <LineChart className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => goToClient(c, "workspace")}
-                          title="Workspace"
-                          className="h-6 w-6 hover:bg-background"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </Td>
-                  </TwentyRow>
-                );
-              })}
-            </tbody>
-          </TwentyTable>
-        </div>
-
-        {/* Bottom KPI Grid */}
-        <div className="border-t border-border p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="border border-border rounded-md p-4 flex items-center gap-4">
-            <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-              <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="16" fill="none" className="stroke-border" strokeWidth="2.5" />
-                <circle
-                  cx="18" cy="18" r="16"
-                  fill="none"
-                  className="stroke-primary"
-                  strokeWidth="2.5"
-                  strokeDasharray="100"
-                  strokeDashoffset={100 - setupPct}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="text-[11px] font-bold text-foreground tabular-nums">{setupPct}%</span>
-            </div>
-            <div>
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                Configuration du modèle
-              </div>
-              <div className="text-base font-semibold text-foreground mt-0.5 tabular-nums">
-                {totalClients - missingSetup} / {totalClients}
-              </div>
-            </div>
-          </div>
-
-          <div className="border border-border rounded-md p-4">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" /> Prévisions
-            </div>
-            <div className="text-xl font-semibold text-foreground tabular-nums">
-              0 / {totalClients}
-            </div>
-            <div className="mt-2 flex gap-1 items-end h-8">
-              {[0.4, 0.6, 0.5, 0.8, 0.7, 0.5].map((h, i) => (
-                <div key={i} className="w-1.5 bg-primary/30 rounded-full" style={{ height: `${h * 100}%` }} />
-              ))}
-            </div>
-          </div>
-
-          <div className="border border-border rounded-md p-4">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" /> Optimisation live
-            </div>
-            <div className="text-xl font-semibold text-foreground">—</div>
-            <div className="mt-2 text-[10px] text-muted-foreground italic">
-              En attente de données de production
-            </div>
-          </div>
-
-          <div className="border border-border rounded-md p-4">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
-              <Settings className="h-3 w-3" /> Boucle d'apprentissage
-            </div>
-            <div className="text-xl font-semibold text-foreground">—</div>
-            <div className="mt-3 h-1 bg-border rounded-full w-full overflow-hidden">
-              <div className="h-full bg-primary" style={{ width: "0%" }} />
-            </div>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            {alertCount > 0 ? (
+              <StatusDot status="bad" label={`${alertCount} alerte${alertCount > 1 ? "s" : ""}`} />
+            ) : totalRoutines > 0 ? (
+              <StatusDot status="good" label="RAS" />
+            ) : (
+              <StatusDot status="missing" label="AUCUN CLIENT" />
+            )}
+            <MicroLabel color="#5f6b82">SYNC {timeStr}</MicroLabel>
           </div>
         </div>
-      </div>
-    </TwentyPage>
+      </header>
+
+      {/* ── Hero: PROCHAINE ACTION ───────────────────────────────────── */}
+      {nextTarget ? (
+        nextTarget.blocked ? (
+          <HeroAction
+            title="Débloquer"
+            clientAccent={nextTarget.client.company_name}
+            reason={nextTarget.blocked.reason}
+            ctaLabel={nextTarget.blocked.actionLabel}
+            onCta={() => openSetup(nextTarget)}
+            meta={{
+              step: "SETUP",
+              duration: "~15 MIN",
+              extra: "BLOQUÉ — DONNÉES MANQUANTES",
+            }}
+          />
+        ) : (
+          <HeroAction
+            title="Walkdown métriques —"
+            clientAccent={nextTarget.client.company_name}
+            reason={`Le digest du matin est prêt : lis les 6 branches, note les 2 à surveiller, puis passe au Buyer Workspace.`}
+            ctaLabel="Commencer"
+            onCta={() => openWalkdown(nextTarget)}
+            meta={{
+              duration: "~10 MIN",
+              step: `ÉTAPE 2/${ROUTINE_STEP_LABELS.length}`,
+              synced: `SYNCHRO ${timeStr}`,
+              extra: nextTarget.status === "bad" ? "1 BRANCHE ROUGE" : undefined,
+            }}
+          />
+        )
+      ) : (
+        <div className="card-premium" style={{ padding: 32, textAlign: "center", color: "#8b97ad" }}>
+          <MicroLabel color="#5f6b82" style={{ display: "block", marginBottom: 8 }}>
+            AUCUNE ACTION EN ATTENTE
+          </MicroLabel>
+          <div style={{ fontSize: 15, color: "#c8d2e4" }}>
+            Ajoute un client pour lancer la première routine.
+          </div>
+        </div>
+      )}
+
+      {/* ── ROUTINE DU JOUR list ────────────────────────────────────── */}
+      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <MicroLabel>ROUTINE DU JOUR</MicroLabel>
+          <MicroLabel color="#5f6b82">
+            {totalRoutines} CLIENT{totalRoutines > 1 ? "S" : ""}
+          </MicroLabel>
+        </div>
+
+        {loading ? (
+          <div className="card-premium" style={{ padding: 40, textAlign: "center", color: "#5f6b82" }}>
+            Chargement…
+          </div>
+        ) : routines.length === 0 ? (
+          <div className="card-premium" style={{ padding: 40, textAlign: "center" }}>
+            <div style={{ color: "#c8d2e4", fontSize: 14, marginBottom: 6 }}>
+              Aucun client dans le portefeuille.
+            </div>
+            <div style={{ color: "#8b97ad", fontSize: 12 }}>
+              Crée-en un depuis <b>Clients</b> pour démarrer.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {routines.map((r) => (
+              <ClientRoutineRow
+                key={r.client.id}
+                clientInitial={initials(r.client.company_name)}
+                clientName={r.client.company_name}
+                clientCode={r.client.client_code}
+                status={r.status}
+                progress={r.progress}
+                steps={r.blocked ? undefined : r.steps}
+                onClick={r.blocked ? undefined : () => openWalkdown(r)}
+                blocked={
+                  r.blocked
+                    ? {
+                        reason: r.blocked.reason,
+                        actionLabel: r.blocked.actionLabel,
+                        onAction: () => openSetup(r),
+                      }
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }

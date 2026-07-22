@@ -192,7 +192,7 @@ export default function GrowthDiagnosis() {
     load();
   };
 
-  if (loading || !client) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading || !client) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const ready = !!(fi && qb);
   const factors: string[] = Array.isArray(current?.contributing_factors) ? current!.contributing_factors : [];
@@ -227,7 +227,7 @@ export default function GrowthDiagnosis() {
       />
 
       {!ready && (
-        <div className="gos-card" style={{ marginBottom: 20, borderColor: "hsl(43 90% 55% / 0.4)" }}>
+        <div className="gos-card" style={{ marginBottom: 20, borderColor: "rgba(245, 183, 78, 0.4)" }}>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>Setup incomplet</div>
           <div style={{ color: "var(--tdia-muted)", fontSize: 13 }}>
             Il manque les <b>Financial Inputs</b> et/ou la <b>Quantitative Baseline</b>. Complète le Growth Model Setup pour un diagnostic complet.
@@ -242,7 +242,7 @@ export default function GrowthDiagnosis() {
       ) : (
         <section
           style={{
-            background: "hsl(220 45% 16%)",
+            background: "rgba(255, 255, 255, 0.02)",
             border: "1px solid var(--tdia-border)",
             borderRadius: 12,
             overflow: "hidden",
@@ -254,7 +254,7 @@ export default function GrowthDiagnosis() {
             style={{
               padding: "14px 20px",
               borderBottom: "1px solid var(--tdia-border)",
-              background: "hsl(220 45% 14%)",
+              background: "rgba(255, 255, 255, 0.02)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -278,7 +278,7 @@ export default function GrowthDiagnosis() {
                   fontWeight: 700,
                   letterSpacing: "0.03em",
                   textTransform: "uppercase",
-                  color: "#f8fafc",
+                  color: "#eef2fa",
                 }}
               >
                 Diagnostic de croissance · {new Date(current.created_at).toLocaleString()}
@@ -346,7 +346,7 @@ export default function GrowthDiagnosis() {
                 style={{
                   marginBottom: 28,
                   padding: 16,
-                  background: "hsl(226 100% 60% / 0.06)",
+                  background: "rgba(77, 159, 255, 0.06)",
                   borderLeft: "2px solid var(--tdia-blue)",
                   borderRadius: "0 8px 8px 0",
                 }}
@@ -360,7 +360,7 @@ export default function GrowthDiagnosis() {
               {/* Two-column: factors + focus */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
                 <div>
-                  <div style={{ ...cockpitLabel, color: "#f8fafc", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ ...cockpitLabel, color: "#eef2fa", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ width: 3, height: 12, background: "var(--tdia-blue)" }} />
                     Facteurs contributifs
                   </div>
@@ -370,7 +370,7 @@ export default function GrowthDiagnosis() {
                     <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
                       {factors.map((f, i) => (
                         <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: "var(--tdia-muted)", lineHeight: 1.5 }}>
-                          <span style={{ marginTop: 6, width: 6, height: 6, borderRadius: 999, background: "hsl(226 100% 60% / 0.5)", flexShrink: 0 }} />
+                          <span style={{ marginTop: 6, width: 6, height: 6, borderRadius: 999, background: "rgba(77, 159, 255, 0.5)", flexShrink: 0 }} />
                           <span>{f}</span>
                         </li>
                       ))}
@@ -379,14 +379,14 @@ export default function GrowthDiagnosis() {
                 </div>
                 <div
                   style={{
-                    background: "hsl(220 45% 14%)",
+                    background: "rgba(255, 255, 255, 0.02)",
                     padding: 16,
                     borderRadius: 8,
                     border: "1px solid var(--tdia-border)",
                   }}
                 >
-                  <div style={{ ...cockpitLabel, color: "#f8fafc", marginBottom: 10 }}>Focus recommandé</div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: "#dbeafe", lineHeight: 1.55 }}>
+                  <div style={{ ...cockpitLabel, color: "#eef2fa", marginBottom: 10 }}>Focus recommandé</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: "#eef2fa", lineHeight: 1.55 }}>
                     {current.recommended_focus ?? "—"}
                   </div>
                 </div>
@@ -394,7 +394,7 @@ export default function GrowthDiagnosis() {
             </div>
 
             {/* RIGHT SIDEBAR */}
-            <div style={{ background: "hsl(0 0% 98.8% / 0.5)" }}>
+            <div style={{ background: "rgba(11, 19, 34, 0.6)" }}>
               <div style={{ padding: 24, borderBottom: "1px solid var(--tdia-border)" }}>
                 <div style={cockpitLabel}>Métriques clés</div>
                 <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -416,7 +416,7 @@ export default function GrowthDiagnosis() {
                       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", color: "var(--tdia-muted)" }}>
                         {new Date(h.created_at).toLocaleDateString(undefined, { day: "2-digit", month: "short" })}
                       </span>
-                      <span style={{ color: "#f8fafc", fontWeight: 500, textAlign: "center", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ color: "#eef2fa", fontWeight: 500, textAlign: "center", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {h.problem_type ?? "—"}
                       </span>
                       <span style={{ fontWeight: 700, color: severityColor(h.severity) }}>
@@ -440,16 +440,16 @@ const cockpitLabel: React.CSSProperties = {
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.03em",
-  color: "hsl(0 0% 45%)",
+  color: "#8b97ad",
 };
 
 function severityColor(sev: string | null | undefined): string {
   switch ((sev ?? "").toUpperCase()) {
-    case "HIGH": return "#c1121f";
+    case "HIGH": return "#ff6b6b";
     case "MEDIUM":
-    case "MED": return "#a8730a";
-    case "LOW": return "#0f8a44";
-    default: return "hsl(0 0% 45%)";
+    case "MED": return "#f5b74e";
+    case "LOW": return "#3ddc97";
+    default: return "#8b97ad";
   }
 }
 
@@ -475,9 +475,9 @@ function renderMetrics(details: Record<string, any>) {
     const costMetric = /^(cac|cpl|cpm|cpc)$/i.test(k);
     const isBad = delta != null && (costMetric ? delta > 0 : delta < 0);
     const isGood = delta != null && (costMetric ? delta < 0 : delta > 0);
-    const color = delta == null ? "hsl(0 0% 45%)" : isBad ? "#c1121f" : isGood ? "#0f8a44" : "hsl(0 0% 45%)";
+    const color = delta == null ? "#8b97ad" : isBad ? "#ff6b6b" : isGood ? "#3ddc97" : "#8b97ad";
     return (
-      <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingBottom: 12, borderBottom: "1px solid hsl(220 45% 16%)" }}>
+      <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingBottom: 12, borderBottom: "1px solid rgba(255, 255, 255, 0.02)" }}>
         <div>
           <div style={{ fontSize: 11, color: "var(--tdia-muted)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.03em" }}>{k}</div>
           <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 18, fontWeight: 700, color: "var(--tdia-text)" }}>
@@ -491,7 +491,7 @@ function renderMetrics(details: Record<string, any>) {
             </div>
           )}
           {nt != null && (
-            <div style={{ fontSize: 10, color: "hsl(0 0% 45%)" }}>Cible: {nt.toFixed(2)}</div>
+            <div style={{ fontSize: 10, color: "#8b97ad" }}>Cible: {nt.toFixed(2)}</div>
           )}
         </div>
       </div>

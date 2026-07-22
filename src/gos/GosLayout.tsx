@@ -7,18 +7,22 @@ import "./tokens.css";
 
 function LayoutInner() {
   const { selectedClient } = useSelectedClient();
-  const { logout } = useAdminAuth();
+  const { session, logout } = useAdminAuth();
+
+  const userEmail = session?.user?.email ?? null;
+  const userName = userEmail ? userEmail.split("@")[0] : null;
 
   return (
-    <div className="gos-root" style={{ display: "flex" }}>
+    <div className="gos-root" style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar
         clientId={selectedClient?.id ?? null}
         hasClient={!!selectedClient}
         clientName={selectedClient?.company_name}
         clientCode={selectedClient?.client_code}
+        userName={userName}
         onLogout={logout}
       />
-      <main style={{ flex: 1, minWidth: 0, padding: 32, width: "100%" }}>
+      <main style={{ flex: 1, minWidth: 0, padding: "32px 40px", width: "100%" }}>
         <Outlet />
       </main>
       <HelpDrawer />

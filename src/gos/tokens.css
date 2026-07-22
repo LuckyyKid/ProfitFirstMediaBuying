@@ -1,157 +1,282 @@
-/* GOS design tokens — original dark navy palette (matches :root in index.css).
-   Applied only under .gos-root to avoid affecting the rest of the app. */
+/* TDIA — Premium Dark design system.
+   Scoped under .gos-root so the CRM/admin side stays on its own theme. */
 
 .gos-root {
-  --tdia-blue: hsl(210 92% 53%);
-  --tdia-blue-light: hsl(210 92% 63%);
-  --tdia-navy: hsl(220 45% 8%);
-  --tdia-navy-2: hsl(220 45% 14%);
-  --tdia-card-bg: hsl(220 45% 14%);
-  --tdia-slate: hsl(215 20% 65%);
-  --tdia-bg: hsl(220 45% 8%);
-  --tdia-card: hsl(220 45% 14%);
-  --tdia-border: hsl(220 45% 25%);
-  --tdia-text: hsl(210 40% 98%);
-  --tdia-muted: hsl(215 20% 65%);
-  --tdia-radius: 8px;
+  /* palette */
+  --tdia-bg: #060910;
+  --tdia-surface: rgba(255, 255, 255, 0.02);
+  --tdia-elevated: linear-gradient(135deg, #0b1322, #080d18);
+  --tdia-hairline: rgba(148, 170, 215, 0.12);
+  --tdia-hairline-strong: rgba(148, 170, 215, 0.25);
+
+  --tdia-text: #eef2fa;
+  --tdia-text-2: #c8d2e4;
+  --tdia-muted: #8b97ad;
+  --tdia-faint: #5f6b82;
+
+  --tdia-blue: #4d9fff;
+  --tdia-blue-deep: #2f6bff;
+  --tdia-blue-light: #9ec8ff;
+  --tdia-blue-gradient: linear-gradient(135deg, #4d9fff, #2f6bff);
+
+  --tdia-good: #3ddc97;
+  --tdia-watch: #f5b74e;
+  --tdia-bad: #ff6b6b;
+  --tdia-missing: #8b97ad;
+
+  /* backwards-compat aliases (older code referenced these names) */
+  --tdia-border: var(--tdia-hairline);
+  --tdia-card: transparent;
+  --tdia-card-bg: rgba(255, 255, 255, 0.02);
+  --tdia-navy: var(--tdia-bg);
+  --tdia-navy-2: #0b1322;
+  --tdia-slate: var(--tdia-muted);
+  --tdia-radius: 14px;
   --tdia-shadow: none;
 
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
   color: var(--tdia-text);
-  background: var(--tdia-bg);
   min-height: 100vh;
+  background:
+    radial-gradient(1200px 500px at 30% -10%, rgba(47, 107, 255, 0.14), transparent 60%),
+    var(--tdia-bg);
+  letter-spacing: -0.005em;
 }
 
-.gos-root .gos-card {
-  background: var(--tdia-card);
-  border: 1px solid var(--tdia-border);
-  border-radius: var(--tdia-radius);
-  box-shadow: var(--tdia-shadow);
-  padding: 16px;
+/* --- card surfaces --------------------------------------------------------- */
+.gos-root .gos-card,
+.gos-root .card-premium {
+  background: var(--tdia-surface);
+  border: 1px solid var(--tdia-hairline);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 20px;
 }
 
-.gos-root .gos-btn-primary {
-  background: var(--tdia-blue);
+.gos-root .card-elevated {
+  background: linear-gradient(135deg, #0b1322, #080d18);
+  border: 1px solid var(--tdia-hairline);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 20px;
+}
+
+/* Hero card technique: gradient border via padded wrapper */
+.gos-root .card-hero-wrap {
+  background: linear-gradient(135deg,
+    rgba(77, 159, 255, 0.45),
+    rgba(77, 159, 255, 0.05) 40%,
+    rgba(148, 170, 215, 0.10));
+  border-radius: 18px;
+  padding: 1px;
+  box-shadow: 0 24px 80px rgba(47, 107, 255, 0.18);
+}
+.gos-root .card-hero-inner {
+  background: linear-gradient(135deg, #0b1322, #080d18);
+  border-radius: 17px;
+  padding: 28px 32px;
+}
+
+/* --- buttons --------------------------------------------------------------- */
+.gos-root .gos-btn-primary,
+.gos-root .btn-primary {
+  background: linear-gradient(135deg, #4d9fff, #2f6bff);
   color: #fff;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-weight: 500;
   border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: filter 0.15s;
-  font-size: 12px;
+  box-shadow:
+    0 8px 28px rgba(47, 107, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-.gos-root .gos-btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+.gos-root .gos-btn-primary:hover:not(:disabled),
+.gos-root .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 34px rgba(47, 107, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
 .gos-root .gos-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.gos-root .gos-btn-secondary {
-  background: hsl(220 45% 20%);
-  color: var(--tdia-text);
-  border: 1px solid var(--tdia-border);
-  border-radius: 6px;
-  padding: 6px 12px;
+.gos-root .gos-btn-secondary,
+.gos-root .btn-secondary {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--tdia-text-2);
+  border: 1px solid var(--tdia-hairline-strong);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-family: inherit;
   font-weight: 500;
-  cursor: pointer;
   font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.gos-root .gos-btn-secondary:hover { background: hsl(220 45% 25%); }
+.gos-root .gos-btn-secondary:hover,
+.gos-root .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(148, 170, 215, 0.35);
+}
 
+/* --- inputs --------------------------------------------------------------- */
 .gos-root .gos-input,
 .gos-root .gos-select,
 .gos-root .gos-textarea {
   width: 100%;
-  padding: 6px 10px;
-  border: 1px solid var(--tdia-border);
-  border-radius: 6px;
-  background: hsl(220 45% 14%);
+  padding: 10px 12px;
+  border: 1px solid var(--tdia-hairline);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  font-family: inherit;
   font-size: 13px;
   color: var(--tdia-text);
-  font-family: inherit;
 }
 .gos-root .gos-input::placeholder,
 .gos-root .gos-textarea::placeholder { color: var(--tdia-muted); }
 .gos-root .gos-input:focus,
 .gos-root .gos-select:focus,
 .gos-root .gos-textarea:focus {
-  outline: 1px solid var(--tdia-blue);
-  outline-offset: -1px;
+  outline: none;
+  border-color: rgba(77, 159, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(77, 159, 255, 0.12);
 }
 
 .gos-root .gos-label {
   display: block;
-  font-size: 11px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
   color: var(--tdia-muted);
-  font-weight: 500;
-  margin-bottom: 4px;
+  font-weight: 400;
+  margin-bottom: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.24em;
 }
 
+/* --- micro-typography ----------------------------------------------------- */
+.gos-root .microlabel {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--tdia-muted);
+  font-weight: 400;
+}
+.gos-root .microlabel-sm {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--tdia-faint);
+  font-weight: 400;
+}
+.gos-root .font-data {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+}
+.gos-root .font-accent {
+  font-family: "Instrument Serif", ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* --- table ---------------------------------------------------------------- */
 .gos-root .gos-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--tdia-text);
 }
 .gos-root .gos-table th {
   text-align: left;
-  padding: 8px 12px;
-  color: var(--tdia-muted);
-  font-weight: 500;
-  font-size: 10px;
+  padding: 12px 14px;
+  color: var(--tdia-faint);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-weight: 400;
+  font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--tdia-border);
-  background: hsl(220 45% 12% / 0.7);
+  letter-spacing: 0.24em;
+  border-bottom: 1px solid var(--tdia-hairline);
+  background: transparent;
 }
 .gos-root .gos-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--tdia-border);
+  padding: 14px;
+  border-bottom: 1px solid rgba(148, 170, 215, 0.08);
 }
-.gos-root .gos-table tr:hover td { background: hsl(220 45% 20% / 0.4); }
+.gos-root .gos-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
 
+/* --- sidebar (slim, 3-5 entries) ----------------------------------------- */
 .gos-root .gos-sidebar {
-  width: 224px;
-  background: hsl(220 45% 10%);
-  border-right: 1px solid var(--tdia-border);
+  width: 220px;
+  background: transparent;
+  border-right: 1px solid var(--tdia-hairline);
   min-height: 100vh;
-  padding: 12px 8px;
+  padding: 24px 16px;
   position: sticky;
   top: 0;
   overflow-y: auto;
   max-height: 100vh;
-}
-.gos-root .gos-sidebar-group {
-  margin-top: 12px;
-}
-.gos-root .gos-sidebar-group-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--tdia-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0 8px 4px;
+  display: flex;
+  flex-direction: column;
 }
 .gos-root .gos-nav-link {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  color: var(--tdia-text);
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--tdia-text-2);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  margin-bottom: 1px;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: 2px;
 }
-.gos-root .gos-nav-link:hover { background: hsl(220 45% 20%); }
+.gos-root .gos-nav-link:hover {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--tdia-text);
+}
 .gos-root .gos-nav-link.active {
-  background: hsl(210 92% 53% / 0.15);
-  color: var(--tdia-blue);
+  background: linear-gradient(135deg, rgba(77, 159, 255, 0.14), rgba(47, 107, 255, 0.05));
+  border-color: rgba(77, 159, 255, 0.25);
+  color: var(--tdia-blue-light);
+  box-shadow: 0 0 24px rgba(47, 107, 255, 0.10);
 }
 .gos-root .gos-nav-link.disabled {
-  color: hsl(215 20% 45%);
+  color: var(--tdia-faint);
   pointer-events: none;
   cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* --- hairline separators -------------------------------------------------- */
+.gos-root .hairline {
+  border-color: var(--tdia-hairline);
+}
+.gos-root .hairline-h {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(148, 170, 215, 0.15), transparent);
+  border: none;
+}
+
+/* --- helpers -------------------------------------------------------------- */
+.gos-root .surface-halo {
+  position: relative;
+}
+.gos-root .surface-halo::before {
+  content: '';
+  position: absolute;
+  inset: -60px -60px auto -60px;
+  height: 160px;
+  background: radial-gradient(600px 200px at 30% 0%, rgba(47, 107, 255, 0.08), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }

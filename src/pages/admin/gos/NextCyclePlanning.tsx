@@ -119,7 +119,7 @@ export default function NextCyclePlanning() {
     }));
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   return (
     <>
@@ -166,14 +166,14 @@ export default function NextCyclePlanning() {
             {learnings.length > 0 && (
               <div style={{ gridColumn: "span 3" }}>
                 <div className="gos-label">Apprentissages liés</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, maxHeight: 160, overflow: "auto", padding: 8, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, maxHeight: 160, overflow: "auto", padding: 8, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
                   {learnings.map(l => {
                     const sel = form.linked_learning_ids.includes(l.id);
                     return (
                       <button key={l.id} type="button" onClick={() => toggleLearning(l.id)}
                         style={{
                           padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer",
-                          border: sel ? "1px solid hsl(140 45% 45%)" : "1px solid hsl(220 45% 25%)",
+                          border: sel ? "1px solid hsl(140 45% 45%)" : "1px solid rgba(148, 170, 215, 0.12)",
                           background: sel ? "hsl(140 45% 30% / 0.35)" : "transparent",
                           color: "var(--tdia-text)",
                         }}>
@@ -218,7 +218,7 @@ export default function NextCyclePlanning() {
               </div>
 
               {p.north_star_goal && (
-                <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 8, marginBottom: 10 }}>
+                <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8, marginBottom: 10 }}>
                   <div style={{ fontSize: 10, color: "var(--tdia-muted)", fontWeight: 600, letterSpacing: "0.03em" }}>NORTH STAR</div>
                   <div style={{ fontWeight: 600, marginTop: 2 }}>{p.north_star_goal}</div>
                 </div>
@@ -269,7 +269,7 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
 }
 function Kpi({ label, v, money }: { label: string; v: number | null; money?: boolean }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 8 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", fontWeight: 600, letterSpacing: "0.03em" }}>{label}</div>
       <div style={{ fontSize: 16, fontWeight: 600, marginTop: 4 }}>{v == null ? "—" : money ? `${Number(v).toLocaleString()} $` : v}</div>
     </div>
@@ -288,6 +288,6 @@ function List({ title, items }: { title: string; items: string[] }) {
   );
 }
 function Tag({ children, tone = "default" }: { children: React.ReactNode; tone?: "default" | "success" | "muted" }) {
-  const bg = tone === "success" ? "hsl(140 45% 30% / 0.35)" : tone === "muted" ? "hsl(220 45% 20%)" : "hsl(220 45% 25%)";
+  const bg = tone === "success" ? "hsl(140 45% 30% / 0.35)" : tone === "muted" ? "rgba(255, 255, 255, 0.04)" : "rgba(148, 170, 215, 0.12)";
   return <span style={{ background: bg, padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 600, letterSpacing: "0.03em" }}>{children}</span>;
 }

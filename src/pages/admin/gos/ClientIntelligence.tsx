@@ -204,7 +204,7 @@ export default function ClientIntelligence() {
     }
   };
 
-  if (loading) return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+  if (loading) return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
 
   const latest = snapshots[0];
 
@@ -298,10 +298,10 @@ export default function ClientIntelligence() {
             <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
               <div style={{
                 width: 110, height: 110, borderRadius: "50%",
-                background: `conic-gradient(${gradeColor(latest.health_grade)} ${(latest.health_score ?? 0) * 3.6}deg, hsl(220 45% 16%) 0)`,
+                background: `conic-gradient(${gradeColor(latest.health_grade)} ${(latest.health_score ?? 0) * 3.6}deg, rgba(255, 255, 255, 0.02) 0)`,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                <div style={{ width: 92, height: 92, borderRadius: "50%", background: "hsl(220 45% 14%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 92, height: 92, borderRadius: "50%", background: "rgba(255, 255, 255, 0.02)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ fontSize: 28, fontWeight: 700, color: gradeColor(latest.health_grade) }}>{latest.health_grade}</div>
                   <div style={{ fontSize: 12, color: "var(--tdia-muted)" }}>{latest.health_score}/100</div>
                 </div>
@@ -315,7 +315,7 @@ export default function ClientIntelligence() {
                 <div style={{ fontSize: 14, color: "var(--tdia-muted)", marginBottom: 12 }}>{latest.summary}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                   {latest.key_metrics && Object.entries(latest.key_metrics).map(([k, v]) => (
-                    <div key={k} style={{ padding: 8, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+                    <div key={k} style={{ padding: 8, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
                       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 600 }}>{k.replace(/_/g, " ")}</div>
                       <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{String(v)}</div>
                     </div>
@@ -359,13 +359,13 @@ export default function ClientIntelligence() {
           </div>
 
           {Array.isArray(latest.alerts) && latest.alerts.length > 0 && (
-            <div className="gos-card" style={{ marginBottom: 16, borderColor: "hsl(0 72% 60%)" }}>
+            <div className="gos-card" style={{ marginBottom: 16, borderColor: "#ff6b6b" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <AlertTriangle size={16} color="#c1121f" />
                 <div style={{ fontWeight: 600 }}>Alertes</div>
               </div>
               {latest.alerts.map((a: any, i: number) => (
-                <div key={i} style={{ padding: 8, background: "hsl(0 84% 96%)", borderRadius: 6, marginBottom: 6, fontSize: 13 }}>
+                <div key={i} style={{ padding: 8, background: "linear-gradient(135deg, rgba(255, 107, 107, 0.06), rgba(255, 255, 255, 0.015))", borderRadius: 6, marginBottom: 6, fontSize: 13 }}>
                   <span style={{ fontWeight: 600, marginRight: 6 }}>[{a.level}]</span>{a.message}
                 </div>
               ))}
@@ -377,7 +377,7 @@ export default function ClientIntelligence() {
               <div style={{ fontWeight: 600, marginBottom: 10 }}>Historique</div>
               <div style={{ display: "grid", gap: 6 }}>
                 {snapshots.slice(1).map(s => (
-                  <div key={s.id} style={{ display: "grid", gridTemplateColumns: "120px 60px 120px 1fr", gap: 12, padding: 8, background: "hsl(220 45% 14%)", borderRadius: 6, fontSize: 13 }}>
+                  <div key={s.id} style={{ display: "grid", gridTemplateColumns: "120px 60px 120px 1fr", gap: 12, padding: 8, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, fontSize: 13 }}>
                     <div>{new Date(s.snapshot_date).toLocaleDateString()}</div>
                     <div style={{ fontWeight: 700, color: gradeColor(s.health_grade) }}>{s.health_grade} · {s.health_score}</div>
                     <div style={{ color: "var(--tdia-muted)" }}>{s.momentum}</div>
@@ -411,14 +411,14 @@ function SignalCard({ title, icon, items, color }: { title: string; icon: React.
 }
 function MomentumBadge({ m }: { m: string | null }) {
   if (!m) return null;
-  const color = m === "ACCELERATING" ? "#0f8a44" : m === "SLOWING" ? "#c1121f" : "hsl(0 0% 40%)";
+  const color = m === "ACCELERATING" ? "#0f8a44" : m === "SLOWING" ? "#c1121f" : "#8b97ad";
   return <span style={{ padding: "2px 10px", background: `${color}30`, color, borderRadius: 6, fontSize: 11, fontWeight: 600, letterSpacing: "0.03em" }}>{m}</span>;
 }
 
 function PlainCell({ label, value, tone }: { label: string; value: string; tone?: "good" | "warn" | "bad" | "accent" }) {
   const color = tone === "good" ? "#0f8a44" : tone === "warn" ? "#a8730a" : tone === "bad" ? "#c1121f" : tone === "accent" ? "var(--tdia-blue)" : "var(--tdia-text)";
   return (
-    <div style={{ padding: 8, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 8, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 3 }}>{label}</div>
       <div style={{ color, fontWeight: 500, lineHeight: 1.35 }}>{value}</div>
     </div>
@@ -428,7 +428,7 @@ function PlainCell({ label, value, tone }: { label: string; value: string; tone?
 function MiniStat({ label, value, tone }: { label: string; value: number | string; tone?: "ok" | "warn" | "danger" }) {
   const color = tone === "ok" ? "#0f8a44" : tone === "warn" ? "#a8730a" : tone === "danger" ? "#c1121f" : "var(--tdia-text)";
   return (
-    <div style={{ padding: 8, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 8, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 3 }}>{label}</div>
       <div style={{ color, fontWeight: 600, fontSize: 16 }}>{value}</div>
     </div>

@@ -108,7 +108,7 @@ export default function DataAnalystFoundation() {
   };
 
   if (loading) {
-    return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+    return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   }
 
   return (
@@ -229,7 +229,7 @@ export default function DataAnalystFoundation() {
               ) : (
                 <div style={{ display: "grid", gap: 8 }}>
                   {runs.slice(0, 8).map((run) => (
-                    <div key={run.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+                    <div key={run.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                         <div style={{ fontWeight: 600 }}>{run.output_json.score}/100</div>
                         <div style={{ color: readinessColor(run.output_json.readiness), fontSize: 12, fontWeight: 700 }}>
@@ -270,7 +270,7 @@ function CardTitle({ icon, title }: { icon: ReactNode; title: string }) {
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700 }}>
         {label}
       </div>
@@ -294,7 +294,7 @@ function SignalRow({
 }) {
   const style = severityStyle[severity];
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, borderLeft: `3px solid ${style.color}` }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, borderLeft: `3px solid ${style.color}` }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
         <span style={{ color: style.color, display: "inline-flex" }}>{style.icon}</span>
         <div style={{ fontWeight: 600, flex: 1 }}>{title}</div>
@@ -325,7 +325,7 @@ function ModelCard({ output }: { output: DataAnalystFoundationOutput }) {
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
         {title}
       </div>

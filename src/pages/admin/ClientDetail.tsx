@@ -24,11 +24,10 @@ import {
   timeAgo,
 } from "@/lib/onboardingHelpers";
 import {
-  ArrowLeft, Check, Copy, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Building2,
+  ArrowLeft, Check, Copy, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TwentyPage, PageHeader, NavPill, NavDivider } from "@/components/admin-shell";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -130,16 +129,8 @@ const ClientDetail = () => {
   };
 
   if (!isAuthed) return <Navigate to="/admin/login" replace />;
-  if (loading) return (
-    <TwentyPage>
-      <PageHeader icon={Building2} title="Chargement…" />
-    </TwentyPage>
-  );
-  if (!client) return (
-    <TwentyPage>
-      <PageHeader icon={Building2} title="Client introuvable" />
-    </TwentyPage>
-  );
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Chargement…</div>;
+  if (!client) return <div className="p-8 text-center text-muted-foreground">Client introuvable</div>;
 
   const status = globalStatus(client);
   const risk = riskLevel(client);
@@ -227,33 +218,30 @@ const ClientDetail = () => {
   };
 
   return (
-    <TwentyPage>
-      <PageHeader
-        icon={Building2}
-        title={client.client_name || client.company_name || client.client_code}
-        description={client.client_id || client.client_code}
-        actions={
-          <>
-            <NavPill to="/admin" icon={ArrowLeft}>Retour</NavPill>
-            <NavDivider />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyId}
-              className="h-7 px-2 text-xs hover:bg-muted"
-              title="Copier l'identifiant"
-            >
-              <Copy className="h-3.5 w-3.5" />
+    <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Retour</Link>
             </Button>
+            <div>
+              <h1 className="text-2xl font-bold">{client.client_name || client.company_name || client.client_code}</h1>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-mono">{client.client_id || client.client_code}</span>
+                <button onClick={copyId} className="hover:text-primary"><Copy className="h-3 w-3" /></button>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={refetch}
               disabled={syncing}
-              className="h-7 px-2 text-xs hover:bg-muted gap-1"
               title={client.external_synced_at ? `Dernière synchro : ${timeAgo(client.external_synced_at)}` : "Jamais synchronisé"}
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
               {syncing ? "Synchro…" : "Resynchroniser"}
             </Button>
             <Button
@@ -261,24 +249,20 @@ const ClientDetail = () => {
               size="sm"
               onClick={toggleOnboardingComplete}
               disabled={togglingComplete}
-              className="h-7 px-2 text-xs gap-1"
               title={client.completed_at ? "Rouvrir l'onboarding et réactiver les relances" : "Marquer comme complété et arrêter les relances"}
             >
               {client.completed_at ? (
-                <><RotateCcw className="h-3.5 w-3.5" /> Rouvrir</>
+                <><RotateCcw className="h-4 w-4 mr-1" /> Rouvrir l'onboarding</>
               ) : (
-                <><CheckCircle2 className="h-3.5 w-3.5" /> Complété</>
+                <><CheckCircle2 className="h-4 w-4 mr-1" /> Marquer complété (stop relances)</>
               )}
             </Button>
-            <NavDivider />
-            <span className={`px-2 py-0.5 rounded-md text-[10px] border ${statusBadgeClass[status]}`}>{status}</span>
-            <span className={`px-2 py-0.5 rounded-md text-[10px] border ${riskBadgeClass[risk]}`}>Risque {risk}</span>
-          </>
-        }
-      />
-      <div className="flex-1 overflow-auto px-4 md:px-6 py-4 md:py-6">
-        <div className="max-w-[1400px] mx-auto space-y-4">
-        <Card className="p-4 border-border shadow-none">
+            <span className={`px-2 py-1 rounded-md text-xs border ${statusBadgeClass[status]}`}>{status}</span>
+            <span className={`px-2 py-1 rounded-md text-xs border ${riskBadgeClass[risk]}`}>Risque {risk}</span>
+          </div>
+        </header>
+
+        <Card className="p-4 glass-card">
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="flex justify-between text-sm mb-1">
@@ -546,9 +530,8 @@ const ClientDetail = () => {
             </Card>
           </TabsContent>
         </Tabs>
-        </div>
       </div>
-    </TwentyPage>
+    </div>
   );
 };
 

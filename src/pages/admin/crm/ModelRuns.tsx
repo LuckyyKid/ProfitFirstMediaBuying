@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,24 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { ModelBadge, ForecastDisclaimer } from "@/crm/ModelBadge";
 import { toast } from "sonner";
-import { Cpu, Loader2, Play, ChevronDown, ChevronRight } from "lucide-react";
-import { useCrmClientBriefs, useModelRuns } from "@/crm/hooks";
-import { TwentyPage, PageHeader } from "@/components/admin-shell";
+import { Loader2, Play, ChevronDown, ChevronRight } from "lucide-react";
+
+type ModelRun = {
+  id: string;
+  client_id: string | null;
+  model_name: string;
+  model_version: string;
+  input_json: any;
+  output_json: any;
+  formula_used: any;
+  generated_at: string;
+  generated_by: string | null;
+  am_approved: boolean;
+  am_override: boolean;
+  override_reason: string | null;
+};
+
+type CrmClient = { id: string; company_name: string | null; main_contact_name: string | null };
 
 const MODELS = [
   { fn: "run-decision-scoring", label: "Decision Scoring", model_name: "decision_scoring_engine" },
@@ -63,13 +78,31 @@ const EXAMPLES: Record<string, unknown> = {
 };
 
 export default function ModelRuns() {
-  const clients = useCrmClientBriefs();
+  const [clients, setClients] = useState<CrmClient[]>([]);
   const [clientId, setClientId] = useState<string>("");
-  const { runs, loading, reload, setApproval, setOverride } = useModelRuns(clientId);
+  const [runs, setRuns] = useState<ModelRun[]>([]);
+  const [loading, setLoading] = useState(false);
   const [fn, setFn] = useState<typeof MODELS[number]["fn"]>("run-decision-scoring");
   const [payload, setPayload] = useState(JSON.stringify(EXAMPLES["run-decision-scoring"], null, 2));
   const [invoking, setInvoking] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    supabase.from("crm_clients").select("id, company_name, main_contact_name").order("company_name")
+      .then(({ data }) => setClients(((data ?? []) as unknown) as CrmClient[]));
+  }, []);
+
+  const loadRuns = useCallback(async () => {
+    setLoading(true);
+    let q = supabase.from("model_runs" as any).select("*").order("generated_at", { ascending: false }).limit(200);
+    if (clientId) q = q.eq("client_id", clientId);
+    const { data, error } = await q;
+    if (error) toast.error(error.message);
+    setRuns(((data as unknown) as ModelRun[]) ?? []);
+    setLoading(false);
+  }, [clientId]);
+
+  useEffect(() => { loadRuns(); }, [loadRuns]);
 
   const onFnChange = (v: typeof MODELS[number]["fn"]) => {
     setFn(v);
@@ -105,6 +138,7 @@ export default function ModelRuns() {
         });
       }
     } catch (e: any) {
+      // Non-blocking: model_runs is source of truth
       console.warn(`Optional CRM mirror failed for ${fnName}:`, e?.message ?? e);
     }
   };
@@ -118,7 +152,19 @@ export default function ModelRuns() {
     if (error) return toast.error(error.message);
     toast.success(`${fn} succeeded`);
     if (body?.client_id && data?.output) await persistToCrm(fn, body.client_id, data.output, body);
-    await reload();
+    await loadRuns();
+  };
+
+  const setApproval = async (id: string, am_approved: boolean) => {
+    const { error } = await supabase.from("model_runs" as any).update({ am_approved }).eq("id", id);
+    if (error) return toast.error(error.message);
+    setRuns((r) => r.map((x) => x.id === id ? { ...x, am_approved } : x));
+  };
+  const setOverride = async (id: string, override_reason: string) => {
+    const am_override = override_reason.trim().length > 0;
+    const { error } = await supabase.from("model_runs" as any).update({ am_override, override_reason: am_override ? override_reason : null }).eq("id", id);
+    if (error) return toast.error(error.message);
+    setRuns((r) => r.map((x) => x.id === id ? { ...x, am_override, override_reason: am_override ? override_reason : null } : x));
   };
 
   const clientLabel = useMemo(() => {
@@ -127,16 +173,16 @@ export default function ModelRuns() {
   }, [clients]);
 
   return (
-    <TwentyPage inLayout>
-      <PageHeader
-        icon={Cpu}
-        title="Model Runs"
-        description="Every execution of the TDIA Intelligence Engine is recorded here"
-        actions={<ModelBadge />}
-      />
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Model Runs</h1>
+          <p className="text-sm text-muted-foreground">Every execution of the TDIA Intelligence Engine is recorded here.</p>
+        </div>
+        <ModelBadge />
+      </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-6 space-y-4">
-      <Card className="border-border shadow-none">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Run engine</CardTitle>
         </CardHeader>
@@ -178,7 +224,7 @@ export default function ModelRuns() {
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-none">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             History
@@ -240,7 +286,6 @@ export default function ModelRuns() {
           })}
         </CardContent>
       </Card>
-      </div>
-    </TwentyPage>
+    </div>
   );
 }

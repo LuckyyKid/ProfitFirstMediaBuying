@@ -1,7 +1,38 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAdminClients, archiveClient, deleteClient } from "@/hooks/useAdminClients";
+import {
+  ONBOARDING_STEPS,
+  completedStepsCount,
+  currentStepIndex,
+  globalStatus,
+  isStepDone,
+  progressPercent,
+  riskBadgeClass,
+  riskLevel,
+  statusBadgeClass,
+  timeAgo,
+} from "@/lib/onboardingHelpers";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,76 +50,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Archive,
-  ArchiveRestore,
-  BellRing,
-  ExternalLink,
-  FileSignature,
-  Handshake,
-  LayoutDashboard,
-  LogOut,
-  Mail,
-  MailCheck,
-  MoreHorizontal,
-  Plus,
-  RefreshCcw,
-  Send,
-  Trash2,
-  Users,
-} from "lucide-react";
-import {
-  TwentyPage,
-  PageHeader,
-  NavPill,
-  NavDivider,
-  InsightStrip,
-  StatPill,
-  ViewBar,
-  FilterChipBar,
-  TwentyTableWrap,
-  TwentyTable,
-  TwentyThead,
-  Th,
-  TwentyRow,
-  Td,
-  EmptyRow,
-  LoadingRow,
-  StatusPill,
-  StepDot,
-} from "@/components/admin-shell";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useAdminClients, archiveClient, deleteClient } from "@/hooks/useAdminClients";
-import {
-  ONBOARDING_STEPS,
-  completedStepsCount,
-  currentStepIndex,
-  globalStatus,
-  isStepDone,
-  progressPercent,
-  riskLevel,
-  timeAgo,
-} from "@/lib/onboardingHelpers";
+import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, LayoutDashboard, LogOut, Mail, MailCheck, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const statusBadgeClass: Record<string, string> = {
-  "Signed - Onboarding Sent": "bg-blue-50 text-blue-700 border-blue-200",
-  "Onboarding Not Started": "bg-muted text-muted-foreground border-border",
-  "Onboarding In Progress": "bg-cyan-50 text-cyan-700 border-cyan-200",
-  "Onboarding Blocked": "bg-red-50 text-red-700 border-red-200",
-  "Payment Pending": "bg-amber-50 text-amber-700 border-amber-200",
-  "Contract Pending": "bg-amber-50 text-amber-700 border-amber-200",
-  "Kick-off Not Booked": "bg-amber-50 text-amber-700 border-amber-200",
-  "Onboarding Completed": "bg-emerald-50 text-emerald-700 border-emerald-200",
-};
-
-const riskBadgeClass: Record<string, string> = {
-  Low: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Normal: "bg-muted text-muted-foreground border-border",
-  Medium: "bg-amber-50 text-amber-700 border-amber-200",
-  High: "bg-red-50 text-red-700 border-red-200",
-};
 
 const FILTERS = [
   { key: "all", label: "Tous (actifs)" },
@@ -148,15 +112,10 @@ const AdminDashboard = () => {
     });
   }, [clients, search, filter]);
 
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, filter]);
+  // Reset pagination when filter/search changes
+  useMemo(() => { setVisibleCount(PAGE_SIZE); }, [search, filter]);
 
   const visible = filtered.slice(0, visibleCount);
-  const activeFilterLabel = FILTERS.find((f) => f.key === filter)?.label ?? "";
-
-  const chips = [
-    ...(filter !== "all" ? [{ key: "filter", label: activeFilterLabel, onRemove: () => setFilter("all") }] : []),
-    ...(search.trim() ? [{ key: "search", label: <>Recherche: {search}</>, onRemove: () => setSearch("") }] : []),
-  ];
 
   const onArchive = async (c: any) => {
     try {
@@ -210,6 +169,7 @@ const AdminDashboard = () => {
     else toast.message("Aucun email envoyé (vérifie l'email du client)");
   };
 
+
   const counts = useMemo(() => ({
     total: clients.length,
     blocked: clients.filter((c) => globalStatus(c) === "Onboarding Blocked").length,
@@ -230,185 +190,224 @@ const AdminDashboard = () => {
   };
 
   return (
-    <TwentyPage>
-      <PageHeader
-        icon={Users}
-        title="Admin Onboarding Dashboard"
-        description="TDIA — vue centrale équipe interne"
-        actions={
-          <>
-            <NavPill to="/admin/followups" icon={BellRing}>Suivi</NavPill>
-            <NavPill to="/admin/deals" icon={Handshake}>Deals</NavPill>
-            <NavPill to="/admin/contract-creator" icon={FileSignature}>Contrats</NavPill>
-            <NavPill to="/admin/ops" icon={LayoutDashboard}>Ops</NavPill>
-            <NavPill to="/admin/gos" icon={LayoutDashboard}>Profit First</NavPill>
-            <NavPill to="/admin/crm" icon={LayoutDashboard}>CRM</NavPill>
-            <NavDivider />
-            <Button variant="ghost" size="sm" onClick={runChecks} disabled={runningCheck} className="h-7 px-2 text-xs hover:bg-muted">
-              <RefreshCcw className={`h-3.5 w-3.5 mr-1 ${runningCheck ? "animate-spin" : ""}`} />
+    <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Admin Onboarding Dashboard</h1>
+            <p className="text-sm text-muted-foreground">TDIA — vue centrale équipe interne</p>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/followups">
+                <BellRing className="h-4 w-4 mr-2" />
+                Suivi clients
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/deals">
+                <Handshake className="h-4 w-4 mr-2" />
+                Deals closés
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/contract-creator">
+                <FileSignature className="h-4 w-4 mr-2" />
+                Générateur de contrats
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/ops">
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Agent Ops Dashboard
+              </Link>
+            </Button>
+
+
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/gos">
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Profit First Media Buying
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={runChecks} disabled={runningCheck}>
+              <RefreshCcw className={`h-4 w-4 mr-2 ${runningCheck ? "animate-spin" : ""}`} />
               Run checks
             </Button>
-            <Button variant="ghost" size="sm" onClick={logout} className="h-7 px-2 text-xs hover:bg-muted">
-              <LogOut className="h-3.5 w-3.5" />
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
             </Button>
-          </>
-        }
-      />
+          </div>
+        </header>
 
-      <InsightStrip>
-        <StatPill label="Total" value={counts.total} />
-        <StatPill label="Bloqués" value={counts.blocked} tone="red" onClick={() => setFilter("blocked")} active={filter === "blocked"} />
-        <StatPill label="À rappeler" value={counts.callbackDue} tone="amber" onClick={() => setFilter("callback_due")} active={filter === "callback_due"} />
-        <StatPill label="Complétés" value={counts.completed} tone="green" onClick={() => setFilter("completed")} active={filter === "completed"} />
-        <StatPill label="Haut risque" value={counts.highRisk} tone="red" onClick={() => setFilter("high_risk")} active={filter === "high_risk"} />
-      </InsightStrip>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <StatCard label="Total clients" value={counts.total} />
+          <StatCard label="Bloqués" value={counts.blocked} tone="red" />
+          <StatCard label="À rappeler" value={counts.callbackDue} tone="amber" onClick={() => setFilter("callback_due")} />
+          <StatCard label="Complétés" value={counts.completed} tone="green" />
+          <StatCard label="Haut risque" value={counts.highRisk} tone="red" />
+        </div>
 
-      <ViewBar
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Rechercher (code, nom, entreprise, email, tel)…"
-        filters={FILTERS}
-        activeFilter={filter}
-        onFilterChange={(k) => setFilter(k as FilterKey)}
-        total={filtered.length}
-        grandTotal={clients.length}
-      />
+        <Card className="p-4 space-y-4 glass-card">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[240px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher (code, nom, entreprise, email, tel)…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={filter} onValueChange={(v) => setFilter(v as FilterKey)}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FILTERS.map((f) => (
+                  <SelectItem key={f.key} value={f.key}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="text-xs text-muted-foreground">
+              {filtered.length} / {clients.length}
+            </div>
+          </div>
 
-      <FilterChipBar
-        chips={chips}
-        onReset={() => { setFilter("all"); setSearch(""); }}
-      />
-
-      <TwentyTableWrap>
-        <TwentyTable>
-          <TwentyThead>
-            <Th className="w-8"></Th>
-            <Th>Client</Th>
-            <Th>Entreprise</Th>
-            <Th>Contact</Th>
-            <Th>Closer</Th>
-            <Th>Deal</Th>
-            <Th>Statut</Th>
-            <Th>Étape</Th>
-            <Th className="w-[160px]">Progression</Th>
-            <Th>Pay.</Th>
-            <Th>Ctrt.</Th>
-            <Th>K/off</Th>
-            <Th>Activité</Th>
-            <Th>Suivi</Th>
-            <Th>Risque</Th>
-            <Th className="w-16"></Th>
-          </TwentyThead>
-          <tbody>
-            {loading ? (
-              <LoadingRow colSpan={16} />
-            ) : visible.length === 0 ? (
-              <EmptyRow colSpan={16} title="Aucun client" hint="Ajuste tes filtres ou clique sur « Réinitialiser »." />
-            ) : visible.map((c) => {
-              const status = globalStatus(c);
-              const risk = riskLevel(c);
-              const stepIdx = currentStepIndex(c);
-              const stepLabel = ONBOARDING_STEPS[stepIdx]?.label ?? "—";
-              const pct = progressPercent(c);
-              const done = completedStepsCount(c);
-              const detailRef = c.client_id || c.client_code;
-              const archived = Boolean(c.archived_at);
-              return (
-                <TwentyRow key={detailRef} archived={archived}>
-                  <Td className="w-8 text-center">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary/60 transition-colors" />
-                  </Td>
-                  <Td>
-                    <div className="font-medium text-foreground flex items-center gap-1.5">
-                      <span className="truncate">{c.client_name || "—"}</span>
-                      {archived && <span className="text-[9px] uppercase px-1 py-px rounded bg-muted text-muted-foreground border border-border">arch.</span>}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground font-mono">{c.client_code}</div>
-                  </Td>
-                  <Td>{c.company_name || c.brand_name || "—"}</Td>
-                  <Td>
-                    <div>{c.email || "—"}</div>
-                    {c.phone && <div className="text-[10px] text-muted-foreground">{c.phone}</div>}
-                  </Td>
-                  <Td>{c.closer_name || "—"}</Td>
-                  <Td className="tabular-nums">{c.deal_value ? `${c.deal_value} $` : "—"}</Td>
-                  <Td><StatusPill className={statusBadgeClass[status]}>{status}</StatusPill></Td>
-                  <Td className="truncate max-w-[140px]">{stepLabel}</Td>
-                  <Td>
-                    <div className="space-y-1">
-                      <Progress value={pct} className="h-1" />
-                      <div className="text-[10px] text-muted-foreground tabular-nums">{done}/8 · {pct}%</div>
-                    </div>
-                  </Td>
-                  <Td><StepDot done={isStepDone(c, 4)} /></Td>
-                  <Td><StepDot done={isStepDone(c, 5)} /></Td>
-                  <Td><StepDot done={isStepDone(c, 6)} /></Td>
-                  <Td className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(c.last_activity_at)}</Td>
-                  <Td><FollowupCell client={c} /></Td>
-                  <Td><StatusPill className={riskBadgeClass[risk]}>{risk}</StatusPill></Td>
-                  <Td>
-                    <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button asChild size="sm" variant="ghost" className="h-6 px-1.5 text-[11px] hover:bg-background">
-                        <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon" variant="ghost" className="h-6 w-6 hover:bg-background">
-                            <MoreHorizontal className="h-3.5 w-3.5" />
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Entreprise</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Closer</TableHead>
+                  <TableHead>Deal</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Étape</TableHead>
+                  <TableHead className="w-[160px]">Progression</TableHead>
+                  <TableHead>Paiement</TableHead>
+                  <TableHead>Contrat</TableHead>
+                  <TableHead>Kick-off</TableHead>
+                  <TableHead>Activité</TableHead>
+                  <TableHead>Suivi</TableHead>
+                  <TableHead>Risque</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={15} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                ) : visible.length === 0 ? (
+                  <TableRow><TableCell colSpan={15} className="text-center py-8 text-muted-foreground">Aucun client</TableCell></TableRow>
+                ) : visible.map((c) => {
+                  const status = globalStatus(c);
+                  const risk = riskLevel(c);
+                  const stepIdx = currentStepIndex(c);
+                  const stepLabel = ONBOARDING_STEPS[stepIdx]?.label ?? "—";
+                  const pct = progressPercent(c);
+                  const done = completedStepsCount(c);
+                  const detailRef = c.client_id || c.client_code;
+                  const archived = Boolean(c.archived_at);
+                  return (
+                    <TableRow key={detailRef} className={archived ? "opacity-60" : ""}>
+                      <TableCell>
+                        <div className="font-medium flex items-center gap-2">
+                          {c.client_name || "—"}
+                          {archived && <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">archivé</span>}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">{c.client_code}</div>
+                      </TableCell>
+                      <TableCell>{c.company_name || c.brand_name || "—"}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">{c.email || "—"}</div>
+                        <div className="text-xs text-muted-foreground">{c.phone || ""}</div>
+                      </TableCell>
+                      <TableCell className="text-sm">{c.closer_name || "—"}</TableCell>
+                      <TableCell className="text-sm">{c.deal_value ? `${c.deal_value} $` : "—"}</TableCell>
+                      <TableCell>
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-xs border ${statusBadgeClass[status]}`}>
+                          {status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm">{stepLabel}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <Progress value={pct} className="h-2" />
+                          <div className="text-xs text-muted-foreground">{done}/8 — {pct}%</div>
+                        </div>
+                      </TableCell>
+                      <TableCell><StepDot done={isStepDone(c, 4)} /></TableCell>
+                      <TableCell><StepDot done={isStepDone(c, 5)} /></TableCell>
+                      <TableCell><StepDot done={isStepDone(c, 6)} /></TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{timeAgo(c.last_activity_at)}</TableCell>
+                      <TableCell><FollowupCell client={c} /></TableCell>
+                      <TableCell>
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-xs border ${riskBadgeClass[risk]}`}>
+                          {risk}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>
+                              Ouvrir <ExternalLink className="h-3 w-3 ml-1" />
+                            </Link>
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onResendWelcome(c)} disabled={!c.email}>
-                            {c.welcome_sent_at ? (
-                              <><MailCheck className="h-4 w-4 mr-2" />Renvoyer email de bienvenue</>
-                            ) : (
-                              <><Mail className="h-4 w-4 mr-2" />Envoyer email de bienvenue</>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onSendFollowUp(c)} disabled={!c.email}>
-                            <Send className="h-4 w-4 mr-2" />
-                            {c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onArchive(c)}>
-                            {archived ? (
-                              <><ArchiveRestore className="h-4 w-4 mr-2" />Restaurer</>
-                            ) : (
-                              <><Archive className="h-4 w-4 mr-2" />Archiver</>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => setConfirmDelete({ id: c.client_id, code: c.client_code, name: c.client_name || c.company_name || c.client_code })}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </Td>
-                </TwentyRow>
-              );
-            })}
-            {!loading && filtered.length > visibleCount && (
-              <tr>
-                <td colSpan={16} className="py-3 text-center">
-                  <button
-                    onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
-                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Voir {Math.min(PAGE_SIZE, filtered.length - visibleCount)} de plus ({filtered.length - visibleCount} restants)
-                  </button>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </TwentyTable>
-      </TwentyTableWrap>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => onResendWelcome(c)} disabled={!c.email}>
+                                {c.welcome_sent_at ? (
+                                  <><MailCheck className="h-4 w-4 mr-2" />Renvoyer email de bienvenue</>
+                                ) : (
+                                  <><Mail className="h-4 w-4 mr-2" />Envoyer email de bienvenue</>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => onSendFollowUp(c)} disabled={!c.email}>
+                                <Send className="h-4 w-4 mr-2" />
+                                {c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => onArchive(c)}>
+                                {archived ? (
+                                  <><ArchiveRestore className="h-4 w-4 mr-2" />Restaurer</>
+                                ) : (
+                                  <><Archive className="h-4 w-4 mr-2" />Archiver</>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setConfirmDelete({ id: c.client_id, code: c.client_code, name: c.client_name || c.company_name || c.client_code })}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {!loading && filtered.length > visibleCount && (
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" size="sm" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
+                Voir plus ({filtered.length - visibleCount} restants)
+              </Button>
+            </div>
+          )}
+        </Card>
+      </div>
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
@@ -426,35 +425,52 @@ const AdminDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </TwentyPage>
+    </div>
   );
 };
+
+
+const StatCard = ({ label, value, tone, onClick }: { label: string; value: number; tone?: "red" | "green" | "amber"; onClick?: () => void }) => (
+  <Card
+    className={`p-4 glass-card ${onClick ? "cursor-pointer hover:ring-1 hover:ring-primary/40 transition" : ""}`}
+    onClick={onClick}
+  >
+    <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+    <div className={`text-2xl font-bold mt-1 ${tone === "red" ? "text-red-400" : tone === "green" ? "text-emerald-400" : tone === "amber" ? "text-amber-400" : ""}`}>
+      {value}
+    </div>
+  </Card>
+);
+
+const StepDot = ({ done }: { done: boolean }) => (
+  <span className={`inline-block h-2.5 w-2.5 rounded-full ${done ? "bg-emerald-400" : "bg-zinc-600"}`} />
+);
 
 const FollowupCell = ({ client }: { client: any }) => {
   if (client.callback_due_at) {
     return (
-      <div>
-        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] border border-amber-200 bg-amber-50 text-amber-700 font-medium">
-          À rappeler
+      <div className="space-y-0.5">
+        <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-amber-500/40 bg-amber-500/10 text-amber-300 font-medium">
+          📞 À rappeler
         </span>
-        <div className="text-[10px] text-muted-foreground mt-0.5">depuis {timeAgo(client.callback_due_at)}</div>
+        <div className="text-[11px] text-muted-foreground">depuis {timeAgo(client.callback_due_at)}</div>
       </div>
     );
   }
   if (client.followup_sent_at) {
     return (
-      <div>
-        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] border border-sky-200 bg-sky-50 text-sky-700">
-          Suivi envoyé
+      <div className="space-y-0.5">
+        <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-sky-500/40 bg-sky-500/10 text-sky-300">
+          ✉️ Suivi envoyé
         </span>
-        <div className="text-[10px] text-muted-foreground mt-0.5">
+        <div className="text-[11px] text-muted-foreground">
           il y a {timeAgo(client.followup_sent_at)}
           {client.followup_count > 1 ? ` · ${client.followup_count}×` : ""}
         </div>
       </div>
     );
   }
-  return <span className="text-[10px] text-muted-foreground">—</span>;
+  return <span className="text-xs text-muted-foreground">—</span>;
 };
 
 export default AdminDashboard;

@@ -124,7 +124,7 @@ export default function DataAnalystExecutionPlan() {
   };
 
   if (loading) {
-    return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+    return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   }
 
   return (
@@ -202,7 +202,7 @@ export default function DataAnalystExecutionPlan() {
                   key={item.id}
                   style={{
                     padding: 12,
-                    background: "hsl(220 45% 14%)",
+                    background: "rgba(255, 255, 255, 0.02)",
                     borderRadius: 6,
                     borderLeft: `3px solid ${statusColor(item.status)}`,
                   }}
@@ -232,7 +232,7 @@ export default function DataAnalystExecutionPlan() {
                   key={step.id}
                   style={{
                     padding: 10,
-                    background: "hsl(220 45% 14%)",
+                    background: "rgba(255, 255, 255, 0.02)",
                     borderRadius: 6,
                     borderLeft: `3px solid ${stageColor(step.stage)}`,
                   }}
@@ -263,7 +263,7 @@ export default function DataAnalystExecutionPlan() {
                 {latestPlan.guardrail_monitors.length === 0 ? (
                   <div style={{ color: "var(--tdia-muted)", fontSize: 13 }}>No guardrail monitor generated.</div>
                 ) : latestPlan.guardrail_monitors.map((monitor) => (
-                  <div key={monitor.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, borderLeft: `3px solid ${statusColor(monitor.status)}` }}>
+                  <div key={monitor.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, borderLeft: `3px solid ${statusColor(monitor.status)}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
                       <div style={{ fontWeight: 700 }}>{monitor.label}</div>
                       <Badge value={monitor.check_frequency} color={statusColor(monitor.status)} />
@@ -296,7 +296,7 @@ export default function DataAnalystExecutionPlan() {
             {runs.slice(0, 10).map((run) => (
               <div
                 key={run.id}
-                style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}
+                style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}
               >
                 <div style={{ fontWeight: 600 }}>{run.output_json.engine_version}</div>
                 <div style={{ color: postureColor(run.output_json.posture), fontWeight: 700, fontSize: 12 }}>{postureLabel(run.output_json.posture)}</div>
@@ -329,7 +329,7 @@ function MetricGrid({ children }: { children: ReactNode }) {
 
 function Metric({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
-    <div style={{ padding: 9, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 9, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700 }}>
         {label}
       </div>
@@ -348,7 +348,7 @@ function Badge({ value, color }: { value: string; color?: string }) {
         minHeight: 24,
         padding: "3px 8px",
         borderRadius: 6,
-        background: "hsl(220 45% 16%)",
+        background: "rgba(255, 255, 255, 0.02)",
         color: color ?? "var(--tdia-text)",
         fontSize: 11,
         fontWeight: 800,
@@ -365,7 +365,7 @@ function Badge({ value, color }: { value: string; color?: string }) {
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <div style={{ marginTop: 10, padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ marginTop: 10, padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
         {title}
       </div>

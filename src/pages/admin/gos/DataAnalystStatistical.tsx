@@ -208,7 +208,7 @@ export default function DataAnalystStatistical() {
   };
 
   if (loading) {
-    return <div style={{ height: 300, background: "hsl(220 45% 14%)", borderRadius: 8 }} />;
+    return <div style={{ height: 300, background: "rgba(255, 255, 255, 0.02)", borderRadius: 8 }} />;
   }
 
   return (
@@ -287,7 +287,7 @@ export default function DataAnalystStatistical() {
               <Metric label="Actions" value={latestBrief.actions.length} />
               <Metric label="Guardrails" value={latestBrief.guardrails.length} />
             </MetricGrid>
-            <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+            <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
               <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
                 Primary decision
               </div>
@@ -313,7 +313,7 @@ export default function DataAnalystStatistical() {
             placeholder="Click Build input to generate the JSON file for the Python batch."
             style={{ minHeight: 210, fontFamily: "monospace", resize: "vertical" }}
           />
-          <div style={{ padding: 12, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gap: 8, alignContent: "start" }}>
+          <div style={{ padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gap: 8, alignContent: "start" }}>
             <div style={{ fontSize: 11, color: "var(--tdia-muted)", fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase" }}>
               Export contract
             </div>
@@ -334,7 +334,7 @@ export default function DataAnalystStatistical() {
                 Download JSON
               </button>
             </div>
-            <div style={{ height: 1, background: "hsl(220 45% 25%)", margin: "4px 0" }} />
+            <div style={{ height: 1, background: "rgba(148, 170, 215, 0.12)", margin: "4px 0" }} />
             <code style={{ fontSize: 12, color: "var(--tdia-text)", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
               python scripts\data_analyst_statistical_upgrade.py --input C:\tmp\gos-analyst-input.json --output C:\tmp\gos-analyst-output.json
             </code>
@@ -352,7 +352,7 @@ export default function DataAnalystStatistical() {
             placeholder="Paste data_analyst_statistical_upgrade_v1 JSON output"
             style={{ minHeight: 210, fontFamily: "monospace", resize: "vertical" }}
           />
-          <div style={{ padding: 12, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gap: 8, alignContent: "start" }}>
+          <div style={{ padding: 12, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gap: 8, alignContent: "start" }}>
             <div style={{ fontSize: 11, color: "var(--tdia-muted)", fontWeight: 700, letterSpacing: "0.03em", textTransform: "uppercase" }}>
               Output contract
             </div>
@@ -392,7 +392,7 @@ export default function DataAnalystStatistical() {
           <CardTitle icon={<Database size={16} />} title="Run history" />
           <div style={{ display: "grid", gap: 8 }}>
             {runs.slice(0, 10).map((run) => (
-              <div key={run.id} style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6, display: "grid", gridTemplateColumns: "1fr 150px 140px", gap: 10 }}>
+              <div key={run.id} style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, display: "grid", gridTemplateColumns: "1fr 150px 140px", gap: 10 }}>
                 <div style={{ fontWeight: 600 }}>{run.output_json.engine_version}</div>
                 <div style={{ color: readinessColor(run.output_json.readiness), fontWeight: 700, fontSize: 12 }}>
                   {readinessLabel(run.output_json.readiness)}
@@ -426,7 +426,7 @@ function MetricGrid({ children }: { children: ReactNode }) {
 
 function Metric({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
-    <div style={{ padding: 9, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 9, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700 }}>
         {label}
       </div>
@@ -489,7 +489,7 @@ function MmmIncrementalityCard({ output }: { output: DataAnalystStatisticalOutpu
       {channels.length > 0 && (
         <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
           {channels.slice(0, 4).map((channel) => (
-            <div key={channel.channel ?? "unknown"} style={{ padding: 9, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+            <div key={channel.channel ?? "unknown"} style={{ padding: 9, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13, fontWeight: 600 }}>
                 <span>{channel.channel ?? "unknown"}</span>
                 <span>{channel.incremental_roas ?? "-"} incr ROAS</span>
@@ -520,7 +520,7 @@ function AnomalyCard({ output }: { output: DataAnalystStatisticalOutput }) {
         {anomalies.length === 0 ? (
           <div style={{ color: "var(--tdia-muted)", fontSize: 13 }}>No anomaly flagged.</div>
         ) : anomalies.slice(0, 6).map((row, index) => (
-          <div key={`${row.date}-${row.metric}-${index}`} style={{ padding: 9, background: "hsl(220 45% 14%)", borderRadius: 6, borderLeft: `3px solid ${row.severity === "critical" ? "#c1121f" : "#a8730a"}` }}>
+          <div key={`${row.date}-${row.metric}-${index}`} style={{ padding: 9, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6, borderLeft: `3px solid ${row.severity === "critical" ? "#c1121f" : "#a8730a"}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13, fontWeight: 600 }}>
               <span>{row.date} - {row.metric}</span>
               <span style={{ color: row.severity === "critical" ? "#c1121f" : "#a8730a" }}>{pct(row.delta_pct)}</span>
@@ -548,7 +548,7 @@ function ModelCard({ output }: { output: DataAnalystStatisticalOutput }) {
 
 function BriefList({ title, items }: { title: string; items: string[] }) {
   return (
-    <div style={{ padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
         {title}
       </div>
@@ -567,7 +567,7 @@ function Diagnostics({ items }: { items: string[] }) {
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <div style={{ marginTop: 10, padding: 10, background: "hsl(220 45% 14%)", borderRadius: 6 }}>
+    <div style={{ marginTop: 10, padding: 10, background: "rgba(255, 255, 255, 0.02)", borderRadius: 6 }}>
       <div style={{ fontSize: 10, color: "var(--tdia-muted)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, marginBottom: 6 }}>
         {title}
       </div>

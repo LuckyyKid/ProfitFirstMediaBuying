@@ -29,11 +29,11 @@ const SCOPES = [
 ];
 
 const ROLE_COLORS: Record<string, string> = {
-  media_buyer: "#3b82f6",
+  media_buyer: "#4d9fff",
   growth_strategist: "#8b5cf6",
   creative_strategist: "#ec4899",
-  ops: "#f59e0b",
-  ceo: "#10b981",
+  ops: "#f5b74e",
+  ceo: "#3ddc97",
   analyst: "#6366f1",
   other: "#6b7280",
 };
@@ -306,7 +306,7 @@ function Field({ label, children, required }: { label: string; children: React.R
   return (
     <div>
       <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--tdia-muted)", fontWeight: 600, marginBottom: 4 }}>
-        {label} {required && <span style={{ color: "#c1121f" }}>*</span>}
+        {label} {required && <span style={{ color: "#ff6b6b" }}>*</span>}
       </div>
       {children}
     </div>
@@ -324,7 +324,7 @@ function NoteCard({ note, onDelete }: { note: MapNote; onDelete: () => void }) {
       style={{
         padding: 14,
         borderLeft: `3px solid ${roleColor}`,
-        background: note.is_signal ? "hsl(45 60% 15% / 0.3)" : undefined,
+        background: note.is_signal ? "rgba(245, 183, 78, 0.06)" : undefined,
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
@@ -348,7 +348,7 @@ function NoteCard({ note, onDelete }: { note: MapNote; onDelete: () => void }) {
             {note.scope_label && ` · ${note.scope_label}`}
           </span>
           {note.is_signal && (
-            <span style={{ display: "flex", alignItems: "center", gap: 4, color: "#f59e0b", fontSize: 11, fontWeight: 700 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, color: "#f5b74e", fontSize: 11, fontWeight: 700 }}>
               <Flag size={11} /> SIGNAL
             </span>
           )}

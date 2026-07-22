@@ -23,11 +23,11 @@ import type {
 type Rule = MediaBuyingRuleRow;
 type Action = MediaBuyingActionRow;
 
-const CARD = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BG_DEEP = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
 const GREEN = "#0f8a44";
 const RED = "#c1121f";
 const AMBER = "#a8730a";
@@ -454,7 +454,7 @@ export default function MediaBuyingAutomation() {
         )}
       </Panel>
 
-      <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: "hsl(220 45% 12%)", border: `1px dashed ${BORDER}`, fontSize: 11, color: MUTED, fontFamily: MONO }}>
+      <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: "rgba(255, 255, 255, 0.02)", border: `1px dashed ${BORDER}`, fontSize: 11, color: MUTED, fontFamily: MONO }}>
         This module records suggestions only. Spend increases still require Budget Change Gate and guarded budget application before campaign budgets are changed.
       </div>
     </>

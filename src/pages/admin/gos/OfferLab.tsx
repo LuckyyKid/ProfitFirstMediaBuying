@@ -20,14 +20,14 @@ type Offer = {
 };
 type Objective = { id: string; label: string };
 
-const CARD = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#22c55e";
-const RED = "#ef4444";
-const YELLOW = "#eab308";
+const CARD = "rgba(255, 255, 255, 0.02)";
+const BG_DEEP = "rgba(255, 255, 255, 0.02)";
+const BORDER = "rgba(148, 170, 215, 0.12)";
+const MUTED = "#8b97ad";
+const BLUE = "#4d9fff";
+const GREEN = "#3ddc97";
+const RED = "#ff6b6b";
+const YELLOW = "#f5b74e";
 
 const OFFER_TYPES = ["discount","bundle","bogo","freeshipping","guarantee","upsell","subscription","tripwire","gift","payment_plan"];
 const STATUSES = ["draft","live","paused","winner","loser","archived"];

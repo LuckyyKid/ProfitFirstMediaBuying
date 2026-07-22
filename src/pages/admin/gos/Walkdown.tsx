@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
-import { useParams } from "react-router-dom";
-import { AlertTriangle, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
-import { EmptyState, SectionHeader } from "@/gos/ui";
+// Walkdown — Premium Dark + Mode Guidé wrapper.
+//
+// Reference page for the design system: it puts everything together
+//  - top bar with client + routine progress
+//  - left rail (numbered steps + "Pourquoi cet ordre ?")
+//  - Lecture du système callout (rule #5)
+//  - MetricColumns (KPI row without boxes)
+//  - PremiumTable with alert-row tinting (rule #6, no bare zeros)
+//  - Sticky exit-criteria bar (rule #3)
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useSelectedClient } from "@/gos/context";
 import {
   buildDailyGrowthMap,
@@ -14,42 +23,37 @@ import {
   type DailyGrowthMapWorkspace,
 } from "@/gos/dailyGrowthMapController";
 
-const CARD = "hsl(220 45% 16%)";
-const BG_DEEP = "hsl(220 45% 14%)";
-const BORDER = "hsl(220 45% 25%)";
-const MUTED = "hsl(0 0% 40%)";
-const BLUE = "hsl(226 100% 60%)";
-const GREEN = "#22c55e";
-const RED = "#ef4444";
-const YELLOW = "#f59e0b";
+import { ModeGuide } from "@/gos/premium/ModeGuide";
+import { LectureSysteme } from "@/gos/premium/LectureSysteme";
+import { MetricColumns, type MetricCell } from "@/gos/premium/MetricColumns";
+import { MissingDataCard } from "@/gos/premium/MissingDataCard";
+import {
+  MicroLabel,
+  StatusDot,
+  CardPremium,
+  type Status,
+} from "@/gos/premium/primitives";
+import type { RailStep } from "@/gos/premium/RailStepper";
+import type { CriteriaItem } from "@/gos/premium/ExitCriteriaBar";
 
-const MONO: CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const SCOPES: DailyGrowthMapScope[] = ["mtd", "wtd", "last7", "all"];
-
-function statusColor(status: DailyGrowthMapMetricStatus): string {
-  if (status === "GOOD") return GREEN;
-  if (status === "WATCH") return YELLOW;
-  if (status === "BAD") return RED;
-  return MUTED;
-}
-
-function statusLabel(status: DailyGrowthMapMetricStatus): string {
-  if (status === "GOOD") return "OK";
-  if (status === "WATCH") return "Watch";
-  if (status === "BAD") return "Bad";
-  return "Missing";
-}
 
 function scopeLabel(scope: DailyGrowthMapScope): string {
   if (scope === "mtd") return "MTD";
   if (scope === "wtd") return "WTD";
   if (scope === "last7") return "7 derniers jours";
-  if (scope === "all") return "Tout";
-  return "Custom";
+  return "Tout";
+}
+
+function toPremiumStatus(s: DailyGrowthMapMetricStatus): Status {
+  if (s === "GOOD") return "good";
+  if (s === "WATCH") return "watch";
+  if (s === "BAD") return "bad";
+  return "missing";
 }
 
 function formatValue(metric: DailyGrowthMapMetricNode, value: number | null): string {
-  if (value === null || !Number.isFinite(value)) return "-";
+  if (value === null || !Number.isFinite(value)) return "—";
   if (metric.unit === "money") return `${Math.round(value).toLocaleString("fr-FR")} $`;
   if (metric.unit === "percent") return `${(value * 100).toFixed(1)}%`;
   if (metric.unit === "ratio") return `${value.toFixed(2)}x`;
@@ -58,24 +62,20 @@ function formatValue(metric: DailyGrowthMapMetricNode, value: number | null): st
 }
 
 function formatVariance(value: number | null): string {
-  if (value === null || !Number.isFinite(value)) return "-";
+  if (value === null || !Number.isFinite(value)) return "—";
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
-}
-
-function pct(value: number | null | undefined): string {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
-  return `${(value * 100).toFixed(0)}%`;
 }
 
 export default function Walkdown() {
   const { clientId } = useParams();
-  const { setSelectedClient } = useSelectedClient();
+  const nav = useNavigate();
+  const { selectedClient, setSelectedClient } = useSelectedClient();
   const [workspace, setWorkspace] = useState<DailyGrowthMapWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scope, setScope] = useState<DailyGrowthMapScope>("mtd");
   const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(["contribution_margin", "revenue", "ad_spend", "actual_coverage_rate", "channel_campaign_execution"]),
+    () => new Set(["contribution_margin", "revenue", "ad_spend"]),
   );
 
   const asOfDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -126,195 +126,306 @@ export default function Walkdown() {
     setExpanded(next);
   };
 
-  const renderMetricRows = (parentKey = "__root__"): JSX.Element[] => (
-    (metricsByParent.get(parentKey) ?? []).flatMap((metric) => {
+  const rootMetric = output?.metrics.find((m) => m.level === 0);
+  const revenueMetric = output?.metrics.find((m) => m.key === "revenue");
+  const adSpendMetric = output?.metrics.find((m) => m.key === "ad_spend");
+  const coverageRate = output?.portfolio.actual_coverage_rate ?? null;
+
+  const kpis: MetricCell[] = [
+    rootMetric && {
+      label: "CONTRIBUTION",
+      value: formatValue(rootMetric, rootMetric.actual),
+      delta: formatVariance(rootMetric.variance_vs_target_pct),
+      status: toPremiumStatus(rootMetric.status),
+    },
+    revenueMetric && {
+      label: "REVENUE",
+      value: formatValue(revenueMetric, revenueMetric.actual),
+      delta: formatVariance(revenueMetric.variance_vs_target_pct),
+      status: toPremiumStatus(revenueMetric.status),
+    },
+    adSpendMetric && {
+      label: "AD SPEND",
+      value: formatValue(adSpendMetric, adSpendMetric.actual),
+      delta: formatVariance(adSpendMetric.variance_vs_target_pct),
+      status: toPremiumStatus(adSpendMetric.status),
+      valueColor: adSpendMetric.status === "BAD" ? "#ff6b6b" : undefined,
+    },
+    coverageRate !== null && {
+      label: "COUVERTURE",
+      value: `${Math.round(coverageRate * 100)}%`,
+      delta: coverageRate >= 0.9 ? "COMPLET" : "PARTIEL",
+      status: coverageRate >= 0.9 ? "good" : ("watch" as Status),
+    },
+  ].filter(Boolean) as MetricCell[];
+
+  const badBranches = (output?.metrics ?? []).filter(
+    (m) => m.level <= 1 && m.status === "BAD",
+  );
+  const missingCount = output?.portfolio.missing_metric_count ?? 0;
+
+  // Lecture du système sentence — dynamic
+  const lectureSentence: string = (() => {
+    if (!output) return "En attente du digest.";
+    if (badBranches.length === 0 && missingCount === 0) {
+      return "Toutes les branches sont dans la cible. Aucune action corrective aujourd'hui — passe au Buyer Workspace pour la revue de campagnes.";
+    }
+    if (badBranches.length > 0) {
+      const names = badBranches.slice(0, 2).map((b) => b.label).join(", ");
+      return `${badBranches.length} branche${badBranches.length > 1 ? "s" : ""} rouge${badBranches.length > 1 ? "s" : ""} (${names}) explique${badBranches.length > 1 ? "nt" : ""} l'écart au plan. Ouvre-les ci-dessous, note la cause probable, puis ajuste au Buyer.`;
+    }
+    return `${missingCount} métrique${missingCount > 1 ? "s" : ""} manquante${missingCount > 1 ? "s" : ""}. La routine peut avancer, mais la lecture est partielle — relance la sync avant la revue.`;
+  })();
+
+  // Rail steps (routine du jour) — Walkdown is step 2
+  const railSteps: RailStep[] = [
+    { id: "digest", label: "Digest 7h", state: "done", hint: "FAIT · 07:12" },
+    { id: "walkdown", label: "Walkdown métriques", state: "active", hint: "EN COURS · ~10 MIN" },
+    { id: "buyer", label: "Buyer Workspace", state: "future", hint: "REQUIERT WALKDOWN" },
+    { id: "crea", label: "Créa & Offres", state: "future" },
+    { id: "budget", label: "Budget & Décisions", state: "future" },
+    { id: "debrief", label: "Debrief 18h", state: "locked", hint: "OUVRE À 17:30" },
+  ];
+
+  // Exit criteria for Walkdown
+  const branchesReviewed = badBranches.length === 0;
+  const dataComplete = missingCount === 0;
+  const exitCriteria: CriteriaItem[] = [
+    { label: "Les 6 branches lues", done: branchesReviewed || (output?.metrics.length ?? 0) > 0 },
+    { label: "Notes sur les rouges", done: branchesReviewed },
+    { label: "Sync données complète", done: dataComplete },
+  ];
+
+  const nextDisabled = !exitCriteria.every((c) => c.done);
+
+  const clientName = workspace?.client?.company_name ?? selectedClient?.company_name ?? "Client";
+  const clientCode = workspace?.client?.client_code ?? selectedClient?.client_code ?? "—";
+  const clientStatus: Status = badBranches.length > 0 ? "bad" : missingCount > 0 ? "watch" : "good";
+
+  const openBuyer = () => {
+    if (!clientId) return;
+    nav(`/admin/gos/clients/${clientId}/buyer-workspace`);
+  };
+
+  return (
+    <ModeGuide
+      clientName={clientName}
+      clientCode={clientCode}
+      clientStatus={clientStatus}
+      routineProgress={{ done: 1, total: 6 }}
+      stepTitle="Walkdown métriques"
+      stepSubtitle="ÉTAPE 2/6 · ROUTINE DU JOUR"
+      steps={railSteps}
+      railTitle="ROUTINE"
+      railFooter={
+        <>
+          Pourquoi cet ordre ? Le digest te donne les signaux ; le walkdown les
+          traduit en cause probable ; le Buyer applique l'ajustement ; la créa
+          et le budget suivent. Chaque étape a besoin de la précédente pour
+          décider — c'est pour ça qu'on ne peut pas les faire dans le désordre.
+        </>
+      }
+      exitCriteria={exitCriteria}
+      nextStepLabel="Buyer Workspace"
+      onNextStep={openBuyer}
+      nextDisabled={nextDisabled}
+      onAskLead={() => window.alert("Message envoyé au Lead.")}
+    >
+      {/* Lecture du système — rule #5 */}
+      <LectureSysteme>{lectureSentence}</LectureSysteme>
+
+      {/* KPI row — hairline columns, no boxes */}
+      {kpis.length > 0 && (
+        <CardPremium padding="20px 0">
+          <MetricColumns cells={kpis} />
+        </CardPremium>
+      )}
+
+      {/* Scope selector */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <MicroLabel>PÉRIODE</MicroLabel>
+        {SCOPES.map((item) => {
+          const active = scope === item;
+          return (
+            <button
+              key={item}
+              onClick={() => setScope(item)}
+              style={{
+                padding: "6px 14px",
+                background: active ? "linear-gradient(135deg, rgba(77,159,255,0.16), rgba(47,107,255,0.06))" : "transparent",
+                color: active ? "#9ec8ff" : "#8b97ad",
+                border: `1px solid ${active ? "rgba(77,159,255,0.30)" : "rgba(148,170,215,0.15)"}`,
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 500,
+                cursor: "pointer",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {scopeLabel(item)}
+            </button>
+          );
+        })}
+        <div style={{ marginLeft: "auto" }}>
+          <MicroLabel color="#5f6b82">
+            AS OF {asOfDate}
+          </MicroLabel>
+        </div>
+      </div>
+
+      {/* Error / loading / empty */}
+      {loading && (
+        <div style={{ color: "#5f6b82", fontSize: 13, padding: 24 }}>Chargement du digest…</div>
+      )}
+      {error && (
+        <MissingDataCard reason={error} actionLabel="Réessayer" onAction={load} />
+      )}
+
+      {/* Metric tree */}
+      {output && output.metrics.length > 0 && (
+        <CardPremium padding={0} className="hairline-table-wrap">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(280px,2fr) repeat(3, minmax(96px, 1fr)) 100px 100px",
+              gap: 12,
+              padding: "14px 20px",
+              borderBottom: "1px solid rgba(148, 170, 215, 0.12)",
+            }}
+          >
+            {[
+              { label: "MÉTRIQUE", align: "left" as const },
+              { label: "ACTUEL", align: "right" as const },
+              { label: "CIBLE", align: "right" as const },
+              { label: "PROJECTION", align: "right" as const },
+              { label: "ÉCART", align: "right" as const },
+              { label: "STATUT", align: "right" as const },
+            ].map((h) => (
+              <MicroLabel key={h.label} color="#5f6b82" style={{ fontSize: 9, letterSpacing: "0.28em", textAlign: h.align }}>
+                {h.label}
+              </MicroLabel>
+            ))}
+          </div>
+          {renderMetricRows("__root__")}
+        </CardPremium>
+      )}
+
+      {output && output.metrics.length === 0 && (
+        <MissingDataCard
+          reason="Aucune métrique n'a pu être calculée pour cette période — le plan ou les données actuelles manquent."
+          actionLabel="Voir la source de données"
+          onAction={() => nav("/admin/gos/data-sources")}
+        />
+      )}
+
+      {/* Risks / Conditions strip */}
+      {output && (output.risks.length > 0 || output.missing_data.length > 0) && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+          {output.missing_data.length > 0 && (
+            <CardPremium>
+              <MicroLabel color="#f5b74e" style={{ display: "block", marginBottom: 10 }}>
+                DONNÉES MANQUANTES
+              </MicroLabel>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 6 }}>
+                {output.missing_data.slice(0, 6).map((m) => (
+                  <li key={m} style={{ color: "#c8d2e4", fontSize: 12.5 }}>
+                    <StatusDot status="missing" size={5} showLabel={false} /> <span style={{ marginLeft: 4 }}>{m}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardPremium>
+          )}
+          {output.risks.length > 0 && (
+            <CardPremium>
+              <MicroLabel color="#ff6b6b" style={{ display: "block", marginBottom: 10 }}>
+                RISQUES
+              </MicroLabel>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 6 }}>
+                {output.risks.slice(0, 6).map((m) => (
+                  <li key={m} style={{ color: "#c8d2e4", fontSize: 12.5 }}>
+                    <StatusDot status="bad" size={5} showLabel={false} /> <span style={{ marginLeft: 4 }}>{m}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardPremium>
+          )}
+        </div>
+      )}
+    </ModeGuide>
+  );
+
+  function renderMetricRows(parentKey: string): JSX.Element[] {
+    return (metricsByParent.get(parentKey) ?? []).flatMap((metric) => {
       const hasChildren = metric.children_count > 0;
       const isOpen = expanded.has(metric.key);
-      const color = statusColor(metric.status);
+      const status = toPremiumStatus(metric.status);
+      const color =
+        status === "good" ? "#3ddc97" :
+        status === "watch" ? "#f5b74e" :
+        status === "bad" ? "#ff6b6b" : "#8b97ad";
+      const tint =
+        status === "bad" ? "linear-gradient(90deg, rgba(255, 107, 107, 0.05), transparent 60%)" :
+        status === "watch" ? "linear-gradient(90deg, rgba(245, 183, 78, 0.04), transparent 60%)" :
+        undefined;
+
       const row = (
         <div key={metric.key}>
           <div
             onClick={() => hasChildren && toggle(metric.key)}
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(280px,2fr) repeat(3, minmax(96px, 1fr)) 100px 96px",
+              gridTemplateColumns: "minmax(280px,2fr) repeat(3, minmax(96px, 1fr)) 100px 100px",
               gap: 12,
-              padding: "12px 14px",
-              paddingLeft: 14 + metric.level * 22,
-              background: metric.level === 0 ? "hsl(220 45% 25%)" : metric.level === 1 ? BG_DEEP : "hsl(220 45% 14%)",
-              borderTop: `1px solid ${BORDER}`,
+              padding: "14px 20px",
+              paddingLeft: 20 + metric.level * 20,
+              borderTop: "1px solid rgba(148, 170, 215, 0.08)",
               cursor: hasChildren ? "pointer" : "default",
               alignItems: "center",
+              background: tint,
+              transition: "background 0.15s ease",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-              {hasChildren ? (isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }} />}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+              {hasChildren ? (isOpen ? <ChevronDown size={13} color="#8b97ad" /> : <ChevronRight size={13} color="#8b97ad" />) : <span style={{ width: 13 }} />}
               <div style={{ minWidth: 0 }}>
-                <div style={{ color: metric.level === 0 ? "#fff" : "var(--tdia-text)", fontSize: 13, fontWeight: metric.level === 0 ? 700 : 600 }}>
+                <div style={{
+                  color: metric.level === 0 ? "#eef2fa" : "#c8d2e4",
+                  fontSize: 13,
+                  fontWeight: metric.level === 0 ? 600 : 500,
+                  letterSpacing: "-0.01em",
+                }}>
                   {metric.label}
                 </div>
-                <div style={{ color: MUTED, fontSize: 10, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {metric.formula}
-                </div>
+                {metric.formula && (
+                  <div className="microlabel" style={{
+                    fontSize: 9, marginTop: 3, color: "#5f6b82", letterSpacing: "0.10em",
+                    textTransform: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    {metric.formula}
+                  </div>
+                )}
               </div>
             </div>
-            <div style={{ textAlign: "right", color: "var(--tdia-text)", ...MONO, fontSize: 12 }}>{formatValue(metric, metric.actual)}</div>
-            <div style={{ textAlign: "right", color: MUTED, ...MONO, fontSize: 12 }}>{formatValue(metric, metric.target)}</div>
-            <div style={{ textAlign: "right", color: MUTED, ...MONO, fontSize: 12 }}>{formatValue(metric, metric.projection)}</div>
-            <div style={{ textAlign: "right", color, ...MONO, fontSize: 12, fontWeight: 700 }}>{formatVariance(metric.variance_vs_target_pct)}</div>
+            <div className="font-data" style={{ textAlign: "right", color: "#eef2fa", fontSize: 13 }}>
+              {formatValue(metric, metric.actual)}
+            </div>
+            <div className="font-data" style={{ textAlign: "right", color: "#8b97ad", fontSize: 12 }}>
+              {formatValue(metric, metric.target)}
+            </div>
+            <div className="font-data" style={{ textAlign: "right", color: "#8b97ad", fontSize: 12 }}>
+              {formatValue(metric, metric.projection)}
+            </div>
+            <div className="font-data" style={{ textAlign: "right", color, fontSize: 12, fontWeight: 500 }}>
+              {formatVariance(metric.variance_vs_target_pct)}
+            </div>
             <div style={{ textAlign: "right" }}>
-              <span style={{ padding: "3px 7px", borderRadius: 6, border: `1px solid ${color}55`, color, background: `${color}18`, fontSize: 10, fontWeight: 700 }}>
-                {statusLabel(metric.status)}
-              </span>
+              <StatusDot status={status} showLabel={true} />
             </div>
           </div>
           {isOpen && renderMetricRows(metric.key)}
         </div>
       );
       return [row];
-    })
-  );
-
-  if (loading) return <div style={{ padding: 24, color: MUTED }}>Chargement...</div>;
-
-  return (
-    <div style={{ padding: 24 }}>
-      <SectionHeader
-        guide={{
-          purpose: "Le Daily Growth Map traduit le Profit Plan en arbre de pilotage quotidien: contribution, revenue, spend, AMR, volume, channel et campaign.",
-          dataSource: "Lovable/Supabase Cloud: gos_daily_pnl_targets, dernier gos_profit_plans, gos_campaign_daily_perf.",
-          usedBy: "AM et media buyer pour verifier chaque jour quel driver explique l'ecart au plan.",
-          requiredInputs: ["Daily P&L targets", "Actual revenue/spend/orders/leads", "Profit Plan pour new vs returning/channel/campaign"],
-          nextStep: "Mettre a jour les actuals chaque jour, puis ouvrir les branches rouges ou manquantes.",
-        }}
-        title="Daily Growth Map"
-        subtitle="Hierarchie 35+ metrics: contribution margin -> revenue/spend/gross profit -> volume/efficiency/pacing -> channel -> campaign."
-        actions={
-          <button className="gos-btn-secondary" onClick={load}>
-            <RefreshCw size={14} style={{ verticalAlign: "middle", marginRight: 6 }} />
-            Actualiser
-          </button>
-        }
-      />
-
-      {error && (
-        <div className="gos-card" style={{ marginBottom: 16, borderLeft: `3px solid ${RED}`, color: "var(--tdia-text)" }}>
-          <AlertTriangle size={14} style={{ verticalAlign: "middle", marginRight: 6, color: RED }} />
-          {error}
-        </div>
-      )}
-
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        {SCOPES.map((item) => (
-          <button
-            key={item}
-            onClick={() => setScope(item)}
-            style={{
-              padding: "7px 14px",
-              background: scope === item ? BLUE : CARD,
-              color: "var(--tdia-text)",
-              border: `1px solid ${scope === item ? BLUE : BORDER}`,
-              borderRadius: 6,
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {scopeLabel(item)}
-          </button>
-        ))}
-        <div style={{ marginLeft: "auto", color: MUTED, fontSize: 11, alignSelf: "center" }}>
-          as of {asOfDate} | backend Lovable Cloud
-        </div>
-      </div>
-
-      {!output ? (
-        <div className="gos-card"><EmptyState title="Aucune donnee chargee." /></div>
-      ) : (
-        <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(150px, 1fr))", gap: 12, marginBottom: 16 }}>
-            <SummaryCard label="Metrics" value={output.portfolio.metric_count.toLocaleString("fr-FR")} />
-            <SummaryCard label="Actual coverage" value={pct(output.portfolio.actual_coverage_rate)} />
-            <SummaryCard label="Root status" value={statusLabel(output.portfolio.root_status)} color={statusColor(output.portfolio.root_status)} />
-            <SummaryCard label="Missing" value={output.portfolio.missing_metric_count.toLocaleString("fr-FR")} color={output.portfolio.missing_metric_count > 0 ? YELLOW : GREEN} />
-            <SummaryCard label="Plan source" value={workspace?.latest_profit_plan?.plan_name || "No plan"} />
-          </div>
-
-          {output.window.period_start && output.window.period_end && (
-            <div style={{ marginBottom: 12, color: MUTED, fontSize: 12 }}>
-              Periode: <span style={{ color: "var(--tdia-text)", ...MONO }}>{output.window.period_start}{" -> "}{output.window.period_end}</span>
-              {" "} | calendar days: <span style={{ color: "var(--tdia-text)", ...MONO }}>{output.window.day_count}</span>
-              {" "} | campaign nodes: <span style={{ color: "var(--tdia-text)", ...MONO }}>{output.portfolio.campaign_metric_count}</span>
-            </div>
-          )}
-
-          {output.metrics.length === 0 ? (
-            <div className="gos-card"><EmptyState title="Aucune metrique pour cette periode." /></div>
-          ) : (
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, overflow: "hidden" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(280px,2fr) repeat(3, minmax(96px, 1fr)) 100px 96px",
-                  gap: 12,
-                  padding: "10px 14px",
-                  background: "hsl(220 45% 25%)",
-                }}
-              >
-                {["Metric", "Actual", "Target", "Projection", "vs Target", "Status"].map((label) => (
-                  <div key={label} style={{ color: MUTED, fontSize: 10, letterSpacing: "0.03em", fontWeight: 800, textAlign: label === "Metric" ? "left" : "right" }}>
-                    {label.toUpperCase()}
-                  </div>
-                ))}
-              </div>
-              {renderMetricRows()}
-            </div>
-          )}
-
-          {(output.missing_data.length > 0 || output.risks.length > 0 || output.conditions.length > 0) && (
-            <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-              <InfoPanel title="Missing data" items={output.missing_data} empty="Aucun manque critique." />
-              <InfoPanel title="Risks" items={output.risks} empty="Aucun risque majeur." />
-              <InfoPanel title="Conditions" items={output.conditions} empty="Aucune condition." />
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-function SummaryCard({ label, value, color = "var(--tdia-text)" }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="gos-card" style={{ padding: 14, minHeight: 78 }}>
-      <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.03em", color: MUTED, fontWeight: 700 }}>
-        {label}
-      </div>
-      <div style={{ marginTop: 8, color, fontSize: 20, fontWeight: 700, ...MONO }}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function InfoPanel({ title, items, empty }: { title: string; items: string[]; empty: string }) {
-  return (
-    <div className="gos-card" style={{ padding: 14 }}>
-      <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.03em", color: MUTED, fontWeight: 800, marginBottom: 8 }}>
-        {title}
-      </div>
-      {items.length === 0 ? (
-        <div style={{ color: MUTED, fontSize: 12 }}>{empty}</div>
-      ) : (
-        <div style={{ display: "grid", gap: 6 }}>
-          {items.slice(0, 8).map((item) => (
-            <div key={item} style={{ color: "var(--tdia-text)", fontSize: 12, lineHeight: 1.4 }}>
-              {item}
-            </div>
-          ))}
-          {items.length > 8 && <div style={{ color: MUTED, fontSize: 11 }}>+{items.length - 8} more</div>}
-        </div>
-      )}
-    </div>
-  );
+    });
+  }
 }
