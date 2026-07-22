@@ -1,17 +1,30 @@
 // src/gos/Sidebar.tsx
 //
-// Premium Dark — slim sidebar (3-5 entries).
-// Rule #10: the ~45 GOS pages are NOT listed here. They are reachable only
-// as steps of a guided sequence (Ma Journée → Mode Guidé). This sidebar
-// exposes only the top-level "où je suis dans mon travail" navigation.
+// Design system rule #10 — Sidebar HYBRIDE.
+// - Section AUJOURD'HUI en haut : 3–5 entrées top-level (Ma journée, Clients, Portefeuille).
+// - Section BIBLIOTHÈQUE : toutes les pages GOS groupées par phase en accordéons repliés.
+// - Footer : champ "Rechercher une page…" qui ouvre la palette ⌘K.
 //
-// The ⓘ help affordance from the previous phase-toggle sidebar is preserved
-// per-entry — clicking dispatches HelpContent to the existing HelpDrawer.
+// La routine guidée (Ma journée → Mode Guidé) reste le chemin par défaut ;
+// la bibliothèque est l'accès libre "rangé" que la règle #10 exige.
 
-import { NavLink } from "react-router-dom";
-import { Info, LogOut, ArrowLeft, Calendar, Users, LineChart } from "lucide-react";
+import { useMemo, useState, type CSSProperties } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+  Info, LogOut, ArrowLeft, Calendar, Users, LineChart,
+  Search, ChevronRight,
+} from "lucide-react";
 import type { ComponentType } from "react";
 import { useHelpDispatch, type HelpContent } from "./help";
+import {
+  PHASES,
+  groupPagesByPhase,
+  lifecyclePhaseOf,
+  type LifecyclePhase,
+  type PageEntry,
+  type PhaseKey,
+} from "./pageLibrary";
+import { usePhase, phaseMatches } from "./phase";
 
 type SidebarProps = {
   clientId: string | null;
@@ -21,6 +34,7 @@ type SidebarProps = {
   userName?: string | null;
   clientCount?: number;
   onLogout: () => void;
+  onOpenPalette: () => void;
 };
 
 type TopEntry = {
@@ -29,6 +43,7 @@ type TopEntry = {
   icon: ComponentType<{ size?: number }>;
   end?: boolean;
   help: HelpContent;
+  lifecyclePhase: LifecyclePhase;
 };
 
 const TOP_ENTRIES: TopEntry[] = [
@@ -37,6 +52,7 @@ const TOP_ENTRIES: TopEntry[] = [
     label: "Ma journée",
     icon: Calendar,
     end: true,
+    lifecyclePhase: "active",
     help: {
       title: "Ma journée",
       what: "Ton écran d'atterrissage : la PROCHAINE ACTION à faire maintenant, et la ROUTINE DU JOUR par client.",
@@ -47,6 +63,7 @@ const TOP_ENTRIES: TopEntry[] = [
     to: "/admin/gos/clients",
     label: "Clients",
     icon: Users,
+    lifecyclePhase: "both",
     help: {
       title: "Clients",
       what: "Liste de tous les clients du portefeuille, avec leur statut et leur avancement.",
@@ -57,6 +74,7 @@ const TOP_ENTRIES: TopEntry[] = [
     to: "/admin/gos/portfolio",
     label: "Portefeuille exécutif",
     icon: LineChart,
+    lifecyclePhase: "both",
     help: {
       title: "Portefeuille exécutif",
       what: "Vue consolidée : contribution, ad spend, rentabilité par client, statut des routines.",
@@ -65,15 +83,25 @@ const TOP_ENTRIES: TopEntry[] = [
   },
 ];
 
+const DIM_STYLE: CSSProperties = {
+  opacity: 0.45,
+  transition: "opacity 0.15s ease",
+};
+
 export function Sidebar({
+  clientId,
   hasClient,
   clientName,
   clientCode,
   userName,
   clientCount,
   onLogout,
+  onOpenPalette,
 }: SidebarProps) {
   const { showHelp } = useHelpDispatch();
+  const { phase, setPhase } = usePhase();
+
+  const library = useMemo(() => groupPagesByPhase(), []);
 
   return (
     <aside className="gos-sidebar">
@@ -111,15 +139,76 @@ export function Sidebar({
         </div>
       )}
 
-      {/* Top-level nav — 3 entries, on purpose. */}
+      {/* Phase toggle — "Nouveau client" vs "Client actif". Dims (doesn't hide)
+          items whose lifecycle phase doesn't match, so the sidebar stays a
+          full roadmap regardless of where the client currently is. */}
+      <PhaseToggle phase={phase} onChange={setPhase} />
+
+      {/* AUJOURD'HUI — routine guidée */}
+      <div className="microlabel" style={{ padding: "0 6px 8px", fontSize: 9, color: "var(--tdia-muted)" }}>
+        AUJOURD'HUI
+      </div>
       <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {TOP_ENTRIES.map((entry) => (
-          <TopNavRow key={entry.to} entry={entry} onInfo={() => showHelp(entry.help)} />
+          <TopNavRow
+            key={entry.to}
+            entry={entry}
+            dimmed={!phaseMatches(entry.lifecyclePhase, phase)}
+            onInfo={() => showHelp(entry.help)}
+          />
         ))}
       </nav>
 
+      {/* Hairline dégradée */}
+      <div style={{
+        height: 1,
+        margin: "18px 6px",
+        background: "linear-gradient(90deg, rgba(148, 170, 215, 0.15), transparent)",
+      }} />
+
+      {/* BIBLIOTHÈQUE — accès libre */}
+      <div className="microlabel" style={{ padding: "0 6px 8px", fontSize: 9, color: "var(--tdia-muted)" }}>
+        BIBLIOTHÈQUE · ACCÈS LIBRE
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {PHASES.map((section) => (
+          <PhaseAccordion
+            key={section.key}
+            phaseKey={section.key}
+            phaseLabel={section.label}
+            entries={library[section.key]}
+            clientId={clientId}
+            lifecyclePhase={phase}
+          />
+        ))}
+      </div>
+
       {/* Spacer pushes footer down */}
-      <div style={{ flex: 1 }} />
+      <div style={{ flex: 1, minHeight: 20 }} />
+
+      {/* Search field → opens ⌘K palette */}
+      <button
+        onClick={onOpenPalette}
+        style={{
+          display: "flex", alignItems: "center", gap: 8,
+          width: "100%", padding: "9px 12px",
+          background: "rgba(255, 255, 255, 0.02)",
+          border: "1px solid rgba(148, 170, 215, 0.12)",
+          borderRadius: 10, color: "var(--tdia-muted)",
+          fontSize: 12, cursor: "pointer", textAlign: "left",
+          marginBottom: 14,
+        }}
+      >
+        <Search size={13} style={{ flexShrink: 0 }} />
+        <span style={{ flex: 1 }}>Rechercher une page…</span>
+        <span className="font-data" style={{
+          fontSize: 10, color: "var(--tdia-faint)",
+          padding: "2px 6px", borderRadius: 4,
+          border: "1px solid rgba(148, 170, 215, 0.15)",
+        }}>
+          ⌘K
+        </span>
+      </button>
 
       {/* Footer: user + admin/logout */}
       <div style={{ paddingTop: 16, borderTop: "1px solid var(--tdia-hairline)" }}>
@@ -171,10 +260,16 @@ export function Sidebar({
   );
 }
 
-function TopNavRow({ entry, onInfo }: { entry: TopEntry; onInfo: () => void }) {
+function TopNavRow({ entry, dimmed, onInfo }: { entry: TopEntry; dimmed: boolean; onInfo: () => void }) {
   const Icon = entry.icon;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+    <div
+      style={{
+        display: "flex", alignItems: "center", gap: 2,
+        ...(dimmed ? DIM_STYLE : { transition: "opacity 0.15s ease" }),
+      }}
+      title={dimmed ? "Non prioritaire dans la phase courante" : undefined}
+    >
       <NavLink
         to={entry.to}
         end={entry.end}
@@ -196,6 +291,175 @@ function TopNavRow({ entry, onInfo }: { entry: TopEntry; onInfo: () => void }) {
       >
         <Info size={13} />
       </button>
+    </div>
+  );
+}
+
+function PhaseToggle({ phase, onChange }: { phase: LifecyclePhase; onChange: (p: LifecyclePhase) => void }) {
+  const options: Array<{ key: LifecyclePhase; label: string }> = [
+    { key: "new",    label: "Nouveau" },
+    { key: "active", label: "Actif" },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Phase du client"
+      style={{
+        display: "flex", padding: 3, marginBottom: 18,
+        background: "rgba(255, 255, 255, 0.03)",
+        border: "1px solid rgba(148, 170, 215, 0.12)",
+        borderRadius: 10, gap: 3,
+      }}
+    >
+      {options.map((opt) => {
+        const selected = opt.key === phase;
+        return (
+          <button
+            key={opt.key}
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onChange(opt.key)}
+            style={{
+              flex: 1, padding: "7px 8px", fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.02em",
+              background: selected
+                ? "linear-gradient(135deg, rgba(77, 159, 255, 0.18), rgba(47, 107, 255, 0.06))"
+                : "transparent",
+              color: selected ? "#eef2fa" : "var(--tdia-muted)",
+              border: selected ? "1px solid rgba(77, 159, 255, 0.28)" : "1px solid transparent",
+              borderRadius: 7, cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PhaseAccordion({
+  phaseKey,
+  phaseLabel,
+  entries,
+  clientId,
+  lifecyclePhase,
+}: {
+  phaseKey: PhaseKey;
+  phaseLabel: string;
+  entries: PageEntry[];
+  clientId: string | null;
+  lifecyclePhase: LifecyclePhase;
+}) {
+  const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const loc = useLocation();
+
+  const activeEntry = entries.find((entry) => {
+    const href = entry.buildHref(clientId);
+    return href && (loc.pathname === href || loc.pathname.startsWith(href + "/"));
+  });
+
+  // Dim the whole section header if none of its entries match the current
+  // lifecycle phase (e.g. Review section during "Nouveau client").
+  const sectionMatches = entries.some((e) => phaseMatches(lifecyclePhaseOf(e), lifecyclePhase));
+
+  const shouldOpen = open || !!activeEntry;
+  const visible = shouldOpen ? (showAll ? entries : entries.slice(0, 4)) : [];
+  const overflow = entries.length - 4;
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: "flex", alignItems: "center", gap: 8,
+          width: "100%", padding: "8px 12px",
+          background: "transparent", border: "1px solid transparent",
+          borderRadius: 8, color: "var(--tdia-text-2)",
+          fontSize: 12, fontWeight: 500, cursor: "pointer", textAlign: "left",
+          ...(sectionMatches ? { transition: "opacity 0.15s ease" } : DIM_STYLE),
+        }}
+      >
+        <ChevronRight
+          size={12}
+          style={{
+            color: "var(--tdia-faint)", flexShrink: 0,
+            transition: "transform .15s ease",
+            transform: shouldOpen ? "rotate(90deg)" : "none",
+          }}
+        />
+        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {phaseLabel}
+        </span>
+        <span className="font-data" style={{ fontSize: 10, color: "var(--tdia-faint)" }}>
+          {entries.length}
+        </span>
+      </button>
+
+      {shouldOpen && (
+        <div style={{
+          position: "relative", marginLeft: 12, paddingLeft: 12,
+          borderLeft: "1px solid rgba(148, 170, 215, 0.12)",
+          display: "flex", flexDirection: "column", gap: 1,
+          padding: "4px 0 6px 12px",
+        }}>
+          {visible.map((entry) => {
+            const href = entry.buildHref(clientId);
+            const disabled = !href;
+            const isActive = activeEntry?.key === entry.key;
+            const matches = phaseMatches(lifecyclePhaseOf(entry), lifecyclePhase);
+            // If both disabled and phase-mismatched, keep the stronger fade
+            // (disabled 0.5) — never stack opacities below ~0.35 legibility.
+            const opacity = disabled ? 0.5 : matches ? 1 : 0.45;
+            return (
+              <NavLink
+                key={entry.key}
+                to={href ?? "#"}
+                onClick={(e) => { if (disabled) e.preventDefault(); }}
+                title={
+                  disabled
+                    ? "Sélectionne un client d'abord"
+                    : matches
+                      ? undefined
+                      : "Non prioritaire dans la phase courante"
+                }
+                style={{
+                  display: "block", padding: "6px 10px", borderRadius: 6,
+                  fontSize: 12,
+                  color: disabled ? "var(--tdia-faint)" : (isActive ? "#9ec8ff" : "var(--tdia-text-2)"),
+                  textDecoration: "none",
+                  background: isActive
+                    ? "linear-gradient(135deg, rgba(77, 159, 255, 0.10), rgba(47, 107, 255, 0.03))"
+                    : "transparent",
+                  border: isActive ? "1px solid rgba(77, 159, 255, 0.22)" : "1px solid transparent",
+                  opacity,
+                  transition: "opacity 0.15s ease",
+                  cursor: disabled ? "not-allowed" : "pointer",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}
+              >
+                {entry.label}
+              </NavLink>
+            );
+          })}
+          {!showAll && overflow > 0 && (
+            <button
+              onClick={() => setShowAll(true)}
+              style={{
+                padding: "6px 10px", background: "transparent", border: "none",
+                textAlign: "left", color: "var(--tdia-muted)",
+                fontSize: 11, cursor: "pointer",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                letterSpacing: "0.03em",
+              }}
+            >
+              + {overflow} autre{overflow > 1 ? "s" : ""}…
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

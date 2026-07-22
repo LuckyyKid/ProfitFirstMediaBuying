@@ -225,7 +225,10 @@
   max-height: 100vh;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE / legacy Edge */
 }
+.gos-root .gos-sidebar::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .gos-root .gos-nav-link {
   display: flex;
   align-items: center;

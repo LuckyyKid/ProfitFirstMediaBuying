@@ -229,3 +229,16 @@ All colors MUST be HSL.
     radial-gradient(1px 1px at 95% 68%, hsl(210 92% 53% / 0.1), transparent),
     radial-gradient(1px 1px at 62% 88%, hsl(210 40% 98% / 0.13), transparent);
 }
+
+/* --- Global scrollbar hide -------------------------------------------------
+   Scroll still works (wheel, trackpad, keys, touch) — the visual scrollbar
+   is just removed. Applies to the page and to any scrollable container
+   (modals, drawers, tables, dropdowns, code blocks, etc.).
+*/
+* {
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE / legacy Edge */
+}
+*::-webkit-scrollbar { width: 0; height: 0; display: none; } /* Chromium / WebKit */
+html, body { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
