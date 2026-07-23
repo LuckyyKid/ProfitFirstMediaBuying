@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { RefreshCw, ExternalLink, Trash2, Save, UploadCloud } from "lucide-react";
 import { AdFileUpload } from "./uploads/AdFileUpload";
 import type { Platform } from "./uploads/adPlatformParser";
+import { useSelectedClient } from "./context";
+import type { BusinessType } from "./ui";
 
 type ProviderId = "shopify" | "meta_ads" | "ga4" | "google_ads";
 
@@ -23,6 +25,10 @@ interface Provider {
   fields: Array<{ key: string; label: string; type: "text" | "password"; placeholder?: string; scope: "config" | "credentials" }>;
   ingestFunction?: string;
   docsUrl?: string;
+  // Business-type gating — omit for universal providers (ads, analytics).
+  // Only Shopify is e-commerce specific; SaaS/Agence never sell physical
+  // catalogues so hide it there to keep the panel focused.
+  visibleFor?: BusinessType[];
 }
 
 const PROVIDERS: Provider[] = [
@@ -39,6 +45,7 @@ const PROVIDERS: Provider[] = [
     ],
     ingestFunction: "ingest-shopify",
     docsUrl: "https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens/generate-app-access-tokens-admin",
+    visibleFor: ["ECOMMERCE", "HYBRID"],
   },
   {
     id: "meta_ads",
@@ -106,6 +113,16 @@ interface SyncRunRow {
 }
 
 export default function IntegrationsPanel({ clientId }: { clientId: string }) {
+  const { selectedClient } = useSelectedClient();
+  const businessType = selectedClient?.business_type ?? null;
+  const providers = useMemo(
+    () => PROVIDERS.filter((p) => {
+      if (!p.visibleFor) return true;
+      if (!businessType) return true;
+      return (p.visibleFor as readonly string[]).includes(businessType);
+    }),
+    [businessType],
+  );
   const [connections, setConnections] = useState<ConnectionRow[]>([]);
   const [runs, setRuns] = useState<Record<string, SyncRunRow[]>>({});
   const [loading, setLoading] = useState(false);
@@ -407,7 +424,7 @@ export default function IntegrationsPanel({ clientId }: { clientId: string }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
-        {PROVIDERS.map(p => {
+        {providers.map(p => {
           const conn = connByProvider.get(p.id);
           const lastRun = conn ? runs[conn.id]?.[0] : undefined;
           const isEditing = editing === p.id;

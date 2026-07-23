@@ -17,7 +17,9 @@ import {
 import type { ComponentType } from "react";
 import { useHelpDispatch, type HelpContent } from "./help";
 import {
+  PAGE_LIBRARY,
   PHASES,
+  filterPagesByBusinessType,
   groupPagesByPhase,
   lifecyclePhaseOf,
   type LifecyclePhase,
@@ -25,6 +27,7 @@ import {
   type PhaseKey,
 } from "./pageLibrary";
 import { usePhase, phaseMatches } from "./phase";
+import { useSelectedClient } from "./context";
 
 type SidebarProps = {
   clientId: string | null;
@@ -100,8 +103,13 @@ export function Sidebar({
 }: SidebarProps) {
   const { showHelp } = useHelpDispatch();
   const { phase, setPhase } = usePhase();
+  const { selectedClient } = useSelectedClient();
+  const businessType = selectedClient?.business_type ?? null;
 
-  const library = useMemo(() => groupPagesByPhase(), []);
+  const library = useMemo(
+    () => groupPagesByPhase(filterPagesByBusinessType(PAGE_LIBRARY, businessType)),
+    [businessType],
+  );
 
   return (
     <aside className="gos-sidebar">

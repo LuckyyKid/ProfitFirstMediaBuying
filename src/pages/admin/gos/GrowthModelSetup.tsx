@@ -23,18 +23,26 @@ function isReady(block: Block, row: any, businessType: string): boolean {
   if (!row) return false;
   const isEcom = businessType === "ECOMMERCE" || businessType === "HYBRID";
   const isLocal = businessType === "LOCAL_SERVICE" || businessType === "HYBRID";
+  const isSaas = businessType === "SAAS";
+  const isAgence = businessType === "AGENCE";
   switch (block) {
     case "business_context":
       return !!(row.goal_lock && row.three_month_objective && row.north_star_kpi && row.success_definition);
     case "financial_inputs":
+      if (isSaas) return row.arpa != null && row.gross_margin_recurring_pct != null && row.churn_monthly_pct != null && row.target_cac != null;
+      if (isAgence) return row.retainer_monthly != null && row.hourly_rate != null && row.churn_monthly_pct != null && row.discovery_close_rate_pct != null;
       if (isEcom) return row.aov != null && row.gross_margin_percent != null && row.target_cac != null && row.target_mer != null;
       if (isLocal) return row.avg_job_value != null && row.gross_margin_percent != null && row.target_cpl != null && row.target_close_rate != null;
       return false;
     case "quantitative_baseline":
+      if (isSaas) return row.mrr_current != null && row.ad_spend_30d != null && row.active_subscriptions != null;
+      if (isAgence) return row.mrr_current != null && row.ad_spend_30d != null && row.active_subscriptions != null;
       if (isEcom) return row.revenue_30d != null && row.ad_spend_30d != null && row.orders_30d != null;
       if (isLocal) return row.leads_30d != null && row.ad_spend_30d != null && row.jobs_closed_30d != null;
       return false;
     case "basket_economics":
+      // Not applicable to recurring models — order economics don't map.
+      if (isSaas || isAgence) return true;
       return row.aov_new != null && row.aov_repeat != null && row.cac_new != null && row.cac_repeat != null
         && row.conversion_rate != null && row.repeat_cycle_months != null && row.churn_per_cycle != null
         && row.inventory_days != null && row.payout_delay_days != null;
@@ -87,14 +95,21 @@ export default function GrowthModelSetup() {
 
   const isEcom = client.business_type === "ECOMMERCE" || client.business_type === "HYBRID";
   const isLocal = client.business_type === "LOCAL_SERVICE" || client.business_type === "HYBRID";
+  const isSaas = client.business_type === "SAAS";
+  const isAgence = client.business_type === "AGENCE";
+  // SaaS has no catalogue/stock/basket. Agence reuses services + capacity but
+  // has no order-based basket economics either.
+  const skipCatalogue = isSaas;
+  const skipStock = isSaas;
+  const skipBasket = isSaas || isAgence;
 
   const blockStatuses: Record<Block, SetupStatus> = {
     business_context: (bc?.status as SetupStatus) ?? (bc ? "MISSING_INPUTS" : "NOT_STARTED"),
     financial_inputs: (fi?.status as SetupStatus) ?? (fi ? "MISSING_INPUTS" : "NOT_STARTED"),
-    products: (isEcom ? products.length : services.length) > 0 ? "READY" : "NOT_STARTED",
-    inventory: (isEcom ? inv.length : cap.length) > 0 ? "READY" : "NOT_STARTED",
+    products: skipCatalogue ? "READY" : (isEcom ? products.length : services.length) > 0 ? "READY" : "NOT_STARTED",
+    inventory: skipStock ? "READY" : (isEcom ? inv.length : cap.length) > 0 ? "READY" : "NOT_STARTED",
     quantitative_baseline: (qb?.status as SetupStatus) ?? (qb ? "MISSING_INPUTS" : "NOT_STARTED"),
-    basket_economics: isReady("basket_economics", be, client.business_type) ? "READY" : (be ? "MISSING_INPUTS" : "NOT_STARTED"),
+    basket_economics: skipBasket ? "READY" : isReady("basket_economics", be, client.business_type) ? "READY" : (be ? "MISSING_INPUTS" : "NOT_STARTED"),
   };
 
   const ordered: Block[] = ["business_context","financial_inputs","products","inventory","quantitative_baseline","basket_economics"];
@@ -229,10 +244,24 @@ export default function GrowthModelSetup() {
           </div>
           {current === "business_context" && <BusinessContextForm clientId={client.id} row={bc} products={products} onSaved={load} />}
           {current === "financial_inputs" && <FinancialInputsForm clientId={client.id} businessType={client.business_type} row={fi} onSaved={load} />}
-          {current === "products" && (isEcom ? <ProductsForm clientId={client.id} rows={products} onSaved={load} /> : <ServicesForm clientId={client.id} rows={services} onSaved={load} />)}
-          {current === "inventory" && (isEcom ? <InventoryForm clientId={client.id} products={products} rows={inv} onSaved={load} /> : <CapacityForm clientId={client.id} services={services} rows={cap} onSaved={load} />)}
+          {current === "products" && (
+            skipCatalogue
+              ? <NotApplicableBlock reason={isSaas ? "Un SaaS n'a pas de SKU physique — passe directement au bloc suivant." : "Non applicable pour ce type de client."} />
+              : isEcom ? <ProductsForm clientId={client.id} rows={products} onSaved={load} />
+              : <ServicesForm clientId={client.id} rows={services} onSaved={load} />
+          )}
+          {current === "inventory" && (
+            skipStock
+              ? <NotApplicableBlock reason={isSaas ? "Un SaaS n'a pas de stock — passe directement au bloc suivant." : "Non applicable pour ce type de client."} />
+              : isEcom ? <InventoryForm clientId={client.id} products={products} rows={inv} onSaved={load} />
+              : <CapacityForm clientId={client.id} services={services} rows={cap} onSaved={load} />
+          )}
           {current === "quantitative_baseline" && <BaselineForm clientId={client.id} businessType={client.business_type} row={qb} onSaved={load} />}
-          {current === "basket_economics" && <BasketEconomicsForm clientId={client.id} row={be} qbRow={qb} fiRow={fi} onSaved={load} />}
+          {current === "basket_economics" && (
+            skipBasket
+              ? <NotApplicableBlock reason={isSaas || isAgence ? "Les modèles récurrents utilisent LTV/CAC et MRR — l'économie du panier ne s'applique pas ici." : "Non applicable."} />
+              : <BasketEconomicsForm clientId={client.id} row={be} qbRow={qb} fiRow={fi} onSaved={load} />
+          )}
 
           {/* Prev / Next nav */}
           <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between", gap: 12 }}>
@@ -276,6 +305,16 @@ function Grid({ children }: { children: React.ReactNode }) {
 
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="gos-label">{label}</label>{children}</div>;
+}
+
+function NotApplicableBlock({ reason }: { reason: string }) {
+  return (
+    <div className="gos-card" style={{ textAlign: "center", padding: 32 }}>
+      <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.5 }}>—</div>
+      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--tdia-text)", marginBottom: 6 }}>Non applicable</div>
+      <div style={{ fontSize: 13, color: "var(--tdia-muted)", maxWidth: 460, margin: "0 auto" }}>{reason}</div>
+    </div>
+  );
 }
 
 const NORTH_STAR_KPI_OPTIONS = [
@@ -462,6 +501,19 @@ function FinancialInputsForm({ clientId, businessType, row, onSaved }: any) {
   const num = (v: any) => (v == null ? "" : v);
   const isEcom = businessType === "ECOMMERCE" || businessType === "HYBRID";
   const isLocal = businessType === "LOCAL_SERVICE" || businessType === "HYBRID";
+  const isSaas = businessType === "SAAS";
+  const isAgence = businessType === "AGENCE";
+
+  // Sensible defaults for recurring models the first time the form renders.
+  useEffect(() => {
+    if (isSaas && f.gross_margin_recurring_pct == null) {
+      setF((prev: any) => ({ ...prev, gross_margin_recurring_pct: 80 }));
+    }
+    if (isAgence && f.gross_margin_recurring_pct == null) {
+      setF((prev: any) => ({ ...prev, gross_margin_recurring_pct: 55 }));
+    }
+    // eslint-disable-next-line
+  }, [isSaas, isAgence]);
 
   // Auto-derive from Shopify on mount; auto-fill empty fields
   useEffect(() => {
@@ -497,7 +549,11 @@ function FinancialInputsForm({ clientId, businessType, row, onSaved }: any) {
 
   const save = async () => {
     setSaving(true);
-    const ready = isEcom
+    const ready = isSaas
+      ? f.arpa != null && f.gross_margin_recurring_pct != null && f.churn_monthly_pct != null && f.target_cac != null
+      : isAgence
+      ? f.retainer_monthly != null && f.hourly_rate != null && f.churn_monthly_pct != null && f.discovery_close_rate_pct != null
+      : isEcom
       ? f.aov != null && f.gross_margin_percent != null && f.target_cac != null && f.target_mer != null
       : f.avg_job_value != null && f.gross_margin_percent != null && f.target_cpl != null && f.target_close_rate != null;
     const payload = { ...f, client_id: clientId, business_type: businessType, status: ready ? "READY" : "MISSING_INPUTS" };
@@ -505,7 +561,11 @@ function FinancialInputsForm({ clientId, businessType, row, onSaved }: any) {
     ["aov","gross_margin_percent","cogs_per_order","shipping_cost_per_order","fulfillment_cost_per_order",
      "payment_processing_percent","refund_rate_percent","target_cac","target_mer","target_roas","payback_window_days",
      "desired_contribution_margin_percent","avg_job_value","labor_cost","material_cost","travel_cost","target_cpl",
-     "target_cost_per_booked_appointment","target_cost_per_job","target_close_rate"].forEach((k) => {
+     "target_cost_per_booked_appointment","target_cost_per_job","target_close_rate",
+     // Recurrence columns (SaaS + Agence)
+     "arpa","churn_monthly_pct","trial_to_paid_pct","onboarding_cost","cac_payback_months",
+     "gross_margin_recurring_pct","retainer_monthly","hours_delivered_per_month","hourly_rate",
+     "weekly_delivery_capacity","discovery_close_rate_pct"].forEach((k) => {
       if (payload[k] != null && payload[k] !== "") payload[k] = Number(payload[k]);
     });
     const { error } = row
@@ -567,6 +627,35 @@ function FinancialInputsForm({ clientId, businessType, row, onSaved }: any) {
             <F label="Target Cost / Booked Appointment"><input type="number" className="gos-input" value={num(f.target_cost_per_booked_appointment)} onChange={(e) => set("target_cost_per_booked_appointment", e.target.value)} /></F>
             <F label="Target Cost / Job"><input type="number" className="gos-input" value={num(f.target_cost_per_job)} onChange={(e) => set("target_cost_per_job", e.target.value)} /></F>
             <F label="Target Close Rate %"><input type="number" className="gos-input" value={num(f.target_close_rate)} onChange={(e) => set("target_close_rate", e.target.value)} /></F>
+          </Grid>
+        </>
+      )}
+      {isSaas && (
+        <>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--tdia-muted)", textTransform: "uppercase", margin: "20px 0 12px" }}>SaaS — unit economics récurrentes</div>
+          <Grid>
+            <F label="ARPA (revenu mensuel / compte)"><input type="number" className="gos-input" value={num(f.arpa)} onChange={(e) => set("arpa", e.target.value)} /></F>
+            <F label="Marge brute récurrente %"><input type="number" className="gos-input" value={num(f.gross_margin_recurring_pct)} onChange={(e) => set("gross_margin_recurring_pct", e.target.value)} /><div style={{ fontSize: 10, color: "var(--tdia-primary, #4f8cff)", marginTop: 2 }}>Défaut 80% (SaaS)</div></F>
+            <F label="Churn mensuel %"><input type="number" className="gos-input" value={num(f.churn_monthly_pct)} onChange={(e) => set("churn_monthly_pct", e.target.value)} /></F>
+            <F label="Trial → paid %"><input type="number" className="gos-input" value={num(f.trial_to_paid_pct)} onChange={(e) => set("trial_to_paid_pct", e.target.value)} /></F>
+            <F label="Coût onboarding / logo"><input type="number" className="gos-input" value={num(f.onboarding_cost)} onChange={(e) => set("onboarding_cost", e.target.value)} /></F>
+            <F label="CAC cible"><input type="number" className="gos-input" value={num(f.target_cac)} onChange={(e) => set("target_cac", e.target.value)} /></F>
+            <F label="CAC payback (mois)"><input type="number" className="gos-input" value={num(f.cac_payback_months)} onChange={(e) => set("cac_payback_months", e.target.value)} /></F>
+          </Grid>
+        </>
+      )}
+      {isAgence && (
+        <>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--tdia-muted)", textTransform: "uppercase", margin: "20px 0 12px" }}>Agence — retainers & capacité</div>
+          <Grid>
+            <F label="Retainer moyen mensuel"><input type="number" className="gos-input" value={num(f.retainer_monthly)} onChange={(e) => set("retainer_monthly", e.target.value)} /></F>
+            <F label="Heures livrées / client / mois"><input type="number" className="gos-input" value={num(f.hours_delivered_per_month)} onChange={(e) => set("hours_delivered_per_month", e.target.value)} /></F>
+            <F label="Taux horaire livré ($/h)"><input type="number" className="gos-input" value={num(f.hourly_rate)} onChange={(e) => set("hourly_rate", e.target.value)} /></F>
+            <F label="Marge brute récurrente %"><input type="number" className="gos-input" value={num(f.gross_margin_recurring_pct)} onChange={(e) => set("gross_margin_recurring_pct", e.target.value)} /><div style={{ fontSize: 10, color: "var(--tdia-primary, #4f8cff)", marginTop: 2 }}>Défaut 55% (Agence)</div></F>
+            <F label="Churn mensuel %"><input type="number" className="gos-input" value={num(f.churn_monthly_pct)} onChange={(e) => set("churn_monthly_pct", e.target.value)} /></F>
+            <F label="Close rate discovery → mandat %"><input type="number" className="gos-input" value={num(f.discovery_close_rate_pct)} onChange={(e) => set("discovery_close_rate_pct", e.target.value)} /></F>
+            <F label="Capacité livraison hebdo (heures)"><input type="number" className="gos-input" value={num(f.weekly_delivery_capacity)} onChange={(e) => set("weekly_delivery_capacity", e.target.value)} /></F>
+            <F label="CAC cible"><input type="number" className="gos-input" value={num(f.target_cac)} onChange={(e) => set("target_cac", e.target.value)} /></F>
           </Grid>
         </>
       )}
@@ -785,6 +874,8 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
   const num = (v: any) => (v == null ? "" : v);
   const isEcom = businessType === "ECOMMERCE" || businessType === "HYBRID";
   const isLocal = businessType === "LOCAL_SERVICE" || businessType === "HYBRID";
+  const isSaas = businessType === "SAAS";
+  const isAgence = businessType === "AGENCE";
 
   useEffect(() => {
     if (!isEcom) return;
@@ -851,7 +942,9 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
 
   const save = async () => {
     setSaving(true);
-    const ready = isEcom
+    const ready = isSaas || isAgence
+      ? f.mrr_current != null && f.ad_spend_30d != null && f.active_subscriptions != null
+      : isEcom
       ? f.revenue_30d != null && f.ad_spend_30d != null && f.orders_30d != null
       : f.leads_30d != null && f.ad_spend_30d != null && f.jobs_closed_30d != null;
     const payload: any = { ...f, client_id: clientId, business_type: businessType, status: ready ? "READY" : "MISSING_INPUTS" };
@@ -918,6 +1011,27 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
       {isLocal && (<>
         <div style={{ fontSize: 12, fontWeight: 600, color: "var(--tdia-muted)", textTransform: "uppercase", margin: "20px 0 12px" }}>Local Service</div>
         <Grid>{localFields.map(([k, l]) => <F key={k} label={l}><input type="number" className="gos-input" value={num(f[k])} onChange={(e) => set(k, e.target.value)} /></F>)}</Grid>
+      </>)}
+      {(isSaas || isAgence) && (<>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--tdia-muted)", textTransform: "uppercase", margin: "20px 0 12px" }}>
+          {isSaas ? "SaaS — MRR & rétention" : "Agence — retainers & rétention"}
+        </div>
+        <Grid>
+          <F label="MRR actuel"><input type="number" className="gos-input" value={num(f.mrr_current)} onChange={(e) => set("mrr_current", e.target.value)} /></F>
+          <F label={isSaas ? "Abonnements actifs" : "Mandats actifs"}><input type="number" className="gos-input" value={num(f.active_subscriptions)} onChange={(e) => set("active_subscriptions", e.target.value)} /></F>
+          <F label="Nouveau MRR 30j"><input type="number" className="gos-input" value={num(f.new_mrr_30d)} onChange={(e) => set("new_mrr_30d", e.target.value)} /></F>
+          <F label="MRR churné 30j"><input type="number" className="gos-input" value={num(f.churned_mrr_30d)} onChange={(e) => set("churned_mrr_30d", e.target.value)} /></F>
+          <F label="MRR expansion 30j"><input type="number" className="gos-input" value={num(f.expansion_mrr_30d)} onChange={(e) => set("expansion_mrr_30d", e.target.value)} /></F>
+          <F label="Net Revenue Retention %"><input type="number" className="gos-input" value={num(f.net_revenue_retention_pct)} onChange={(e) => set("net_revenue_retention_pct", e.target.value)} /></F>
+          {isSaas ? (
+            <F label="Signups trial 30j"><input type="number" className="gos-input" value={num(f.trial_signups_30d)} onChange={(e) => set("trial_signups_30d", e.target.value)} /></F>
+          ) : (
+            <F label="Discovery calls 30j"><input type="number" className="gos-input" value={num(f.discovery_calls_30d)} onChange={(e) => set("discovery_calls_30d", e.target.value)} /></F>
+          )}
+          <F label="Ad Spend 30j"><input type="number" className="gos-input" value={num(f.ad_spend_30d)} onChange={(e) => set("ad_spend_30d", e.target.value)} /></F>
+          <F label="CAC 30j"><input type="number" className="gos-input" value={num(f.cac_30d)} onChange={(e) => set("cac_30d", e.target.value)} /></F>
+          <F label="MER 30j"><input type="number" className="gos-input" value={num(f.mer_30d)} onChange={(e) => set("mer_30d", e.target.value)} /></F>
+        </Grid>
       </>)}
       <div style={{ marginTop: 16 }}>
         <button className="gos-btn-primary" onClick={save} disabled={saving}><Save size={14} style={{ marginRight: 6, verticalAlign: -2 }} />{saving ? "Enregistrement…" : "Enregistrer"}</button>

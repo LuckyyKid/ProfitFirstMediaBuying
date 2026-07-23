@@ -40,7 +40,8 @@ export const PHASES = [
   "CLIENT_REVIEW_APPROVAL","CAMPAIGN_BUILD","LAUNCH_PREP","LIVE","REPORTING","AT_RISK",
 ] as const;
 
-export const BUSINESS_TYPES = ["ECOMMERCE","LOCAL_SERVICE","HYBRID","OTHER"] as const;
+export const BUSINESS_TYPES = ["ECOMMERCE","LOCAL_SERVICE","SAAS","AGENCE","HYBRID","OTHER"] as const;
+export type BusinessType = typeof BUSINESS_TYPES[number];
 export const RISK_LEVELS = ["UNKNOWN","LOW","MEDIUM","HIGH","CRITICAL"] as const;
 export const SETUP_STATUSES = ["NOT_STARTED","MISSING_INPUTS","READY","APPROVED","ERROR"] as const;
 export type SetupStatus = typeof SETUP_STATUSES[number];

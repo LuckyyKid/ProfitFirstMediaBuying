@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ArrowRight } from "lucide-react";
-import { PAGE_LIBRARY, PHASES, searchPages, type PageEntry, type PhaseKey } from "./pageLibrary";
+import { PAGE_LIBRARY, PHASES, filterPagesByBusinessType, searchPages, type PageEntry, type PhaseKey } from "./pageLibrary";
 import { useSelectedClient } from "./context";
 
 type Props = {
@@ -26,12 +26,16 @@ export function CommandPalette({ open, onOpenChange }: Props) {
   const nav = useNavigate();
   const { selectedClient } = useSelectedClient();
   const clientId = selectedClient?.id ?? null;
+  const businessType = selectedClient?.business_type ?? null;
   const [q, setQ] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const results = useMemo(() => searchPages(q).slice(0, 40), [q]);
+  const results = useMemo(
+    () => searchPages(q, filterPagesByBusinessType(PAGE_LIBRARY, businessType)).slice(0, 40),
+    [q, businessType],
+  );
 
   useEffect(() => {
     if (open) {

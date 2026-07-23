@@ -49,6 +49,7 @@ import GrowthDiagnosis from "./pages/admin/gos/GrowthDiagnosis";
 import PlanningPrediction from "./pages/admin/gos/PlanningPrediction";
 import EventEffect from "./pages/admin/gos/EventEffect";
 import Retention from "./pages/admin/gos/Retention";
+import MrrRetention from "./pages/admin/gos/MrrRetention";
 import SpendingPower from "./pages/admin/gos/SpendingPower";
 import Forecast from "./pages/admin/gos/Forecast";
 import MetricTargets from "./pages/admin/gos/MetricTargets";
@@ -174,6 +175,7 @@ const App = () => (
             <Route path="clients/:clientId/planning-prediction" element={<PlanningPrediction />} />
             <Route path="clients/:clientId/event-effect" element={<EventEffect />} />
             <Route path="clients/:clientId/retention" element={<Retention />} />
+            <Route path="clients/:clientId/mrr-retention" element={<MrrRetention />} />
             <Route path="clients/:clientId/spending-power" element={<SpendingPower />} />
             <Route path="clients/:clientId/forecast" element={<Forecast />} />
             <Route path="clients/:clientId/metric-targets" element={<MetricTargets />} />

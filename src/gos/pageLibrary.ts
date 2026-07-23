@@ -4,6 +4,8 @@
 // (sidebar Bibliothèque + ⌘K palette). This catalog classifies every route by
 // phase and computes the concrete href given the currently-selected client.
 
+import type { BusinessType } from "./ui";
+
 export type PhaseKey =
   | "setup"
   | "plan"
@@ -28,6 +30,10 @@ export type PageEntry = {
   // Client lifecycle relevance — optional per entry; falls back to a sensible
   // default derived from the workflow phase (see lifecyclePhaseOf).
   lifecyclePhase?: LifecyclePhase;
+  // Business-type gating. When omitted the page is universal. When set, the
+  // sidebar hides the page unless the current client's business_type is in
+  // the list. Applied AFTER lifecycle filtering.
+  visibleFor?: BusinessType[];
 };
 
 // Default mapping workflow phase → lifecycle phase. Override per entry when
@@ -75,9 +81,11 @@ export const PAGE_LIBRARY: PageEntry[] = [
   { key: "financial-inputs",     label: "Financial inputs",       phase: "setup",  needsClient: true,
     buildHref: (c) => clientRoute(c, "financial-inputs") },
   { key: "products",             label: "Produits",               phase: "setup",  needsClient: true,
-    buildHref: (c) => clientRoute(c, "products") },
+    buildHref: (c) => clientRoute(c, "products"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "inventory",            label: "Inventaire",             phase: "setup",  needsClient: true,
-    buildHref: (c) => clientRoute(c, "inventory") },
+    buildHref: (c) => clientRoute(c, "inventory"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "quantitative-baseline",label: "Quantitative baseline",  phase: "setup",  needsClient: true,
     buildHref: (c) => clientRoute(c, "quantitative-baseline") },
   { key: "business-objectives",  label: "Business objectives",    phase: "setup",  needsClient: true,
@@ -89,7 +97,8 @@ export const PAGE_LIBRARY: PageEntry[] = [
   { key: "intelligence",         label: "Client intelligence",    phase: "setup",  needsClient: true,
     buildHref: (c) => clientRoute(c, "intelligence") },
   { key: "ecommerce-financial-model-client", label: "Modèle financier ecommerce", phase: "setup", needsClient: true,
-    buildHref: (c) => clientRoute(c, "ecommerce-financial-model") },
+    buildHref: (c) => clientRoute(c, "ecommerce-financial-model"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
 
   // --- Plan 30 jours ------------------------------------------------------
   { key: "growth-diagnosis",     label: "Diagnostic de croissance", phase: "plan", needsClient: true,
@@ -108,8 +117,13 @@ export const PAGE_LIBRARY: PageEntry[] = [
     buildHref: (c) => clientRoute(c, "retention") },
   { key: "retention-ltv",        label: "Retention & LTV",         phase: "plan", needsClient: true,
     buildHref: (c) => clientRoute(c, "retention-ltv") },
+  { key: "mrr-retention",        label: "MRR & rétention",         phase: "plan", needsClient: true,
+    buildHref: (c) => clientRoute(c, "mrr-retention"),
+    aliases: ["mrr", "récurrent", "abonnements", "retainers"],
+    visibleFor: ["SAAS", "AGENCE"] },
   { key: "sku-demand-plan-client", label: "SKU demand plan",       phase: "plan", needsClient: true,
-    buildHref: (c) => clientRoute(c, "sku-demand-plan") },
+    buildHref: (c) => clientRoute(c, "sku-demand-plan"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "growth-execution-map", label: "Growth execution map",    phase: "plan", needsClient: true,
     buildHref: (c) => clientRoute(c, "growth-execution-map") },
   { key: "next-cycle-planning",  label: "Next cycle planning",     phase: "plan", needsClient: true,
@@ -135,7 +149,8 @@ export const PAGE_LIBRARY: PageEntry[] = [
   { key: "walkdown",             label: "Walkdown",                phase: "daily", needsClient: true,
     buildHref: (c) => clientRoute(c, "walkdown") },
   { key: "buyer-workspace",      label: "Buyer workspace",         phase: "daily", needsClient: true,
-    buildHref: (c) => clientRoute(c, "buyer-workspace") },
+    buildHref: (c) => clientRoute(c, "buyer-workspace"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "daily-budget-planner", label: "Daily budget planner",    phase: "daily", needsClient: true,
     buildHref: (c) => clientRoute(c, "daily-budget-planner") },
   { key: "budget-change-gate",   label: "Budget change gate",      phase: "daily", needsClient: true,
@@ -183,9 +198,11 @@ export const PAGE_LIBRARY: PageEntry[] = [
   { key: "data-sources",         label: "Data sources",            phase: "data", needsClient: false,
     buildHref: () => globalRoute("data-sources") },
   { key: "ecommerce-financial-model-global", label: "Modèle financier ecommerce (global)", phase: "data", needsClient: false,
-    buildHref: () => globalRoute("ecommerce-financial-model") },
+    buildHref: () => globalRoute("ecommerce-financial-model"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "sku-demand-plan-global", label: "SKU demand plan (global)", phase: "data", needsClient: false,
-    buildHref: () => globalRoute("sku-demand-plan") },
+    buildHref: () => globalRoute("sku-demand-plan"),
+    visibleFor: ["ECOMMERCE", "HYBRID"] },
   { key: "settings",             label: "Settings",                phase: "data", needsClient: false,
     buildHref: () => globalRoute("settings") },
 ];
@@ -196,6 +213,21 @@ export function groupPagesByPhase(entries: PageEntry[] = PAGE_LIBRARY): Record<P
   };
   for (const entry of entries) out[entry.phase].push(entry);
   return out;
+}
+
+// Filter the catalog by the current client's business_type. Pages without
+// a `visibleFor` list are treated as universal. When the client has no
+// declared type yet (null/undefined) we return the full catalog so the
+// user can still browse — gating without a type would just look broken.
+export function filterPagesByBusinessType(
+  entries: PageEntry[] = PAGE_LIBRARY,
+  businessType: string | null | undefined,
+): PageEntry[] {
+  if (!businessType) return entries;
+  return entries.filter((e) => {
+    if (!e.visibleFor || e.visibleFor.length === 0) return true;
+    return (e.visibleFor as readonly string[]).includes(businessType);
+  });
 }
 
 export function searchPages(query: string, entries: PageEntry[] = PAGE_LIBRARY): PageEntry[] {
