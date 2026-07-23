@@ -6,6 +6,17 @@ Before making architectural, backend, GOS, or Profit System changes, read:
 2. `docs/profit-system-modeling.md` - deterministic TypeScript models vs Python/R statistical layer.
 3. `Six-File+Context+Methodology/README.md` - spec-driven AI workflow and context-file methodology.
 
+## Design System — Premium Dark
+
+For any UI work (new page, redesign, tweak, component), the visual language and UX rules are non-negotiable and defined in `.lovable/design-system.md`. Read it before touching styles. The doc covers:
+
+- Ambient palette, typography (Inter / JetBrains Mono / Instrument Serif) and CSS tokens.
+- Component recipes (cards, hero, buttons, badges, KPI columns, tables, timelines, progress, "lecture du système" insets, blocking alerts).
+- SOP-guided UX rules — 10 mandatory rules including one-and-only-one hero next-action, numbered steps with exit criteria, locked future steps, hybrid sidebar + ⌘K palette pattern.
+- Anti-slop interdicts (no emoji except 🔒, no glassmorphism, no opaque grey borders, no bold ≥ 700, no pure white body text).
+
+Reference screens live under `docs/design-references/` (screens 2a, 2b, 3a, 3b). Reproduce those, don't improvise.
+
 ## Admin CRM Reference
 
 For any work inside `src/pages/admin/crm/*` (and `src/crm/*` when it backs the admin CRM), use `twenty-main/twenty-main/` as the canonical CRM reference:

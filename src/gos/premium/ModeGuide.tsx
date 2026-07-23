@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { RailStepper, type RailStep } from "./RailStepper";
 import { ExitCriteriaBar, type CriteriaItem } from "./ExitCriteriaBar";
 import { StatusDot, MicroLabel, type Status } from "./primitives";
+import { ModeGuideActiveMarker } from "../RoutineBanner";
 
 export type ModeGuideProps = {
   clientName: string;
@@ -64,6 +65,7 @@ export function ModeGuide({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "calc(100vh - 64px)", margin: -32 }}>
+      <ModeGuideActiveMarker />
       {/* ── Top bar ─────────────────────────────────────────────────── */}
       <div
         style={{

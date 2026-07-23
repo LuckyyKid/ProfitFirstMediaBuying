@@ -235,3 +235,103 @@ export function renderFollowUpEmail(p0: FollowUpEmailParams): string {
   `;
   return shell("On peut vous aider — TDIA", inner);
 }
+
+// ─── Seasonal emails ────────────────────────────────────────────────────────
+
+function firstNameOf(fullName?: string | null): string {
+  const n = (fullName ?? "").trim().split(/\s+/)[0];
+  return n || "bonjour";
+}
+
+function signature(): string {
+  return `<div style="margin-top:26px;font-family:${SANS};font-size:14px;line-height:1.6;color:${BODY};">
+    À très vite,<br>
+    <span style="color:${TEXT};font-weight:700;">L'équipe TDIA</span>
+  </div>`;
+}
+
+function letterShell(paragraphs: string[], cta?: {url: string; label: string}): string {
+  return paragraphs
+    .map((p) => `<p style="margin:0 0 16px;font-family:${SANS};font-size:15px;line-height:1.7;color:${BODY};">${p}</p>`)
+    .join("")
+    + (cta ? `<div style="margin:22px 0 8px;">${pillButton(cta.url, cta.label, "primary")}</div>` : "")
+    + signature();
+}
+
+// ── Yearly 1:1 check-in (sent ~1 month before New Year) ────────────────
+export interface YearlyCheckinEmailParams {
+  contactName?: string | null;
+  companyName?: string | null;
+  currentYear: number;
+  nextYear: number;
+  calendlyUrl: string;
+}
+
+export function renderYearlyCheckinEmail(p0: YearlyCheckinEmailParams): string {
+  const first = esc(firstNameOf(p0.contactName));
+  const company = p0.companyName ? ` chez <strong style="color:${TEXT};">${esc(p0.companyName)}</strong>` : "";
+
+  const inner = `
+    ${headline(`${first},`, `${p0.currentYear} touche à sa fin`)}
+    ${letterShell([
+      `Difficile de croire qu'on est déjà à un mois du nouvel an. Avant que la fin d'année ne devienne folle, on aimerait vraiment prendre un moment avec vous.`,
+      `L'idée est simple : un appel de 30 minutes, en 1:1, pour faire le point sur ${p0.currentYear} et surtout pour comprendre où vous voulez emmener ${company ? "l'entreprise" : "votre projet"} en <strong style="color:${TEXT};">${p0.nextYear}</strong>. Vos plans, vos ambitions, ce qui doit changer, ce qu'on peut préparer ensemble en amont.`,
+      `On ressort systématiquement de ces appels avec une vision beaucoup plus claire de comment on peut vous être utile l'année suivante${company} — et honnêtement, c'est un des moments qu'on préfère dans l'année.`,
+      `Choisissez le créneau qui vous arrange le plus, on s'adapte :`,
+    ], { url: p0.calendlyUrl, label: "Réserver mon appel 30 min" })}
+
+    <div style="text-align:center;font-family:${SANS};font-size:12px;color:${MUTED};margin-top:18px;">
+      Rien ne colle dans les créneaux proposés ? Répondez à cet email et on trouve autre chose.
+    </div>
+  `;
+  return shell(`${first}, on prend 30 min avant que ${p0.currentYear} se termine ?`, inner);
+}
+
+// ── Christmas (Dec 24) — pure warmth, no CTA ───────────────────────────
+export interface ChristmasEmailParams {
+  contactName?: string | null;
+  companyName?: string | null;
+  currentYear: number;
+}
+
+export function renderChristmasEmail(p0: ChristmasEmailParams): string {
+  const first = esc(firstNameOf(p0.contactName));
+  const withCompany = p0.companyName
+    ? `Travailler avec <strong style="color:${TEXT};">${esc(p0.companyName)}</strong> cette année a été une vraie chance pour nous.`
+    : `Vous avoir à nos côtés cette année a été une vraie chance pour nous.`;
+
+  const inner = `
+    ${headline(`Joyeux Noël,`, `${first}`)}
+    ${letterShell([
+      `Aujourd'hui, on met les campagnes, les rapports et les tableaux de bord de côté. On voulait juste prendre 30 secondes pour vous souhaiter, à vous et à vos proches, un très beau Noël.`,
+      withCompany + ` Chaque échange, chaque projet, chaque victoire (et chaque petit défi, aussi 😉) a compté.`,
+      `Profitez bien de ces moments en famille — ils passent trop vite. On se retrouve avec plein d'énergie de l'autre côté des fêtes.`,
+    ])}
+  `;
+  return shell(`Joyeux Noël de la part de toute l'équipe TDIA`, inner);
+}
+
+// ── New Year (Dec 31) — well-wishes for the year ahead ────────────────
+export interface NewYearEmailParams {
+  contactName?: string | null;
+  companyName?: string | null;
+  currentYear: number;
+  nextYear: number;
+}
+
+export function renderNewYearEmail(p0: NewYearEmailParams): string {
+  const first = esc(firstNameOf(p0.contactName));
+  const target = p0.companyName
+    ? `pour <strong style="color:${TEXT};">${esc(p0.companyName)}</strong>`
+    : `pour vous`;
+
+  const inner = `
+    ${headline(`Bonne année,`, `${first}`)}
+    ${letterShell([
+      `Voilà, ${p0.currentYear} tire sa révérence. On en profite pour vous envoyer nos meilleurs vœux — de santé d'abord, puis tout le reste : réussite, sérénité, et surtout des projets qui vous passionnent.`,
+      `Qu'${p0.nextYear} soit à la hauteur de vos ambitions ${target}. De notre côté, on est prêts à mettre toute notre énergie pour que cette nouvelle année soit votre meilleure jusqu'à présent.`,
+      `Merci pour votre confiance. On se retrouve très vite.`,
+    ])}
+  `;
+  return shell(`Que ${p0.nextYear} soit à la hauteur de vos ambitions`, inner);
+}

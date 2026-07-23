@@ -378,6 +378,44 @@ function BusinessContextForm({ clientId, row, products, onSaved }: any) {
   );
 }
 
+// Compute Meta-derived values from measurement snapshots (CSV imports).
+// Reads snapshots imported via AdFileUpload where notes JSON contains platform="meta_ads".
+// Filters by created_at (upload date) — the CSV's period_start may fall outside the 30-day
+// window (e.g., a 30-day report starting 32 days ago) even when the data was just uploaded.
+async function deriveFromMeta(clientId: string) {
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  const { data, error } = await supabase
+    .from("gos_measurement_snapshots")
+    .select("actual_ad_spend, actual_revenue, actual_orders, actual_roas, notes, created_at, period_start, period_end")
+    .eq("client_id", clientId)
+    .gte("created_at", since)
+    .like("notes", '%"platform":"meta_ads"%')
+    .order("created_at", { ascending: false });
+  if (error) console.error("[deriveFromMeta] query error:", error.message);
+  const snaps = data ?? [];
+  const spend = snaps.reduce((s, r) => s + Number(r.actual_ad_spend || 0), 0);
+  const revenue = snaps.reduce((s, r) => s + Number(r.actual_revenue || 0), 0);
+  const orders = snaps.reduce((s, r) => s + Number(r.actual_orders || 0), 0);
+  let activeAds = 0;
+  for (const r of snaps) {
+    try {
+      const meta = JSON.parse((r as { notes?: string }).notes ?? "{}");
+      if (typeof meta.active_count === "number") activeAds += meta.active_count;
+    } catch { /* ignore malformed notes */ }
+  }
+  const roas = spend > 0 ? Number((revenue / spend).toFixed(2)) : null;
+  const cpa = orders > 0 ? Number((spend / orders).toFixed(2)) : null;
+  return {
+    ad_spend_30d: snaps.length ? Number(spend.toFixed(2)) : null,
+    meta_revenue_30d: snaps.length ? Number(revenue.toFixed(2)) : null,
+    meta_orders_30d: snaps.length ? orders : null,
+    roas_30d: roas,
+    meta_cpa: cpa,
+    active_ads_count: activeAds || null,
+    has_data: snaps.length > 0,
+  };
+}
+
 // Compute Shopify-derived values from measurement snapshots + product profiles
 async function deriveFromShopify(clientId: string) {
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10);
@@ -742,6 +780,7 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
   const [f, setF] = useState<any>(row ?? { business_type: businessType });
   const [saving, setSaving] = useState(false);
   const [derived, setDerived] = useState<any>(null);
+  const [metaDerived, setMetaDerived] = useState<any>(null);
   const set = (k: string, v: any) => setF((p: any) => ({ ...p, [k]: v === "" ? null : v }));
   const num = (v: any) => (v == null ? "" : v);
   const isEcom = businessType === "ECOMMERCE" || businessType === "HYBRID";
@@ -750,15 +789,27 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
   useEffect(() => {
     if (!isEcom) return;
     (async () => {
-      const d = await deriveFromShopify(clientId);
-      setDerived(d);
-      if (!d.has_data) return;
+      const [shop, meta] = await Promise.all([deriveFromShopify(clientId), deriveFromMeta(clientId)]);
+      setDerived(shop);
+      setMetaDerived(meta);
       setF((prev: any) => {
         const next = { ...prev };
-        if (next.revenue_30d == null && d.revenue_30d != null) next.revenue_30d = d.revenue_30d;
-        if (next.orders_30d == null && d.orders_30d != null) next.orders_30d = d.orders_30d;
-        if (next.aov_30d == null && d.aov != null) next.aov_30d = d.aov;
-        if (next.ad_spend_30d == null) next.ad_spend_30d = 0; // no ad platform connected yet
+        if (shop.has_data) {
+          if (next.revenue_30d == null && shop.revenue_30d != null) next.revenue_30d = shop.revenue_30d;
+          if (next.orders_30d == null && shop.orders_30d != null) next.orders_30d = shop.orders_30d;
+          if (next.aov_30d == null && shop.aov != null) next.aov_30d = shop.aov;
+        }
+        if (meta.has_data) {
+          if (next.ad_spend_30d == null && meta.ad_spend_30d != null) next.ad_spend_30d = meta.ad_spend_30d;
+          if (next.roas_30d == null && meta.roas_30d != null) next.roas_30d = meta.roas_30d;
+          if (next.active_ads_count == null && meta.active_ads_count != null) next.active_ads_count = meta.active_ads_count;
+        }
+        // Blended MER = revenue Shopify / spend Meta (once both present)
+        if (next.mer_30d == null && shop.has_data && meta.has_data && meta.ad_spend_30d && shop.revenue_30d) {
+          next.mer_30d = Number((shop.revenue_30d / meta.ad_spend_30d).toFixed(2));
+        }
+        if (!shop.has_data && !meta.has_data) return prev;
+        if (next.ad_spend_30d == null && !meta.has_data) next.ad_spend_30d = 0;
         return next;
       });
     })();
@@ -766,17 +817,36 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
   }, [clientId]);
 
   const autofill = async () => {
-    const d = await deriveFromShopify(clientId);
-    setDerived(d);
-    if (!d.has_data) { toast.error("Aucune donnée Shopify — lance d'abord une synchro."); return; }
-    setF((prev: any) => ({
-      ...prev,
-      revenue_30d: d.revenue_30d ?? prev.revenue_30d,
-      orders_30d: d.orders_30d ?? prev.orders_30d,
-      aov_30d: d.aov ?? prev.aov_30d,
-      ad_spend_30d: prev.ad_spend_30d ?? 0,
-    }));
-    toast.success("Baseline auto-remplie depuis Shopify");
+    const [shop, meta] = await Promise.all([deriveFromShopify(clientId), deriveFromMeta(clientId)]);
+    setDerived(shop);
+    setMetaDerived(meta);
+    if (!shop.has_data && !meta.has_data) {
+      toast.error("Aucune donnée Shopify ni CSV Meta — lance d'abord une synchro ou importe un CSV Meta.");
+      return;
+    }
+    setF((prev: any) => {
+      const next = { ...prev };
+      if (shop.has_data) {
+        next.revenue_30d = shop.revenue_30d ?? prev.revenue_30d;
+        next.orders_30d = shop.orders_30d ?? prev.orders_30d;
+        next.aov_30d = shop.aov ?? prev.aov_30d;
+      }
+      if (meta.has_data) {
+        next.ad_spend_30d = meta.ad_spend_30d ?? prev.ad_spend_30d;
+        next.roas_30d = meta.roas_30d ?? prev.roas_30d;
+        next.active_ads_count = meta.active_ads_count ?? prev.active_ads_count;
+      } else if (next.ad_spend_30d == null) {
+        next.ad_spend_30d = 0;
+      }
+      if (shop.has_data && meta.has_data && meta.ad_spend_30d && shop.revenue_30d) {
+        next.mer_30d = Number((shop.revenue_30d / meta.ad_spend_30d).toFixed(2));
+      }
+      return next;
+    });
+    const parts: string[] = [];
+    if (shop.has_data) parts.push("Shopify");
+    if (meta.has_data) parts.push("CSV Meta");
+    toast.success(`Baseline auto-remplie depuis ${parts.join(" + ")}`);
   };
 
   const save = async () => {
@@ -799,7 +869,8 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
     else { toast.success("Saved"); onSaved(); }
   };
 
-  const AUTO_KEYS = new Set(["revenue_30d", "orders_30d", "aov_30d"]);
+  const SHOPIFY_KEYS = new Set(["revenue_30d", "orders_30d", "aov_30d"]);
+  const META_KEYS = new Set(["ad_spend_30d", "roas_30d", "active_ads_count", "mer_30d"]);
   const ecomFields = [
     ["revenue_30d","Revenue 30d"],["ad_spend_30d","Ad Spend 30d"],["mer_30d","MER 30d"],["cac_30d","CAC 30d"],
     ["roas_30d","ROAS 30d"],["aov_30d","AOV 30d"],["cvr_30d","CVR 30d (%)"],["atc_rate_30d","ATC Rate (%)"],
@@ -821,17 +892,26 @@ function BaselineForm({ clientId, businessType, row, onSaved }: any) {
       {isEcom && (<>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12, flexWrap: "wrap" }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: "var(--tdia-muted)", textTransform: "uppercase" }}>E-commerce</div>
-          <button className="gos-btn-secondary" type="button" onClick={autofill} style={{ fontSize: 12 }}>⟳ Auto-remplir depuis Shopify</button>
+          <button className="gos-btn-secondary" type="button" onClick={autofill} style={{ fontSize: 12 }}>⟳ Auto-remplir (Shopify + CSV Meta)</button>
         </div>
-        {derived && derived.has_data && (
-          <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "rgba(255, 255, 255, 0.02)", padding: "8px 10px", borderRadius: 6, marginBottom: 12 }}>
-            Shopify 30j : revenue {derived.revenue_30d ?? 0} · orders {derived.orders_30d ?? 0} · AOV {derived.aov ?? "—"}. Ad spend reste manuel jusqu'à connexion Meta/Google.
+        {(derived?.has_data || metaDerived?.has_data) && (
+          <div style={{ fontSize: 12, color: "var(--tdia-muted)", background: "rgba(255, 255, 255, 0.02)", padding: "8px 10px", borderRadius: 6, marginBottom: 12, display: "flex", flexDirection: "column", gap: 4 }}>
+            {derived?.has_data && (
+              <div>Shopify 30j : revenue {derived.revenue_30d ?? 0} · orders {derived.orders_30d ?? 0} · AOV {derived.aov ?? "—"}</div>
+            )}
+            {metaDerived?.has_data && (
+              <div>CSV Meta 30j : spend {metaDerived.ad_spend_30d ?? 0} · revenue {metaDerived.meta_revenue_30d ?? 0} · ROAS {metaDerived.roas_30d ?? "—"} · {metaDerived.active_ads_count ?? 0} pubs actives</div>
+            )}
+            {!metaDerived?.has_data && derived?.has_data && (
+              <div style={{ opacity: 0.7 }}>Aucun CSV Meta importé — ad_spend/ROAS restent manuels. Importe un CSV Meta depuis la page Data Sources pour compléter.</div>
+            )}
           </div>
         )}
         <Grid>{ecomFields.map(([k, l]) => (
           <F key={k} label={l}>
             <input type="number" className="gos-input" value={num(f[k])} onChange={(e) => set(k, e.target.value)} />
-            {AUTO_KEYS.has(k) && f[k] != null && <div style={{ fontSize: 10, color: "var(--tdia-primary, #4f8cff)", marginTop: 2 }}>Auto depuis Shopify</div>}
+            {SHOPIFY_KEYS.has(k) && f[k] != null && <div style={{ fontSize: 10, color: "var(--tdia-primary, #4f8cff)", marginTop: 2 }}>Auto depuis Shopify</div>}
+            {META_KEYS.has(k) && f[k] != null && metaDerived?.has_data && <div style={{ fontSize: 10, color: "#0866FF", marginTop: 2 }}>Auto depuis CSV Meta</div>}
           </F>
         ))}</Grid>
       </>)}

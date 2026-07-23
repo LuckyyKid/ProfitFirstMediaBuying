@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.gos-daily-digest]
 verify_jwt = false
+
+[functions.send-seasonal-email]
+verify_jwt = false
+
+[functions.notify-christmas-gifts]
+verify_jwt = false

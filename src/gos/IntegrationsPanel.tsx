@@ -4,9 +4,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { RefreshCw, ExternalLink, Trash2, Save } from "lucide-react";
+import { RefreshCw, ExternalLink, Trash2, Save, UploadCloud } from "lucide-react";
+import { AdFileUpload } from "./uploads/AdFileUpload";
+import type { Platform } from "./uploads/adPlatformParser";
 
 type ProviderId = "shopify" | "meta_ads" | "ga4" | "google_ads";
+
+const UPLOADABLE_PROVIDERS: readonly ProviderId[] = ["meta_ads", "google_ads", "ga4"];
+const isUploadable = (id: ProviderId): id is Platform => UPLOADABLE_PROVIDERS.includes(id);
 
 interface Provider {
   id: ProviderId;
@@ -118,6 +123,9 @@ export default function IntegrationsPanel({ clientId }: { clientId: string }) {
   // Shopify shop domain modal
   const [shopifyModalOpen, setShopifyModalOpen] = useState(false);
   const [shopifyDomain, setShopifyDomain] = useState("");
+
+  // CSV/XLSX upload modal (Meta / Google Ads / GA4)
+  const [uploadFor, setUploadFor] = useState<Platform | null>(null);
 
 
   const load = async () => {
@@ -585,6 +593,16 @@ export default function IntegrationsPanel({ clientId }: { clientId: string }) {
                       {p.id !== "ga4" && (
                         <button className="gos-btn-secondary" onClick={() => startEdit(p)} style={{ padding: "8px 12px" }}>Modifier</button>
                       )}
+                      {isUploadable(p.id) && (
+                        <button
+                          className="gos-btn-secondary"
+                          onClick={() => setUploadFor(p.id)}
+                          title="Importer un export CSV/XLSX"
+                          style={{ padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                        >
+                          <UploadCloud size={12} /> Fichier
+                        </button>
+                      )}
                       <button className="gos-btn-secondary" onClick={() => disconnect(conn)} title="Déconnecter" style={{ padding: "8px 10px" }}>
                         <Trash2 size={12} />
                       </button>
@@ -623,6 +641,16 @@ export default function IntegrationsPanel({ clientId }: { clientId: string }) {
                           style={{ padding: "8px 12px" }}
                         >
                           Manuel
+                        </button>
+                      )}
+                      {isUploadable(p.id) && (
+                        <button
+                          className="gos-btn-secondary"
+                          onClick={() => setUploadFor(p.id)}
+                          title="Importer un export CSV/XLSX sans connecter le compte"
+                          style={{ padding: "8px 12px", display: "inline-flex", alignItems: "center", gap: 6 }}
+                        >
+                          <UploadCloud size={12} /> Fichier
                         </button>
                       )}
                     </div>
@@ -776,6 +804,15 @@ export default function IntegrationsPanel({ clientId }: { clientId: string }) {
             </div>
           </div>
         </div>
+      )}
+
+      {uploadFor && (
+        <AdFileUpload
+          clientId={clientId}
+          expectedPlatform={uploadFor}
+          onClose={() => setUploadFor(null)}
+          onDone={load}
+        />
       )}
     </div>
   );

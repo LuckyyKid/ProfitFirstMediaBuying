@@ -31,13 +31,29 @@ const fmtCompact = (n: number) => {
   return String(Math.round(n));
 };
 
+type FieldSource = "profit-plan" | "meta-ads" | "default" | "manual";
+
+const FATIGUE_DEFAULT = 30000; // static/image benchmark — see docs/gos-input-source-guide.md
+const CPM_DEFAULT = 12.5;
+const SPEND_DEFAULT = 25000;
+
 export default function CreativeDemand() {
   const { clientId } = useParams();
   const { setSelectedClient } = useSelectedClient();
   const [targets, setTargets] = useState<any[]>([]);
   const [runs, setRuns] = useState<CreativeDemandRunRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ period_label: "", target_ad_spend: "25000", avg_cpm: "12.5", fatigue: "200000" });
+  const [form, setForm] = useState({
+    period_label: "",
+    target_ad_spend: String(SPEND_DEFAULT),
+    avg_cpm: String(CPM_DEFAULT),
+    fatigue: String(FATIGUE_DEFAULT),
+  });
+  const [sources, setSources] = useState<{ spend: FieldSource; cpm: FieldSource; fatigue: FieldSource }>({
+    spend: "default",
+    cpm: "default",
+    fatigue: "default",
+  });
 
   const load = async () => {
     if (!clientId) return;
@@ -50,6 +66,41 @@ export default function CreativeDemand() {
     if (c.data) { setSelectedClient(c.data as any); }
     setTargets(t.data ?? []);
     setRuns(r);
+
+    // Auto-fill from live data
+    const latestTarget = t.data?.[0];
+    const clientCode = (c.data as any)?.client_code as string | undefined;
+    let metaCpm: number | null = null;
+    if (clientCode) {
+      const { data: crmClient } = await supabase
+        .from("crm_clients")
+        .select("id")
+        .eq("client_code", clientCode)
+        .maybeSingle();
+      if (crmClient?.id) {
+        const { data: baseline } = await supabase
+          .from("crm_quantitative_baselines")
+          .select("meta_cpm")
+          .eq("client_id", crmClient.id)
+          .maybeSingle();
+        if (baseline?.meta_cpm != null && Number(baseline.meta_cpm) > 0) {
+          metaCpm = Number(baseline.meta_cpm);
+        }
+      }
+    }
+    setForm((prev) => ({
+      ...prev,
+      target_ad_spend: latestTarget?.target_ad_spend
+        ? String(Math.round(Number(latestTarget.target_ad_spend) / 4))
+        : prev.target_ad_spend,
+      avg_cpm: metaCpm != null ? String(metaCpm) : prev.avg_cpm,
+    }));
+    setSources({
+      spend: latestTarget?.target_ad_spend ? "profit-plan" : "default",
+      cpm: metaCpm != null ? "meta-ads" : "default",
+      fatigue: "default",
+    });
+
     setLoading(false);
   };
 
@@ -87,6 +138,7 @@ export default function CreativeDemand() {
     if (!t) { toast.error("Aucune cible existante"); return; }
     const weekly = t.target_ad_spend ? Math.round(Number(t.target_ad_spend) / 4) : 0;
     setForm({ period_label: t.period_label, target_ad_spend: String(weekly), avg_cpm: form.avg_cpm, fatigue: form.fatigue });
+    setSources((prev) => ({ ...prev, spend: "profit-plan" }));
   };
 
   if (loading) return <div style={{ height: 300, background: CARD, borderRadius: 8 }} />;
@@ -128,14 +180,14 @@ export default function CreativeDemand() {
           <input value={form.period_label} onChange={(e) => setForm({ ...form, period_label: e.target.value })} placeholder="Semaine 45"
             style={inputStyle()} />
         </InputCell>
-        <InputCell label="Spend hebdo">
-          <MoneyInput value={form.target_ad_spend} onChange={(v) => setForm({ ...form, target_ad_spend: v })} accent />
+        <InputCell label="Spend hebdo" source={sources.spend}>
+          <MoneyInput value={form.target_ad_spend} onChange={(v) => { setForm({ ...form, target_ad_spend: v }); setSources((p) => ({ ...p, spend: "manual" })); }} accent />
         </InputCell>
-        <InputCell label="CPM moyen">
-          <MoneyInput value={form.avg_cpm} onChange={(v) => setForm({ ...form, avg_cpm: v })} />
+        <InputCell label="CPM moyen" source={sources.cpm}>
+          <MoneyInput value={form.avg_cpm} onChange={(v) => { setForm({ ...form, avg_cpm: v }); setSources((p) => ({ ...p, cpm: "manual" })); }} />
         </InputCell>
-        <InputCell label="Seuil fatigue (impr.)">
-          <input value={form.fatigue} onChange={(e) => setForm({ ...form, fatigue: e.target.value })} inputMode="numeric"
+        <InputCell label="Seuil fatigue (impr.)" source={sources.fatigue}>
+          <input value={form.fatigue} onChange={(e) => { setForm({ ...form, fatigue: e.target.value }); setSources((p) => ({ ...p, fatigue: "manual" })); }} inputMode="numeric"
             style={inputStyle()} />
         </InputCell>
         <InputCell label="Depuis cible">
@@ -266,10 +318,24 @@ function inputStyle(): React.CSSProperties {
   };
 }
 
-function InputCell({ label, children }: { label: string; children: React.ReactNode }) {
+function InputCell({ label, children, source }: { label: string; children: React.ReactNode; source?: FieldSource }) {
+  const sourceMeta: Record<FieldSource, { text: string; color: string }> = {
+    "profit-plan": { text: "Profit Plan", color: GREEN },
+    "meta-ads": { text: "Meta Ads", color: BLUE },
+    "default": { text: "Benchmark", color: MUTED },
+    "manual": { text: "Manuel", color: AMBER },
+  };
+  const meta = source ? sourceMeta[source] : null;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <label style={{ fontSize: 10, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>{label}</label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+        <label style={{ fontSize: 10, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.03em" }}>{label}</label>
+        {meta && (
+          <span title={`Source : ${meta.text}`} style={{ fontFamily: MONO, fontSize: 9, color: meta.color, textTransform: "uppercase", letterSpacing: "0.03em", opacity: 0.85 }}>
+            · {meta.text}
+          </span>
+        )}
+      </div>
       {children}
     </div>
   );
