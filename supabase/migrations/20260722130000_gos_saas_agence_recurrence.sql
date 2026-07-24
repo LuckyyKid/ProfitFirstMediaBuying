@@ -32,11 +32,8 @@ ALTER TABLE public.gos_quantitative_baselines
   ADD CONSTRAINT gos_quantitative_baselines_business_type_check
     CHECK (business_type IN ('ECOMMERCE','LOCAL_SERVICE','SAAS','AGENCE','HYBRID','OTHER'));
 
-ALTER TABLE public.gos_business_contexts
-  DROP CONSTRAINT IF EXISTS gos_business_contexts_business_type_check;
-ALTER TABLE public.gos_business_contexts
-  ADD CONSTRAINT gos_business_contexts_business_type_check
-    CHECK (business_type IN ('ECOMMERCE','LOCAL_SERVICE','SAAS','AGENCE','HYBRID','OTHER'));
+-- (gos_business_contexts has no business_type column in the live schema —
+--  the enum lives on gos_clients and gets joined, so no CHECK needed here.)
 
 -- ============================================================
 -- 2. Recurrence unit economics on gos_financial_inputs
