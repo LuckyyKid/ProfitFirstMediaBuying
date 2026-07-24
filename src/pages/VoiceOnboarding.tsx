@@ -426,7 +426,7 @@ const VoiceOnboarding = () => {
   // ---------------------------------------------------------------------------
   // Render.
   // ---------------------------------------------------------------------------
-  const progress = useMemo(() => {
+  const progressPct = useMemo(() => {
     const done = Object.keys(answers).length;
     return Math.round((done / totalBlocks) * 100);
   }, [answers, totalBlocks]);
@@ -504,12 +504,12 @@ const VoiceOnboarding = () => {
       <div className="w-full max-w-md mx-auto pt-2">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
           <span>Note {blockIndex + 1} / {totalBlocks}</span>
-          <span>{progress}%</span>
+          <span>{progressPct}%</span>
         </div>
         <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
           <div
             className="h-full bg-emerald-500 transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${progressPct}%` }}
           />
         </div>
       </div>
