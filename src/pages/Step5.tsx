@@ -11,6 +11,7 @@ import { useClient } from "@/hooks/useClient";
 import { useClientProgress } from "@/hooks/useClientProgress";
 import { QuizSlideshow } from "@/components/QuizSlideshow";
 import { getBusinessDeepDiveQuestions } from "@/data/quizQuestions";
+import { stripVocalQuestions } from "@/data/voiceBlocks";
 
 const translations = {
   en: {
@@ -40,8 +41,11 @@ const Step5 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!(progress as any)?.business_deep_dive_submitted;
-  const deepDiveQuestions = getBusinessDeepDiveQuestions(
-    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
+  const deepDiveQuestions = stripVocalQuestions(
+    getBusinessDeepDiveQuestions(
+      (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
+    ),
+    "business_deep_dive",
   );
 
   // Deep Dive now runs AFTER contract, right before kickoff.

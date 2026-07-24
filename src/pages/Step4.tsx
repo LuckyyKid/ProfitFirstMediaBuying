@@ -11,6 +11,7 @@ import { useClient } from "@/hooks/useClient";
 import { useClientProgress } from "@/hooks/useClientProgress";
 import { QuizSlideshow } from "@/components/QuizSlideshow";
 import { getFounderScanQuestions } from "@/data/quizQuestions";
+import { stripVocalQuestions } from "@/data/voiceBlocks";
 
 const translations = {
   en: {
@@ -38,8 +39,11 @@ const Step4 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!progress?.founder_scan_submitted;
-  const founderQuestions = getFounderScanQuestions(
-    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
+  const founderQuestions = stripVocalQuestions(
+    getFounderScanQuestions(
+      (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
+    ),
+    "founder_scan",
   );
 
   // After Founder Scan, go to Payment (step6). Mark step 5 completed too so

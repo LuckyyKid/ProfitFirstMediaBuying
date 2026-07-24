@@ -118,7 +118,7 @@ const Step2 = () => {
       console.error("platforms completion sync error:", error);
     });
     playSuccessSound();
-    setTimeout(() => navigate("/step3"), 300);
+    setTimeout(() => navigate("/voice"), 300);
   };
 
   return (

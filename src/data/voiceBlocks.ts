@@ -159,3 +159,35 @@ export const VOICE_TOTAL_BLOCKS = VOICE_BLOCKS.length;
 export function findVoiceBlock(id: string): VoiceBlock | undefined {
   return VOICE_BLOCKS.find((b) => b.id === id);
 }
+
+// IDs of written-form fields covered by the vocal blocks for a given form.
+// The Local Service variant of the quiz uses different IDs (ls_*), so it
+// won't match anything here — LS clients see the full written form for now.
+export function getVocalCoveredFieldIds(formKey: FormKey): Set<string> {
+  const ids = new Set<string>();
+  for (const b of VOICE_BLOCKS) {
+    if (b.formKey !== formKey) continue;
+    for (const f of b.targetFieldIds) ids.add(f);
+  }
+  return ids;
+}
+
+export function stripVocalQuestions<T extends { id: string }>(
+  questions: T[],
+  formKey: FormKey,
+): T[] {
+  const covered = getVocalCoveredFieldIds(formKey);
+  if (covered.size === 0) return questions;
+  return questions.filter((q) => !covered.has(q.id));
+}
+
+export function stripVocalFromBlocks<B extends { questionIds: string[] }>(
+  blocks: B[],
+  formKey: FormKey,
+): B[] {
+  const covered = getVocalCoveredFieldIds(formKey);
+  if (covered.size === 0) return blocks;
+  return blocks
+    .map((b) => ({ ...b, questionIds: b.questionIds.filter((id) => !covered.has(id)) }))
+    .filter((b) => b.questionIds.length > 0);
+}

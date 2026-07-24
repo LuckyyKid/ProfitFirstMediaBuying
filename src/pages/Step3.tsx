@@ -11,6 +11,7 @@ import { useClient } from "@/hooks/useClient";
 import { useClientProgress } from "@/hooks/useClientProgress";
 import { QuizBlocks } from "@/components/QuizBlocks";
 import { getWelcomeQuestions } from "@/data/quizQuestions";
+import { stripVocalQuestions, stripVocalFromBlocks } from "@/data/voiceBlocks";
 
 const translations = {
   en: {
@@ -40,9 +41,11 @@ const Step3 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!progress?.welcome_form_submitted;
-  const { questions: welcomeQuestions, blocks: welcomeBlocks } = getWelcomeQuestions(
+  const { questions: rawWelcomeQuestions, blocks: rawWelcomeBlocks } = getWelcomeQuestions(
     (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
   );
+  const welcomeQuestions = stripVocalQuestions(rawWelcomeQuestions, "welcome");
+  const welcomeBlocks = stripVocalFromBlocks(rawWelcomeBlocks, "welcome");
 
   const handleComplete = () => {
     markStepCompleted(3);
