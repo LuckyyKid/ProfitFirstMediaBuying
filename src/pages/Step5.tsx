@@ -41,11 +41,12 @@ const Step5 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!(progress as any)?.business_deep_dive_submitted;
+  const businessType =
+    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce";
   const deepDiveQuestions = stripVocalQuestions(
-    getBusinessDeepDiveQuestions(
-      (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
-    ),
+    getBusinessDeepDiveQuestions(businessType),
     "business_deep_dive",
+    businessType,
   );
 
   // Deep Dive now runs AFTER contract, right before kickoff.

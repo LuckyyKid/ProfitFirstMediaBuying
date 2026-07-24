@@ -41,11 +41,11 @@ const Step3 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!progress?.welcome_form_submitted;
-  const { questions: rawWelcomeQuestions, blocks: rawWelcomeBlocks } = getWelcomeQuestions(
-    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
-  );
-  const welcomeQuestions = stripVocalQuestions(rawWelcomeQuestions, "welcome");
-  const welcomeBlocks = stripVocalFromBlocks(rawWelcomeBlocks, "welcome");
+  const businessType =
+    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce";
+  const { questions: rawWelcomeQuestions, blocks: rawWelcomeBlocks } = getWelcomeQuestions(businessType);
+  const welcomeQuestions = stripVocalQuestions(rawWelcomeQuestions, "welcome", businessType);
+  const welcomeBlocks = stripVocalFromBlocks(rawWelcomeBlocks, "welcome", businessType);
 
   const handleComplete = () => {
     markStepCompleted(3);

@@ -39,11 +39,12 @@ const Step4 = () => {
   const clientCode = (info as any)?.client?.client_code ?? null;
   const { progress } = useClientProgress(clientCode);
   const alreadyDone = !!progress?.founder_scan_submitted;
+  const businessType =
+    (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce";
   const founderQuestions = stripVocalQuestions(
-    getFounderScanQuestions(
-      (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce"
-    ),
+    getFounderScanQuestions(businessType),
     "founder_scan",
+    businessType,
   );
 
   // After Founder Scan, go to Payment (step6). Mark step 5 completed too so

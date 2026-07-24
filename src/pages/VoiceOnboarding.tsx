@@ -15,9 +15,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useClient } from "@/hooks/useClient";
+import { useClientProgress } from "@/hooks/useClientProgress";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { useWakeLock } from "@/hooks/useWakeLock";
-import { VOICE_BLOCKS, type VoiceBlock } from "@/data/voiceBlocks";
+import { getVoiceBlocksForType, type VoiceBlock } from "@/data/voiceBlocks";
 import { cn } from "@/lib/utils";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -135,6 +136,12 @@ const VoiceOnboarding = () => {
   const navigate = useNavigate();
   const { info } = useClient();
   const clientCode: string | null = (info as any)?.client?.client_code ?? null;
+  const { progress } = useClientProgress(clientCode);
+  const businessType =
+    (progress as any)?.business_type ??
+    (info as any)?.client?.business_type ??
+    "ecommerce";
+  const voiceBlocks = useMemo(() => getVoiceBlocksForType(businessType), [businessType]);
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [blockIndex, setBlockIndex] = useState(0);
@@ -156,8 +163,8 @@ const VoiceOnboarding = () => {
   const recorder = useVoiceRecorder();
   useWakeLock(phase === "question" && !textMode);
 
-  const currentBlock = VOICE_BLOCKS[blockIndex];
-  const totalBlocks = VOICE_BLOCKS.length;
+  const currentBlock = voiceBlocks[blockIndex];
+  const totalBlocks = voiceBlocks.length;
 
   // ---------------------------------------------------------------------------
   // Session resume on mount.
@@ -165,7 +172,7 @@ const VoiceOnboarding = () => {
   useEffect(() => {
     if (!clientCode) return;
     const s = loadSession(clientCode);
-    if (s && s.blockIndex > 0 && s.blockIndex < VOICE_BLOCKS.length) {
+    if (s && s.blockIndex > 0 && s.blockIndex < voiceBlocks.length) {
       setBlockIndex(s.blockIndex);
       setAnswers(s.answers);
       // Stay on the intro so we can re-request mic permission on user gesture.
@@ -443,7 +450,7 @@ const VoiceOnboarding = () => {
             <Mic className="w-8 h-8 text-emerald-400" />
           </div>
           <h1 className="text-3xl font-semibold text-slate-50">
-            {VOICE_BLOCKS.length} notes vocales rapides
+            {voiceBlocks.length} notes vocales rapides
           </h1>
           <p className="text-slate-300 leading-relaxed">
             Environ 2 minutes chacune. Vous répondez à voix haute, on s'occupe du
