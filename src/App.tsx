@@ -21,6 +21,7 @@ import ClosedDeals from "./pages/admin/ClosedDeals";
 import ContractCreator from "./pages/admin/ContractCreator";
 import FollowUps from "./pages/admin/FollowUps";
 import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import AgentOpsLayout from "./components/agentOps/AgentOpsLayout";
 import OpsDashboard from "./pages/agentOps/Dashboard";
 import OpsClients from "./pages/agentOps/Clients";
@@ -117,6 +118,7 @@ const App = () => (
       <Sonner />
       <div className="stars-bg" />
       <BrowserRouter>
+       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/client" element={<ClientOnboarding />} />
@@ -225,6 +227,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+       </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
