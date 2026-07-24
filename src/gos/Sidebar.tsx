@@ -9,10 +9,10 @@
 // la bibliothèque est l'accès libre "rangé" que la règle #10 exige.
 
 import { useMemo, useState, type CSSProperties } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Info, LogOut, ArrowLeft, Calendar, Users, LineChart,
-  Search, ChevronRight,
+  Search, ChevronRight, Building2,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { useHelpDispatch, type HelpContent } from "./help";
@@ -28,6 +28,8 @@ import {
 } from "./pageLibrary";
 import { usePhase, phaseMatches } from "./phase";
 import { useSelectedClient } from "./context";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useInternalAgency } from "./internalAgency";
 
 type SidebarProps = {
   clientId: string | null;
@@ -103,13 +105,23 @@ export function Sidebar({
 }: SidebarProps) {
   const { showHelp } = useHelpDispatch();
   const { phase, setPhase } = usePhase();
-  const { selectedClient } = useSelectedClient();
+  const { selectedClient, setSelectedClient } = useSelectedClient();
   const businessType = selectedClient?.business_type ?? null;
+  const { isAdmin } = useIsAdmin();
+  const { agency } = useInternalAgency();
+  const navigate = useNavigate();
 
   const library = useMemo(
     () => groupPagesByPhase(filterPagesByBusinessType(PAGE_LIBRARY, businessType)),
     [businessType],
   );
+
+  const openInternalAgency = () => {
+    if (!agency) return;
+    setSelectedClient(agency as any);
+    navigate(`/admin/gos/clients/${agency.id}/workspace`);
+  };
+  const isAgencyActive = !!agency && selectedClient?.id === agency.id;
 
   return (
     <aside className="gos-sidebar">
@@ -125,6 +137,41 @@ export function Sidebar({
           Media Buying
         </div>
       </div>
+
+      {/* TDIA pinned workspace — admin-only shortcut to our own agency's GOS.
+          Sits above the client chip because it's a workspace switcher, not a
+          per-client action. */}
+      {isAdmin && agency && (
+        <button
+          onClick={openInternalAgency}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            width: "100%", padding: "10px 12px",
+            marginBottom: 12,
+            background: isAgencyActive
+              ? "linear-gradient(135deg, rgba(180, 130, 40, 0.20), rgba(180, 130, 40, 0.06))"
+              : "linear-gradient(135deg, rgba(180, 130, 40, 0.10), rgba(255, 255, 255, 0.02))",
+            border: isAgencyActive
+              ? "1px solid rgba(210, 160, 60, 0.45)"
+              : "1px solid rgba(180, 130, 40, 0.25)",
+            borderRadius: 10,
+            color: isAgencyActive ? "#f0d089" : "var(--tdia-text)",
+            cursor: "pointer", textAlign: "left",
+            transition: "all 0.15s ease",
+          }}
+          title="Ouvrir le workspace TDIA — nos propres métriques d'agence"
+        >
+          <Building2 size={15} style={{ flexShrink: 0, color: "#e0a63a" }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="microlabel" style={{ fontSize: 9, color: "#e0a63a", letterSpacing: "0.20em" }}>
+              NOTRE AGENCE
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 2, letterSpacing: "-0.01em" }}>
+              {agency.company_name}
+            </div>
+          </div>
+        </button>
+      )}
 
       {/* Active client chip (only if one is selected) */}
       {hasClient && (

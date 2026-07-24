@@ -343,7 +343,7 @@ export default function GosNewClient() {
               <Field label="Secteur"><input className="gos-input" value={form.industry} onChange={(e) => set("industry", e.target.value)} /></Field>
               <Field label="Type d'activité">
                 <select className="gos-select" value={form.business_type} onChange={(e) => set("business_type", e.target.value)}>
-                  {BUSINESS_TYPES.map((v) => <option key={v} value={v}>{v.replace("_"," ")}</option>)}
+                  {BUSINESS_TYPES.filter((v) => v !== "AGENCE").map((v) => <option key={v} value={v}>{v.replace("_"," ")}</option>)}
                 </select>
               </Field>
               <Field label="Phase actuelle">

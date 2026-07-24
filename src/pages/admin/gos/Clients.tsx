@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SectionHeader, RiskBadge, PhaseBadge, EmptyState } from "@/gos/ui";
 import { useSelectedClient } from "@/gos/context";
 import { buildGosClientPayload, loadDealSources } from "@/gos/dealPrefill";
+import { isInternalAgency } from "@/gos/internalAgency";
 import { toast } from "sonner";
 import { ExternalLink, Zap, RefreshCw } from "lucide-react";
 
@@ -24,7 +25,7 @@ export default function GosClients() {
       supabase.from("gos_clients").select("*").order("created_at", { ascending: false }),
       loadDealSources(),
     ]);
-    setRows(clients ?? []);
+    setRows((clients ?? []).filter((c) => !isInternalAgency(c)));
     setPending(sources.filter((s) => !existingCodes.has(s.key)));
     setLoading(false);
   };
