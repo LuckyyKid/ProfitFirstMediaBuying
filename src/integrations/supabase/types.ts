@@ -7032,6 +7032,69 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_email_sends: {
+        Row: {
+          client_code: string
+          created_at: string
+          email_id: string | null
+          error: string | null
+          id: string
+          recipient_email: string
+          status: string
+          type: string
+          year: number
+        }
+        Insert: {
+          client_code: string
+          created_at?: string
+          email_id?: string | null
+          error?: string | null
+          id?: string
+          recipient_email: string
+          status: string
+          type: string
+          year: number
+        }
+        Update: {
+          client_code?: string
+          created_at?: string
+          email_id?: string | null
+          error?: string | null
+          id?: string
+          recipient_email?: string
+          status?: string
+          type?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      seasonal_slack_sends: {
+        Row: {
+          channel: string
+          client_count: number | null
+          created_at: string
+          id: string
+          type: string
+          year: number
+        }
+        Insert: {
+          channel: string
+          client_count?: number | null
+          created_at?: string
+          id?: string
+          type: string
+          year: number
+        }
+        Update: {
+          channel?: string
+          client_count?: number | null
+          created_at?: string
+          id?: string
+          type?: string
+          year?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -7058,6 +7121,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      exec_sql: { Args: { _sql: string }; Returns: undefined }
+      exec_sql_json: { Args: { _sql: string }; Returns: Json }
       has_gos_client_role: {
         Args: {
           _client_id: string
