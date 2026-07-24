@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ClientOnboarding from "./pages/ClientOnboarding";
 import Step2 from "./pages/Step2";
 import Step3 from "./pages/Step3";
+import VoiceOnboarding from "./pages/VoiceOnboarding";
 import Step4 from "./pages/Step4";
 import Step5 from "./pages/Step5";
 import Step6 from "./pages/Step6";
@@ -120,6 +121,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/client" element={<ClientOnboarding />} />
           <Route path="/step2" element={<Step2 />} />
+          <Route path="/voice" element={<VoiceOnboarding />} />
           <Route path="/step3" element={<Step3 />} />
           <Route path="/step4" element={<Step4 />} />
           <Route path="/step5" element={<Step5 />} />

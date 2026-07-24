@@ -49,7 +49,14 @@
       "PowerShell($bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create\\(\\).GetBytes\\($bytes\\); -join \\($bytes | ForEach-Object { $_.ToString\\(\"x2\"\\) }\\))",
       "Bash(node -e \"const fs=require\\('fs'\\); const sql=fs.readFileSync\\('supabase/migrations/20260722120000_seasonal_broadcast_logs.sql','utf8'\\); fs.writeFileSync\\('/tmp/migration_payload.json', JSON.stringify\\({action:'db.exec',payload:{sql}}\\)\\);\")",
       "Read(//tmp/**)",
-      "Bash(node -e \"const fs=require\\('fs'\\); const sql=fs.readFileSync\\('supabase/migrations/20260722120000_seasonal_broadcast_logs.sql','utf8'\\); fs.writeFileSync\\('./.tmp_migration_payload.json', JSON.stringify\\({action:'db.exec',payload:{sql}}\\)\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); const sql=fs.readFileSync\\('supabase/migrations/20260722120000_seasonal_broadcast_logs.sql','utf8'\\); fs.writeFileSync\\('./.tmp_migration_payload.json', JSON.stringify\\({action:'db.exec',payload:{sql}}\\)\\);\")",
+      "Bash(git stash *)",
+      "Bash(git fetch *)",
+      "Bash(git ls-remote *)",
+      "Bash(npx tsx *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
