@@ -206,7 +206,7 @@ const Step2 = () => {
                 <div className="flex items-center gap-2">
                   <h4 className="text-lg font-semibold text-primary">{t.tiktokVideo}</h4>
                   {isWatched(VIDEO_IDS.tiktok) && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-[hsl(var(--good))]" />
                   )}
                 </div>
                 <YouTubeTracker
@@ -225,7 +225,7 @@ const Step2 = () => {
                 <div className="flex items-center gap-2">
                   <h4 className="text-lg font-semibold text-primary">{t.facebookVideo}</h4>
                   {isWatched(VIDEO_IDS.facebook) && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-[hsl(var(--good))]" />
                   )}
                 </div>
                 <YouTubeTracker
@@ -244,7 +244,7 @@ const Step2 = () => {
                 <div className="flex items-center gap-2">
                   <h4 className="text-lg font-semibold text-primary">{t.googleVideo}</h4>
                   {isWatched(VIDEO_IDS.google) && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-[hsl(var(--good))]" />
                   )}
                 </div>
                 <YouTubeTracker
@@ -263,7 +263,7 @@ const Step2 = () => {
                 <div className="flex items-center gap-2">
                   <h4 className="text-lg font-semibold text-primary">{t.googleTagManager}</h4>
                   {isWatched(VIDEO_IDS.gtm) && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-[hsl(var(--good))]" />
                   )}
                 </div>
                 <YouTubeTracker
@@ -282,7 +282,7 @@ const Step2 = () => {
                 <div className="flex items-center gap-2">
                   <h4 className="text-lg font-semibold text-primary">{t.googleAnalytics}</h4>
                   {isWatched(VIDEO_IDS.analytics) && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-[hsl(var(--good))]" />
                   )}
                 </div>
                 <YouTubeTracker

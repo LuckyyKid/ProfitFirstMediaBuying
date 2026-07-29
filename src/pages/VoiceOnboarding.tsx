@@ -122,7 +122,9 @@ function Waveform({ values, active }: { values: number[]; active: boolean }) {
             key={i}
             className={cn(
               "w-1.5 rounded-full transition-all duration-75",
-              active ? "bg-emerald-400" : "bg-slate-500/60",
+              active
+                ? "bg-[linear-gradient(180deg,#4d9fff,#2f6bff)] shadow-[0_0_6px_rgba(77,159,255,0.5)]"
+                : "bg-[rgba(148,170,215,0.15)]",
             )}
             style={{ height: `${h}px` }}
           />
@@ -435,7 +437,7 @@ const VoiceOnboarding = () => {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md text-center space-y-3">
-          <p className="text-lg text-slate-100">Aucune session client active.</p>
+          <p className="text-lg text-foreground">Aucune session client active.</p>
           <Button onClick={() => navigate("/client")}>Retour à la connexion</Button>
         </div>
       </div>
@@ -446,18 +448,21 @@ const VoiceOnboarding = () => {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 animate-fade-in">
         <div className="max-w-md text-center space-y-6">
-          <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-            <Mic className="w-8 h-8 text-emerald-400" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] border border-[rgba(77,159,255,0.25)] shadow-[0_0_24px_rgba(47,107,255,0.2)] flex items-center justify-center">
+            <Mic className="w-8 h-8 text-[#9ec8ff]" />
           </div>
-          <h1 className="text-3xl font-semibold text-slate-50">
-            {voiceBlocks.length} notes vocales rapides
+          <h1 className="text-3xl font-medium tracking-[-0.02em] text-foreground">
+            <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#9ec8ff] block mb-2">
+              {voiceBlocks.length} notes
+            </span>
+            Notes vocales <span className="font-serif italic text-[#9ec8ff]">rapides</span>
           </h1>
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#c8d2e4] leading-relaxed">
             Environ 2 minutes chacune. Vous répondez à voix haute, on s'occupe du
             reste. Comme un vocal à un pote — pas d'écrit, pas de longues phrases
             à taper sur le téléphone.
           </p>
-          <ul className="text-sm text-slate-400 text-left space-y-1 mx-auto max-w-xs">
+          <ul className="text-sm text-[#5f6b82] text-left space-y-1 mx-auto max-w-xs">
             <li>• Trouvez un endroit calme si possible</li>
             <li>• Prenez votre temps, on enregistre en continu</li>
             <li>• Vous pourrez toujours écrire à la place si vous préférez</li>
@@ -478,14 +483,16 @@ const VoiceOnboarding = () => {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 animate-fade-in">
         <div className="max-w-md text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <Check className="w-8 h-8 text-emerald-400" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-[linear-gradient(135deg,#4d9fff,#2f6bff)] shadow-[0_8px_28px_rgba(47,107,255,0.4)] flex items-center justify-center">
+            <Check className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-semibold text-slate-50">C'est enregistré.</h2>
-          <p className="text-slate-300">
+          <h2 className="text-2xl font-medium tracking-[-0.02em] text-foreground">
+            C'est <span className="font-serif italic text-[#9ec8ff]">enregistré</span>.
+          </h2>
+          <p className="text-[#c8d2e4]">
             On finalise le reste avec vous en quelques questions rapides.
           </p>
-          <Loader2 className="w-5 h-5 animate-spin text-slate-400 mx-auto" />
+          <Loader2 className="w-5 h-5 animate-spin text-[#9ec8ff] mx-auto" />
         </div>
       </div>
     );
@@ -502,13 +509,13 @@ const VoiceOnboarding = () => {
     <div className="min-h-screen flex flex-col p-5 sm:p-6 animate-fade-in">
       {/* Progress + counter */}
       <div className="w-full max-w-md mx-auto pt-2">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-[#5f6b82] mb-2">
           <span>Note {blockIndex + 1} / {totalBlocks}</span>
-          <span>{progressPct}%</span>
+          <span className="text-[#9ec8ff]">{progressPct}%</span>
         </div>
-        <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+        <div className="h-[3px] rounded-full bg-[rgba(148,170,215,0.12)] overflow-hidden">
           <div
-            className="h-full bg-emerald-500 transition-all duration-500"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)] transition-all duration-500"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -525,16 +532,16 @@ const VoiceOnboarding = () => {
             transition={{ duration: 0.25 }}
             className="w-full text-center space-y-3"
           >
-            <p className="text-xs uppercase tracking-wider text-slate-500">
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#9ec8ff]">
               {currentBlock.formKey === "welcome" ? "Votre univers"
                 : currentBlock.formKey === "founder_scan" ? "Vous, fondateur·rice"
                 : "Votre business"}
             </p>
-            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-50 leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-medium tracking-[-0.02em] text-foreground leading-tight">
               {currentBlock.prompt}
             </h2>
             {currentBlock.subtext && (
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm text-[#c8d2e4] leading-relaxed">
                 {currentBlock.subtext}
               </p>
             )}
@@ -543,7 +550,7 @@ const VoiceOnboarding = () => {
 
         {/* Ambient warning */}
         {ambientWarning && !textMode && (
-          <div className="mt-6 flex items-start gap-2 text-xs text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 max-w-xs">
+          <div className="mt-6 flex items-start gap-2 text-xs text-[hsl(var(--watch))] bg-[rgba(255,184,77,0.06)] border border-[rgba(255,184,77,0.2)] rounded-[10px] px-3 py-2 max-w-xs">
             <Volume2 className="w-4 h-4 mt-0.5 shrink-0" />
             <span>On vous entend mal, un endroit plus calme si vous pouvez ?</span>
           </div>
@@ -553,7 +560,7 @@ const VoiceOnboarding = () => {
         {!textMode && (
           <div className="mt-8 w-full flex flex-col items-center gap-3">
             <Waveform values={recorder.waveform} active={recorder.status === "recording"} />
-            <div className="text-sm tabular-nums text-slate-300">
+            <div className="font-mono text-sm tabular-nums text-[#c8d2e4]">
               {preparing ? "…" : `${formatSec(recorder.currentDurationMs)} · reste ${formatSec(remainingSec * 1000)}`}
             </div>
           </div>
@@ -562,8 +569,8 @@ const VoiceOnboarding = () => {
         {/* Countdown overlay */}
         {countdownStartAt !== null && !textMode && (
           <div className="mt-6 text-center space-y-3">
-            <p className="text-slate-300">
-              Question suivante dans <span className="text-emerald-400 font-semibold">{countdownSec}</span>…
+            <p className="text-[#c8d2e4]">
+              Question suivante dans <span className="text-[#9ec8ff] font-mono font-semibold">{countdownSec}</span>…
             </p>
             <Button variant="outline" onClick={cancelCountdown}>
               J'ai encore quelque chose à dire
@@ -574,7 +581,7 @@ const VoiceOnboarding = () => {
         {/* Short-answer nudge */}
         {showShortNudge && !textMode && (
           <div className="mt-6 text-center space-y-3">
-            <p className="text-slate-300">Vous voulez ajouter quelque chose ?</p>
+            <p className="text-[#c8d2e4]">Vous voulez ajouter quelque chose ?</p>
             <div className="flex gap-2 justify-center">
               <Button variant="outline" onClick={resumeAfterShortNudge}>
                 Oui, je continue
@@ -651,7 +658,7 @@ const VoiceOnboarding = () => {
           )}
         </div>
         {recorder.error && (
-          <div className="mt-3 flex items-start gap-2 text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+          <div className="mt-3 flex items-start gap-2 text-xs text-[hsl(var(--bad))] bg-[rgba(255,107,107,0.06)] border border-[rgba(255,107,107,0.25)] rounded-[10px] px-3 py-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>Micro indisponible : {recorder.error}</span>
           </div>

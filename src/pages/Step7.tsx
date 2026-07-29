@@ -117,11 +117,13 @@ const Step7 = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Single Premium radial halo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-glow/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[500px]"
+          style={{ background: "radial-gradient(600px 250px at 50% 0%, rgba(47,107,255,0.14), transparent 60%)" }}
+        />
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -143,8 +145,8 @@ const Step7 = () => {
               <FileCheck className="h-16 w-16 text-primary animate-scale-in" />
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary-glow to-primary bg-clip-text text-transparent">
-              {t.title}
+            <h2 className="text-4xl md:text-5xl font-medium tracking-[-0.02em] text-foreground">
+              <span className="font-serif italic text-[#9ec8ff]">{t.title}</span>
             </h2>
             
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -169,8 +171,8 @@ const Step7 = () => {
               </div>
               <div className="flex flex-col items-center gap-3 pt-2">
                 {alreadySigned ? (
-                  <div className="w-full max-w-xl rounded-2xl border border-green-500/30 bg-green-500/10 p-6 flex flex-col items-center gap-3">
-                    <CheckCircle2 className="h-10 w-10 text-green-500" />
+                  <div className="w-full max-w-xl rounded-[14px] border border-[rgba(122,232,180,0.25)] bg-[linear-gradient(135deg,rgba(122,232,180,0.06),rgba(255,255,255,0.015))] p-6 flex flex-col items-center gap-3">
+                    <CheckCircle2 className="h-10 w-10 text-[hsl(var(--good))]" />
                     <p className="text-lg font-semibold text-foreground">{t.alreadySignedTitle}</p>
                     <p className="text-sm text-muted-foreground text-center">{t.alreadySignedDesc}</p>
                   </div>

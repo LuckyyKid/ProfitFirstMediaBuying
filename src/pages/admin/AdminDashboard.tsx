@@ -436,22 +436,22 @@ const StatCard = ({ label, value, tone, onClick }: { label: string; value: numbe
     onClick={onClick}
   >
     <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-    <div className={`text-2xl font-bold mt-1 ${tone === "red" ? "text-red-400" : tone === "green" ? "text-emerald-400" : tone === "amber" ? "text-amber-400" : ""}`}>
+    <div className={`text-2xl font-mono font-medium mt-1 ${tone === "red" ? "text-[hsl(var(--bad))]" : tone === "green" ? "text-[hsl(var(--good))]" : tone === "amber" ? "text-[hsl(var(--watch))]" : "text-foreground"}`}>
       {value}
     </div>
   </Card>
 );
 
 const StepDot = ({ done }: { done: boolean }) => (
-  <span className={`inline-block h-2.5 w-2.5 rounded-full ${done ? "bg-emerald-400" : "bg-zinc-600"}`} />
+  <span className={`inline-block h-2.5 w-2.5 rounded-full ${done ? "bg-[hsl(var(--good))] shadow-[0_0_6px_rgba(122,232,180,0.5)]" : "bg-[rgba(148,170,215,0.15)]"}`} />
 );
 
 const FollowupCell = ({ client }: { client: any }) => {
   if (client.callback_due_at) {
     return (
       <div className="space-y-0.5">
-        <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-amber-500/40 bg-amber-500/10 text-amber-300 font-medium">
-          📞 À rappeler
+        <span className="inline-block px-2 py-0.5 rounded-[6px] font-mono text-[9px] uppercase tracking-[0.16em] border border-[rgba(255,184,77,0.3)] bg-[rgba(255,184,77,0.06)] text-[hsl(var(--watch))]">
+          À rappeler
         </span>
         <div className="text-[11px] text-muted-foreground">depuis {timeAgo(client.callback_due_at)}</div>
       </div>
@@ -460,8 +460,8 @@ const FollowupCell = ({ client }: { client: any }) => {
   if (client.followup_sent_at) {
     return (
       <div className="space-y-0.5">
-        <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-sky-500/40 bg-sky-500/10 text-sky-300">
-          ✉️ Suivi envoyé
+        <span className="inline-block px-2 py-0.5 rounded-[6px] font-mono text-[9px] uppercase tracking-[0.16em] border border-[rgba(77,159,255,0.3)] bg-[rgba(77,159,255,0.06)] text-[#9ec8ff]">
+          Suivi envoyé
         </span>
         <div className="text-[11px] text-muted-foreground">
           il y a {timeAgo(client.followup_sent_at)}

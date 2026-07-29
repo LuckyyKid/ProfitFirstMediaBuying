@@ -24,9 +24,9 @@ const translations = {
   en: {
     step: "STEP 1: WHAT TO EXPECT",
     mainTitle: "Let's Talk About On-Boarding",
-    welcomeMessage: "Welcome to the TDIA Adventure 🎉",
+    welcomeMessage: "Welcome to the TDIA Adventure",
     motivationText:
-      "We're truly happy to have you with us.\n\nOur goal is simple: help you acquire customers at the best possible cost, with an approach focused on performance, technology, and transparency.\n\nOver the next few days, here's what you can expect:\n\nDay 1: Kickoff Call – We'll review your strategy, goals, and initial priorities together.\n\nDay 3: Technical Setup – Implementation of tracking, advertising access, and communication accounts.\n\nDay 10: Phone Check-In – Initial feedback on the experience and first optimizations.\n\nOur promise: WE take the risk. You can focus on your business, we'll handle everything else.\n\nIf you have any questions before the kickoff, feel free to reach out here or on Slack.\n\nWelcome aboard! 🚀",
+      "We're truly happy to have you with us.\n\nOur goal is simple: help you acquire customers at the best possible cost, with an approach focused on performance, technology, and transparency.\n\nOver the next few days, here's what you can expect:\n\nDay 1: Kickoff Call – We'll review your strategy, goals, and initial priorities together.\n\nDay 3: Technical Setup – Implementation of tracking, advertising access, and communication accounts.\n\nDay 10: Phone Check-In – Initial feedback on the experience and first optimizations.\n\nOur promise: WE take the risk. You can focus on your business, we'll handle everything else.\n\nIf you have any questions before the kickoff, feel free to reach out here or on Slack.\n\nWelcome aboard.",
     ctaButton: "Take me to the next step",
     ctaSubtext: "(2/6)",
     welcomePackTitle: "Your Welcome Pack",
@@ -48,9 +48,9 @@ const translations = {
   fr: {
     step: "ÉTAPE 1: À QUOI S'ATTENDRE",
     mainTitle: "Parlons de l'Intégration",
-    welcomeMessage: "Bienvenue dans l'aventure TDIA 🎉",
+    welcomeMessage: "Bienvenue dans l'aventure TDIA",
     motivationText:
-      "On est vraiment heureux de t'avoir avec nous.\n\nNotre objectif est simple : t'aider à acquérir des clients au meilleur coût possible, avec une approche axée sur la performance, la technologie et la transparence.\n\nAu cours des prochains jours, voici ce à quoi tu peux t'attendre :\n\nJour 1 : Kickoff Call – On revoit ensemble ta stratégie, tes objectifs et les premières priorités.\n\nJour 3 : Installation technique – Mise en place du tracking, des accès publicitaires et des comptes de communication.\n\nJour 10 : Check-In téléphonique – Un premier retour sur l'expérience et les premières optimisations.\n\nNotre promesse : WE take the risk. Tu peux te concentrer sur ton business, on s'occupe de tout le reste.\n\nSi tu as la moindre question avant le kickoff, tu peux nous écrire directement ici ou sur Slack.\n\nEncore bienvenue à bord ! 🚀",
+      "On est vraiment heureux de t'avoir avec nous.\n\nNotre objectif est simple : t'aider à acquérir des clients au meilleur coût possible, avec une approche axée sur la performance, la technologie et la transparence.\n\nAu cours des prochains jours, voici ce à quoi tu peux t'attendre :\n\nJour 1 : Kickoff Call – On revoit ensemble ta stratégie, tes objectifs et les premières priorités.\n\nJour 3 : Installation technique – Mise en place du tracking, des accès publicitaires et des comptes de communication.\n\nJour 10 : Check-In téléphonique – Un premier retour sur l'expérience et les premières optimisations.\n\nNotre promesse : WE take the risk. Tu peux te concentrer sur ton business, on s'occupe de tout le reste.\n\nSi tu as la moindre question avant le kickoff, tu peux nous écrire directement ici ou sur Slack.\n\nEncore bienvenue à bord.",
     ctaButton: "Passez à l'étape suivante",
     ctaSubtext: "(2/6)",
     welcomePackTitle: "Votre Pack de Bienvenue",
@@ -298,7 +298,7 @@ const ClientOnboarding = () => {
             <div className="flex items-center gap-2 mb-2">
               <h3 className="text-lg font-semibold text-primary">Vidéo de bienvenue</h3>
               {isWatched(WELCOME_VIDEO_ID) && (
-                <Check className="h-5 w-5 text-green-500" />
+                <Check className="h-5 w-5 text-[hsl(var(--good))]" />
               )}
             </div>
             <YouTubeTracker

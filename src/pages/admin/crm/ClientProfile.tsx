@@ -510,7 +510,7 @@ function DecisionScoringTab({ clientId }: { clientId: string }) {
         <div className="mt-4 p-3 border rounded bg-muted/30 text-sm flex gap-6">
           <div><span className="text-muted-foreground">Score:</span> <b>{preview.decision_score}</b></div>
           <div><span className="text-muted-foreground">Priorité:</span> <b>{preview.priority}</b></div>
-          {preview.override_note && <div className="text-amber-500">{preview.override_note}</div>}
+          {preview.override_note && <div className="text-[hsl(var(--watch))]">{preview.override_note}</div>}
         </div>
         <div className="mt-3 flex justify-end"><Button onClick={save}>Enregistrer</Button></div>
       </Card>
@@ -525,7 +525,7 @@ function DecisionScoringTab({ clientId }: { clientId: string }) {
                   <TableCell className="max-w-md truncate">{h?.hypothesis ?? s.hypothesis_id}</TableCell>
                   <TableCell><b>{s.decision_score}</b></TableCell>
                   <TableCell><StatusBadge status={s.priority} /></TableCell>
-                  <TableCell>{s.am_approved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : "—"}</TableCell>
+                  <TableCell>{s.am_approved ? <CheckCircle2 className="h-4 w-4 text-[hsl(var(--good))]" /> : "—"}</TableCell>
                   <TableCell className="text-xs">{new Date(s.created_at).toLocaleDateString()}</TableCell>
                 </TableRow>
               );

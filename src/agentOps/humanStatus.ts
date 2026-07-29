@@ -39,24 +39,24 @@ export function shortStatusLabel(status?: string | null): string {
 
 export function toneClasses(tone: Tone): string {
   switch (tone) {
-    case "completed": return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-    case "running": return "bg-sky-500/15 text-sky-300 border-sky-500/30";
-    case "queued": return "bg-slate-500/15 text-slate-300 border-slate-500/30";
-    case "human_review": return "bg-orange-500/15 text-orange-300 border-orange-500/30";
-    case "failed": return "bg-red-500/15 text-red-300 border-red-500/30";
-    case "warning": return "bg-yellow-500/15 text-yellow-300 border-yellow-500/30";
+    case "completed": return "bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))] border-[rgba(122,232,180,0.3)]";
+    case "running": return "bg-[rgba(77,159,255,0.08)] text-[#9ec8ff] border-[rgba(77,159,255,0.3)]";
+    case "queued": return "bg-[rgba(148,170,215,0.06)] text-[#c8d2e4] border-[rgba(148,170,215,0.15)]";
+    case "human_review": return "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
+    case "failed": return "bg-[rgba(255,107,107,0.08)] text-[hsl(var(--bad))] border-[rgba(255,107,107,0.3)]";
+    case "warning": return "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
     default: return "bg-secondary text-foreground/80 border-border/40";
   }
 }
 
 export function toneDotClass(tone: Tone): string {
   switch (tone) {
-    case "completed": return "bg-emerald-400";
-    case "running": return "bg-sky-400 animate-pulse";
-    case "queued": return "bg-slate-400";
-    case "human_review": return "bg-orange-400";
-    case "failed": return "bg-red-400";
-    case "warning": return "bg-yellow-400";
+    case "completed": return "bg-[hsl(var(--good))] shadow-[0_0_6px_rgba(122,232,180,0.5)]";
+    case "running": return "bg-[#4d9fff] animate-pulse shadow-[0_0_6px_rgba(77,159,255,0.6)]";
+    case "queued": return "bg-[rgba(148,170,215,0.3)]";
+    case "human_review": return "bg-[hsl(var(--watch))] shadow-[0_0_6px_rgba(255,184,77,0.5)]";
+    case "failed": return "bg-[hsl(var(--bad))] shadow-[0_0_6px_rgba(255,107,107,0.5)]";
+    case "warning": return "bg-[hsl(var(--watch))]";
     default: return "bg-muted-foreground";
   }
 }

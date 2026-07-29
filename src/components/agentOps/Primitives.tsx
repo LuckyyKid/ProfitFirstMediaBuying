@@ -10,7 +10,7 @@ export function PlaceholderBanner(_props: { className?: string; children?: React
 
 export function BackendErrorBanner({ message, className }: { message?: string; className?: string }) {
   return (
-    <div className={cn("rounded-md border border-red-500/30 bg-red-500/10 text-red-200 text-sm px-3 py-2 flex items-start gap-2", className)}>
+    <div className={cn("rounded-md border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.08)] text-red-200 text-sm px-3 py-2 flex items-start gap-2", className)}>
       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
       <div>
         <div className="font-semibold">Backend unavailable</div>
@@ -34,9 +34,9 @@ export function SectionHeader({ title, subtitle, right }: { title: string; subti
 
 export function KpiCard({ label, value, hint, tone }: { label: string; value: string | number; hint?: string; tone?: "default" | "success" | "warn" | "danger" }) {
   const toneClass =
-    tone === "success" ? "text-emerald-300" :
-    tone === "warn"    ? "text-orange-300" :
-    tone === "danger"  ? "text-red-300" : "";
+    tone === "success" ? "text-[hsl(var(--good))]" :
+    tone === "warn"    ? "text-[hsl(var(--watch))]" :
+    tone === "danger"  ? "text-[hsl(var(--bad))]" : "";
   return (
     <Card className="p-4 glass-card">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>

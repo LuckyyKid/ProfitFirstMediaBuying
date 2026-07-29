@@ -31,10 +31,10 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 mb-8">
       <div className="relative">
-        {/* Progress Line */}
-        <div className="absolute top-5 left-0 right-0 h-1 bg-border">
+        {/* Progress Line — hairline + fill dégradé bleu */}
+        <div className="absolute top-5 left-0 right-0 h-[3px] rounded-full bg-[rgba(148,170,215,0.12)]">
           <div
-            className="h-full bg-gradient-to-r from-primary to-primary-glow transition-all duration-500"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)] transition-all duration-500"
             style={{ width: `${((currentDisplay - 1) / (total - 1)) * 100}%` }}
           />
         </div>
@@ -54,10 +54,13 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
               >
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 border-2",
-                    isCompleted && "bg-primary border-primary text-primary-foreground",
-                    isCurrent && "bg-background border-primary text-primary scale-110 shadow-lg",
-                    !isCompleted && !isCurrent && "bg-background border-border text-muted-foreground"
+                    "w-10 h-10 rounded-full flex items-center justify-center font-mono text-sm transition-all duration-300 border",
+                    isCompleted &&
+                      "bg-[linear-gradient(135deg,#4d9fff,#2f6bff)] border-transparent text-white shadow-[0_4px_16px_rgba(47,107,255,0.35)]",
+                    isCurrent &&
+                      "bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] border-[rgba(77,159,255,0.4)] text-[#9ec8ff] scale-110 shadow-[0_0_24px_rgba(47,107,255,0.35)]",
+                    !isCompleted && !isCurrent &&
+                      "bg-background border-[rgba(148,170,215,0.12)] text-[#5f6b82]"
                   )}
                 >
                   {isCompleted ? <Check className="w-5 h-5" /> : displayNumber}
@@ -66,7 +69,9 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
                 <span
                   className={cn(
                     "text-xs font-medium text-center max-w-[90px] transition-colors duration-300",
-                    (isCurrent || isCompleted) ? "text-foreground" : "text-muted-foreground"
+                    isCurrent && "text-[#9ec8ff]",
+                    isCompleted && "text-[#c8d2e4]",
+                    !isCurrent && !isCompleted && "text-[#5f6b82]"
                   )}
                 >
                   {label}

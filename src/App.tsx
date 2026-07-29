@@ -116,7 +116,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <div className="stars-bg" />
       <BrowserRouter>
        <ErrorBoundary>
         <Routes>

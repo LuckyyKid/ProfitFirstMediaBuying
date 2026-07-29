@@ -154,23 +154,29 @@ export function timeAgo(iso?: string | null): string {
   return `il y a ${d} j`;
 }
 
+const GOOD = "bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))] border-[rgba(122,232,180,0.3)]";
+const INFO = "bg-[rgba(77,159,255,0.08)] text-[#9ec8ff] border-[rgba(77,159,255,0.3)]";
+const MUTED = "bg-[rgba(148,170,215,0.06)] text-[#c8d2e4] border-[rgba(148,170,215,0.15)]";
+const WATCH = "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
+const BAD = "bg-[rgba(255,107,107,0.08)] text-[hsl(var(--bad))] border-[rgba(255,107,107,0.3)]";
+
 export const statusBadgeClass: Record<GlobalStatus, string> = {
-  "Signed - Onboarding Sent": "bg-blue-500/15 text-blue-300 border-blue-500/30",
-  "Onboarding Not Started": "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
-  "Onboarding In Progress": "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-  "Onboarding Blocked": "bg-red-500/15 text-red-300 border-red-500/30",
-  "Payment Pending": "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  "Payment Completed": "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  "Contract Pending": "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  "Contract Signed": "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  "Kick-off Not Booked": "bg-orange-500/15 text-orange-300 border-orange-500/30",
-  "Kick-off Booked": "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  "Onboarding Completed": "bg-green-500/20 text-green-300 border-green-500/40",
+  "Signed - Onboarding Sent": INFO,
+  "Onboarding Not Started": MUTED,
+  "Onboarding In Progress": INFO,
+  "Onboarding Blocked": BAD,
+  "Payment Pending": WATCH,
+  "Payment Completed": GOOD,
+  "Contract Pending": WATCH,
+  "Contract Signed": GOOD,
+  "Kick-off Not Booked": WATCH,
+  "Kick-off Booked": GOOD,
+  "Onboarding Completed": GOOD,
 };
 
 export const riskBadgeClass: Record<Risk, string> = {
-  Low: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  Normal: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
-  Medium: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  High: "bg-red-500/15 text-red-300 border-red-500/30",
+  Low: GOOD,
+  Normal: MUTED,
+  Medium: WATCH,
+  High: BAD,
 };

@@ -45,22 +45,22 @@ export default function Pipeline() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="relative rounded-2xl border border-white/5 bg-[#0a1226]/60 backdrop-blur-xl px-6 py-5 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(34,211,238,0.1),transparent_60%)] pointer-events-none" />
+      <div className="relative rounded-[14px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] px-6 py-5 overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(600px 200px at 80% 30%, rgba(47,107,255,0.1), transparent 60%)" }} />
         <div className="relative flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-cyan-400/20 to-violet-500/20 border border-cyan-400/30 flex items-center justify-center shrink-0">
-              <Workflow className="h-6 w-6 text-cyan-300" />
+            <div className="relative h-12 w-12 rounded-[12px] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] border border-[rgba(77,159,255,0.25)] flex items-center justify-center shrink-0 shadow-[0_0_24px_rgba(47,107,255,0.15)]">
+              <Workflow className="h-6 w-6 text-[#9ec8ff]" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-cyan-300">
-                <span className={cn("h-1.5 w-1.5 rounded-full", activeRun ? "bg-cyan-400 animate-pulse" : "bg-slate-500")} />
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#9ec8ff]">
+                <span className={cn("h-1.5 w-1.5 rounded-full", activeRun ? "bg-[#4d9fff] animate-pulse shadow-[0_0_6px_rgba(77,159,255,0.6)]" : "bg-[rgba(148,170,215,0.2)]")} />
                 {activeRun ? "Pipeline en cours" : "Pipeline"}
               </div>
-              <h1 className="text-xl md:text-2xl font-semibold text-slate-100 mt-0.5 tracking-tight">
+              <h1 className="text-xl md:text-2xl font-medium text-foreground mt-0.5 tracking-[-0.02em]">
                 {activeRun ? `Audit ${activeRun.client_id}` : "Aucun run en cours"}
               </h1>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#c8d2e4] mt-0.5">
                 {activeRun
                   ? `${humanStatusLabel(activeRun.status)} · démarré ${timeAgo(activeRun.started_at ?? activeRun.created_at)}`
                   : "Aucun audit n'est actuellement en cours d'exécution."}
@@ -68,13 +68,13 @@ export default function Pipeline() {
             </div>
           </div>
           {activeRun ? (
-            <Button asChild variant="outline" className="border-cyan-400/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-100">
+            <Button asChild variant="outline">
               <Link to={`/admin/ops/run/${activeRun.id}`}>
                 <ExternalLink className="h-4 w-4 mr-1.5" /> Ouvrir le run
               </Link>
             </Button>
           ) : (
-            <Button asChild className="bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/30 text-cyan-100">
+            <Button asChild>
               <Link to="/admin/ops/new"><Plus className="h-4 w-4 mr-1.5" /> Lancer un audit</Link>
             </Button>
           )}
@@ -92,19 +92,19 @@ export default function Pipeline() {
 
 function EmptyPipeline({ runs, loading }: { runs: WorkflowRun[]; loading: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-[#0a1226]/60 backdrop-blur-xl p-10 text-center">
-      <div className="mx-auto h-14 w-14 rounded-2xl border border-white/10 bg-white/[0.03] flex items-center justify-center mb-4">
-        <Workflow className="h-6 w-6 text-slate-500" />
+    <div className="rounded-[14px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div className="mx-auto h-14 w-14 rounded-[12px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] flex items-center justify-center mb-4">
+        <Workflow className="h-6 w-6 text-[#5f6b82]" />
       </div>
-      <div className="text-base font-medium text-slate-200">
+      <div className="text-base font-medium text-foreground">
         {loading ? "Chargement…" : "Aucun pipeline actif"}
       </div>
-      <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+      <p className="text-sm text-[#5f6b82] mt-1 max-w-md mx-auto">
         Lancez un nouvel audit pour visualiser le pipeline en temps réel ici. Aucune donnée n'est affichée tant qu'aucun run n'est en cours.
       </p>
       {runs.length > 0 && (
         <div className="mt-6 max-w-md mx-auto text-left">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-2">Runs suivis</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#5f6b82] mb-2">Runs suivis</div>
           <div className="space-y-1.5">
             {runs.slice(0, 5).map((r) => {
               const tone = statusTone(r.status);
@@ -112,13 +112,13 @@ function EmptyPipeline({ runs, loading }: { runs: WorkflowRun[]; loading: boolea
                 <Link
                   key={r.id}
                   to={`/admin/ops/run/${r.id}`}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] px-3 py-2 text-xs"
+                  className="flex items-center justify-between gap-2 rounded-[10px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(148,170,215,0.2)] px-3 py-2 text-xs transition-colors"
                 >
                   <span className="flex items-center gap-2 min-w-0">
                     <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", toneDotClass(tone))} />
-                    <span className="font-mono text-slate-300 truncate">{r.id.slice(0, 8)}…</span>
+                    <span className="font-mono text-[#c8d2e4] truncate">{r.id.slice(0, 8)}…</span>
                   </span>
-                  <span className="text-slate-500">{humanStatusLabel(r.status)}</span>
+                  <span className="text-[#5f6b82]">{humanStatusLabel(r.status)}</span>
                 </Link>
               );
             })}
@@ -167,7 +167,7 @@ function ActivePipeline({ runId }: { runId: string }) {
   return (
     <section className="space-y-4">
       <div className="flex items-end justify-between gap-3">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#5f6b82]">
           {showAll
             ? "Vue complète du workflow TDIA."
             : `Focus sur le moteur actuellement en exécution${activeEngine ? ` · ${activeEngine.name}` : ""}.`}
@@ -177,7 +177,7 @@ function ActivePipeline({ runId }: { runId: string }) {
             variant="outline"
             size="sm"
             onClick={() => setShowAll((v) => !v)}
-            className="border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 h-8 text-xs"
+            className="h-8 text-xs"
           >
             {showAll ? "Focus pipeline actif" : "Voir tout le pipeline"}
           </Button>

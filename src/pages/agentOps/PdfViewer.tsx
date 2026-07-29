@@ -99,7 +99,7 @@ export default function PdfViewer() {
         </Card>
       ) : blobUrl ? (
         <>
-          <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 text-yellow-200 text-xs px-3 py-2">
+          <div className="rounded-[10px] border border-[rgba(255,184,77,0.25)] bg-[rgba(255,184,77,0.06)] text-[hsl(var(--watch))] text-xs px-3 py-2">
             Si Brave (ou un bloqueur) empêche l'affichage inline, utilisez{" "}
             <a href={blobUrl} target="_blank" rel="noreferrer" className="underline font-medium">Ouvrir dans un nouvel onglet</a>
             {" "}ou{" "}

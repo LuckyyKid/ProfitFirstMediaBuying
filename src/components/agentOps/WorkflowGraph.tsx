@@ -58,7 +58,7 @@ export function WorkflowGraph({ workflowRunId, engines: initialEngines }: { work
                   {running && <ThinkingIndicator label="Working" className="text-[10px]" />}
                 </div>
                 {completed && (
-                  <div className="absolute top-2 right-2 text-emerald-300 text-[10px] font-mono">✓</div>
+                  <div className="absolute top-2 right-2 text-[hsl(var(--good))] text-[10px] font-mono">✓</div>
                 )}
               </div>
             </Link>

@@ -31,10 +31,10 @@ type OverviewData = {
 };
 
 const HEALTH_META: Record<HealthStatus, { label: string; color: string; ring: string }> = {
-  ON_TRACK: { label: "ON TRACK", color: "text-emerald-400", ring: "shadow-[0_0_8px_rgba(52,211,153,0.6)]" },
-  WATCH:    { label: "WATCH",    color: "text-cyan-400",    ring: "shadow-[0_0_8px_rgba(34,211,238,0.6)]" },
-  AT_RISK:  { label: "AT RISK",  color: "text-amber-400",   ring: "shadow-[0_0_8px_rgba(251,191,36,0.6)]" },
-  CRISIS:   { label: "CRISIS",   color: "text-red-400",     ring: "shadow-[0_0_10px_rgba(248,113,113,0.7)]" },
+  ON_TRACK: { label: "ON TRACK", color: "text-[hsl(var(--good))]", ring: "shadow-[0_0_8px_rgba(52,211,153,0.6)]" },
+  WATCH:    { label: "WATCH",    color: "text-[#9ec8ff]",    ring: "shadow-[0_0_8px_rgba(34,211,238,0.6)]" },
+  AT_RISK:  { label: "AT RISK",  color: "text-[hsl(var(--watch))]",   ring: "shadow-[0_0_8px_rgba(251,191,36,0.6)]" },
+  CRISIS:   { label: "CRISIS",   color: "text-[hsl(var(--bad))]",     ring: "shadow-[0_0_10px_rgba(248,113,113,0.7)]" },
 };
 
 const PROBLEM_LABEL: Record<ProblemType, string> = {
@@ -90,7 +90,7 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
   const revenuePct = Math.min(100, Math.round((d.currentRevenue / d.revenueTarget) * 100));
 
   return (
-    <div className="w-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-xl relative overflow-hidden rounded-sm"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] backdrop-blur-xl relative overflow-hidden rounded-sm"
          style={{ color: "#e0e0e0", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
       {/* Scanner */}
       <div className="absolute inset-0 pointer-events-none opacity-5"
@@ -100,14 +100,14 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
            }} />
 
       {/* Header strip */}
-      <div className="border-b border-zinc-800 px-4 py-3 flex justify-between items-center bg-zinc-950/80">
+      <div className="border-b border-[rgba(148,170,215,0.12)] px-4 py-3 flex justify-between items-center bg-[rgba(8,12,20,0.6)]">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse" />
-          <span className="text-[10px] font-bold tracking-[0.2em] text-cyan-500 uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+          <div className="w-2 h-2 rounded-full bg-[#4d9fff] shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse" />
+          <span className="text-[10px] font-bold tracking-[0.2em] text-[#9ec8ff] uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
             System Live
           </span>
         </div>
-        <span className="text-[9px] text-zinc-500 uppercase tracking-widest">
+        <span className="text-[9px] text-[#5f6b82] uppercase tracking-widest">
           Session · Profit-First Workspace
         </span>
       </div>
@@ -117,14 +117,14 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
         {/* Section label + client */}
         <div className="flex justify-between items-end gap-4">
           <div className="min-w-0">
-            <div className="text-[11px] text-zinc-500 uppercase tracking-widest mb-1">Section 01 — Executive Overview</div>
+            <div className="text-[11px] text-[#5f6b82] uppercase tracking-widest mb-1">Section 01 — Executive Overview</div>
             <h1 className="text-2xl font-bold tracking-tight text-white truncate" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
               {d.clientName.toUpperCase()}
             </h1>
-            <div className="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">{d.businessType}</div>
+            <div className="text-[10px] text-[#5f6b82] uppercase tracking-wider mt-1">{d.businessType}</div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="text-[10px] text-zinc-500 uppercase mb-1">Health</div>
+            <div className="text-[10px] text-[#5f6b82] uppercase mb-1">Health</div>
             <div className={`text-base font-bold ${health.color}`} style={{ fontFamily: "'Rajdhani', sans-serif" }}>
               {health.label}
             </div>
@@ -133,22 +133,22 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
 
         {/* Primary diagnostic — revenue vs target */}
         <div className="relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-sm blur opacity-50" />
-          <div className="relative bg-zinc-950 border border-zinc-800 p-4 rounded-sm">
-            <div className="text-[10px] text-zinc-500 uppercase mb-3 flex items-center gap-2">
-              <Activity className="w-3 h-3 text-cyan-500" />
+          <div className="absolute -inset-0.5 bg-[linear-gradient(90deg,rgba(77,159,255,0.2),rgba(47,107,255,0.15))] rounded-sm blur opacity-50" />
+          <div className="relative bg-[#080d18] border border-[rgba(148,170,215,0.12)] p-4 rounded-sm">
+            <div className="text-[10px] text-[#5f6b82] uppercase mb-3 flex items-center gap-2">
+              <Activity className="w-3 h-3 text-[#9ec8ff]" />
               Revenu mensuel actuel vs objectif
             </div>
             <div className="flex justify-between items-baseline">
               <div className="text-3xl font-bold text-white tabular-nums">{fmtMoney(d.currentRevenue)}</div>
-              <div className="text-xs text-zinc-400 font-bold tabular-nums">
-                cible <span className="text-cyan-300">{fmtMoney(d.revenueTarget)}</span>
+              <div className="text-xs text-[#c8d2e4] font-bold tabular-nums">
+                cible <span className="text-[#9ec8ff]">{fmtMoney(d.revenueTarget)}</span>
               </div>
             </div>
-            <div className="mt-4 h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
-              <div className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" style={{ width: `${revenuePct}%` }} />
+            <div className="mt-4 h-1 w-full bg-[rgba(255,255,255,0.02)] rounded-full overflow-hidden">
+              <div className="h-full bg-[#4d9fff] shadow-[0_0_10px_rgba(6,182,212,0.5)]" style={{ width: `${revenuePct}%` }} />
             </div>
-            <div className="mt-1.5 text-[9px] text-zinc-500 uppercase tracking-widest">
+            <div className="mt-1.5 text-[9px] text-[#5f6b82] uppercase tracking-widest">
               {revenuePct}% de la cible atteinte
             </div>
           </div>
@@ -166,36 +166,36 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
         {/* Priority Directives */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-[1px] flex-grow bg-zinc-800" />
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Priority Directives</span>
-            <div className="h-[1px] flex-grow bg-zinc-800" />
+            <div className="h-[1px] flex-grow bg-[rgba(148,170,215,0.1)]" />
+            <span className="text-[10px] text-[#5f6b82] uppercase tracking-widest">Priority Directives</span>
+            <div className="h-[1px] flex-grow bg-[rgba(148,170,215,0.1)]" />
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-3 p-3 bg-zinc-950/60 border-l-2 border-amber-500">
+            <div className="flex items-start gap-3 p-3 bg-[rgba(8,12,20,0.4)] border-l-2 border-[hsl(var(--watch))]">
               <div className="flex-shrink-0 mt-1">
-                <div className="w-4 h-4 rounded-full border border-amber-500/50 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse rounded-full" />
+                <div className="w-4 h-4 rounded-full border border-[rgba(255,184,77,0.5)] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[hsl(var(--watch))] animate-pulse rounded-full" />
                 </div>
               </div>
               <div className="min-w-0">
                 <div className="text-[11px] font-bold text-white uppercase mb-0.5 tracking-wide" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
                   {d.p0Action.title}
                 </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">{d.p0Action.detail}</p>
+                <p className="text-[11px] text-[#c8d2e4] leading-relaxed">{d.p0Action.detail}</p>
               </div>
             </div>
 
             {d.p1Action && (
-              <div className="flex items-start gap-3 p-3 bg-zinc-950/30 border-l-2 border-zinc-700">
-                <div className="flex-shrink-0 mt-1 text-zinc-500">
+              <div className="flex items-start gap-3 p-3 bg-[rgba(8,12,20,0.3)] border-l-2 border-[rgba(148,170,215,0.1)]">
+                <div className="flex-shrink-0 mt-1 text-[#5f6b82]">
                   <Zap className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] font-bold text-zinc-300 uppercase mb-0.5 tracking-wide" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+                  <div className="text-[11px] font-bold text-[#c8d2e4] uppercase mb-0.5 tracking-wide" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
                     {d.p1Action.title}
                   </div>
-                  <p className="text-[11px] text-zinc-500 leading-relaxed">{d.p1Action.detail}</p>
+                  <p className="text-[11px] text-[#5f6b82] leading-relaxed">{d.p1Action.detail}</p>
                 </div>
               </div>
             )}
@@ -206,12 +206,12 @@ function ExecutiveOverview({ d }: { d: OverviewData }) {
       {/* Footer decor */}
       <div className="px-5 pb-4 flex justify-between items-center opacity-40">
         <div className="flex gap-1">
-          <div className="w-1 h-3 bg-cyan-600" />
-          <div className="w-1 h-3 bg-zinc-700" />
-          <div className="w-1 h-3 bg-zinc-800" />
-          <div className="w-1 h-3 bg-zinc-800" />
+          <div className="w-1 h-3 bg-[#2f6bff]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.08)]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.1)]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.1)]" />
         </div>
-        <div className="text-[8px] tracking-[0.3em] text-zinc-600 uppercase">
+        <div className="text-[8px] tracking-[0.3em] text-[#3a4258] uppercase">
           TDIA-PF-WORKSPACE · 01/09
         </div>
       </div>
@@ -225,18 +225,18 @@ function TelemetryCell({
   label: string; value: string; suffix?: string; tone?: "good" | "warn" | "bad" | "neutral"; wide?: boolean;
 }) {
   const toneClass =
-    tone === "good" ? "text-emerald-400" :
-    tone === "warn" ? "text-amber-400" :
-    tone === "bad"  ? "text-red-400"    :
-                      "text-zinc-100";
+    tone === "good" ? "text-[hsl(var(--good))]" :
+    tone === "warn" ? "text-[hsl(var(--watch))]" :
+    tone === "bad"  ? "text-[hsl(var(--bad))]"    :
+                      "text-foreground";
   return (
-    <div className={`bg-zinc-950/70 border border-zinc-800 p-3 rounded-sm ${wide ? "col-span-2" : ""}`}>
-      <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">{label}</div>
+    <div className={`bg-[rgba(8,12,20,0.5)] border border-[rgba(148,170,215,0.12)] p-3 rounded-sm ${wide ? "col-span-2" : ""}`}>
+      <div className="text-[9px] text-[#5f6b82] uppercase tracking-widest mb-1.5">{label}</div>
       <div className="flex items-baseline gap-1">
         <div className={`text-sm font-bold tabular-nums ${toneClass}`} style={{ fontFamily: "'Rajdhani', sans-serif" }}>
           {value}
         </div>
-        {suffix && <div className="text-[9px] text-zinc-500 uppercase">{suffix}</div>}
+        {suffix && <div className="text-[9px] text-[#5f6b82] uppercase">{suffix}</div>}
       </div>
     </div>
   );
@@ -261,11 +261,11 @@ type DataSource = {
 };
 
 const STATUS_META: Record<SourceStatus, { label: string; color: string; bg: string; border: string; dot: string; icon: React.ComponentType<{ className?: string }> }> = {
-  CONNECTED: { label: "CONNECTED", color: "text-emerald-400", bg: "bg-emerald-500/5",  border: "border-emerald-500/40", dot: "bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.7)]", icon: CheckCircle2 },
-  PARTIAL:   { label: "PARTIAL",   color: "text-cyan-300",    bg: "bg-cyan-500/5",     border: "border-cyan-500/30",    dot: "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]",     icon: AlertTriangle },
-  STALE:     { label: "STALE",     color: "text-amber-400",   bg: "bg-amber-500/5",    border: "border-amber-500/40",   dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]",    icon: Clock },
-  MANUAL:    { label: "MANUAL",    color: "text-violet-300",  bg: "bg-violet-500/5",   border: "border-violet-500/30",  dot: "bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]",  icon: Hand },
-  MISSING:   { label: "MISSING",   color: "text-red-400",     bg: "bg-red-500/5",      border: "border-red-500/40",     dot: "bg-red-500 shadow-[0_0_10px_rgba(248,113,113,0.7)]",    icon: XCircle },
+  CONNECTED: { label: "CONNECTED", color: "text-[hsl(var(--good))]", bg: "bg-[rgba(122,232,180,0.05)]",  border: "border-[rgba(122,232,180,0.4)]", dot: "bg-[hsl(var(--good))] shadow-[0_0_8px_rgba(52,211,153,0.7)]", icon: CheckCircle2 },
+  PARTIAL:   { label: "PARTIAL",   color: "text-[#9ec8ff]",    bg: "bg-[rgba(77,159,255,0.05)]",     border: "border-[rgba(77,159,255,0.3)]",    dot: "bg-[#4d9fff] shadow-[0_0_8px_rgba(34,211,238,0.6)]",     icon: AlertTriangle },
+  STALE:     { label: "STALE",     color: "text-[hsl(var(--watch))]",   bg: "bg-[rgba(255,184,77,0.05)]",    border: "border-[rgba(255,184,77,0.4)]",   dot: "bg-[hsl(var(--watch))] shadow-[0_0_8px_rgba(251,191,36,0.6)]",    icon: Clock },
+  MANUAL:    { label: "MANUAL",    color: "text-[#c8d2e4]",  bg: "bg-[rgba(148,170,215,0.05)]",   border: "border-[rgba(148,170,215,0.2)]",  dot: "bg-[rgba(148,170,215,0.15)] shadow-[0_0_8px_rgba(167,139,250,0.6)]",  icon: Hand },
+  MISSING:   { label: "MISSING",   color: "text-[hsl(var(--bad))]",     bg: "bg-[rgba(255,107,107,0.05)]",      border: "border-[rgba(255,107,107,0.4)]",     dot: "bg-[hsl(var(--bad))] shadow-[0_0_10px_rgba(248,113,113,0.7)]",    icon: XCircle },
 };
 
 function useDemoDataSources(): DataSource[] {
@@ -393,17 +393,17 @@ function DataReadiness({ sources }: { sources: DataSource[] }) {
   );
 
   return (
-    <div className="w-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-xl relative overflow-hidden rounded-sm"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] backdrop-blur-xl relative overflow-hidden rounded-sm"
          style={{ color: "#e0e0e0", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
       {/* Header strip */}
-      <div className="border-b border-zinc-800 px-4 py-3 flex justify-between items-center bg-zinc-950/80">
+      <div className="border-b border-[rgba(148,170,215,0.12)] px-4 py-3 flex justify-between items-center bg-[rgba(8,12,20,0.6)]">
         <div className="flex items-center gap-2">
-          <Database className="w-3 h-3 text-cyan-500" />
-          <span className="text-[10px] font-bold tracking-[0.2em] text-cyan-500 uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+          <Database className="w-3 h-3 text-[#9ec8ff]" />
+          <span className="text-[10px] font-bold tracking-[0.2em] text-[#9ec8ff] uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
             Data Pipeline
           </span>
         </div>
-        <span className="text-[9px] text-zinc-500 uppercase tracking-widest">
+        <span className="text-[9px] text-[#5f6b82] uppercase tracking-widest">
           {sources.length} sources · readiness {score}/100
         </span>
       </div>
@@ -411,7 +411,7 @@ function DataReadiness({ sources }: { sources: DataSource[] }) {
       <div className="p-5 space-y-5">
         {/* Section label */}
         <div>
-          <div className="text-[11px] text-zinc-500 uppercase tracking-widest mb-1">Section 02 — Data Readiness</div>
+          <div className="text-[11px] text-[#5f6b82] uppercase tracking-widest mb-1">Section 02 — Data Readiness</div>
           <h2 className="text-xl font-bold tracking-tight text-white" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
             LES MODÈLES SONT-ILS HYDRATÉS ?
           </h2>
@@ -446,12 +446,12 @@ function DataReadiness({ sources }: { sources: DataSource[] }) {
       {/* Footer decor */}
       <div className="px-5 pb-4 flex justify-between items-center opacity-40">
         <div className="flex gap-1">
-          <div className="w-1 h-3 bg-cyan-600" />
-          <div className="w-1 h-3 bg-cyan-600" />
-          <div className="w-1 h-3 bg-zinc-700" />
-          <div className="w-1 h-3 bg-zinc-800" />
+          <div className="w-1 h-3 bg-[#2f6bff]" />
+          <div className="w-1 h-3 bg-[#2f6bff]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.08)]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.1)]" />
         </div>
-        <div className="text-[8px] tracking-[0.3em] text-zinc-600 uppercase">
+        <div className="text-[8px] tracking-[0.3em] text-[#3a4258] uppercase">
           TDIA-PF-WORKSPACE · 02/09
         </div>
       </div>
@@ -469,14 +469,14 @@ function SourceCard({ source }: { source: DataSource }) {
       {/* Head */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-sm bg-zinc-950 border border-zinc-800 flex items-center justify-center flex-shrink-0">
-            <SourceIcon className="w-3.5 h-3.5 text-zinc-300" />
+          <div className="w-7 h-7 rounded-sm bg-[#080d18] border border-[rgba(148,170,215,0.12)] flex items-center justify-center flex-shrink-0">
+            <SourceIcon className="w-3.5 h-3.5 text-[#c8d2e4]" />
           </div>
           <div className="min-w-0">
             <div className="text-[13px] font-bold text-white truncate" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
               {source.name.toUpperCase()}
             </div>
-            <div className="text-[8px] text-zinc-500 uppercase tracking-widest">
+            <div className="text-[8px] text-[#5f6b82] uppercase tracking-widest">
               {source.kind === "INTEGRATION" ? "Intégration" : "Saisie manuelle"} · {source.lastUpdated}
             </div>
           </div>
@@ -490,9 +490,9 @@ function SourceCard({ source }: { source: DataSource }) {
       {/* Data points */}
       <div className="grid grid-cols-2 gap-1 mb-2.5">
         {source.dataPoints.map((dp) => (
-          <div key={dp.label} className="bg-zinc-950/60 border border-zinc-800/70 px-2 py-1.5 rounded-sm">
-            <div className="text-[8px] text-zinc-500 uppercase tracking-widest mb-0.5 truncate">{dp.label}</div>
-            <div className="text-[11px] font-bold text-zinc-100 tabular-nums truncate" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+          <div key={dp.label} className="bg-[rgba(8,12,20,0.4)] border border-[rgba(148,170,215,0.12)]/70 px-2 py-1.5 rounded-sm">
+            <div className="text-[8px] text-[#5f6b82] uppercase tracking-widest mb-0.5 truncate">{dp.label}</div>
+            <div className="text-[11px] font-bold text-foreground tabular-nums truncate" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
               {dp.value}
             </div>
           </div>
@@ -500,11 +500,11 @@ function SourceCard({ source }: { source: DataSource }) {
       </div>
 
       {/* Models impacted */}
-      <div className="border-t border-zinc-800/70 pt-2">
-        <div className="text-[8px] text-zinc-500 uppercase tracking-widest mb-1">Models impacted</div>
+      <div className="border-t border-[rgba(148,170,215,0.12)]/70 pt-2">
+        <div className="text-[8px] text-[#5f6b82] uppercase tracking-widest mb-1">Models impacted</div>
         <div className="flex flex-wrap gap-1">
           {source.modelsImpacted.map((m) => (
-            <span key={m} className="text-[9px] px-1.5 py-0.5 border border-zinc-800 bg-zinc-950/70 text-zinc-300 rounded-sm uppercase tracking-wider">
+            <span key={m} className="text-[9px] px-1.5 py-0.5 border border-[rgba(148,170,215,0.12)] bg-[rgba(8,12,20,0.5)] text-[#c8d2e4] rounded-sm uppercase tracking-wider">
               {m}
             </span>
           ))}
@@ -514,7 +514,7 @@ function SourceCard({ source }: { source: DataSource }) {
       {source.note && (
         <div className={`mt-2 flex items-start gap-1.5 text-[10px] ${meta.color} border-l-2 ${meta.border} pl-2 py-1`}>
           <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-px" />
-          <span className="leading-snug text-zinc-300">{source.note}</span>
+          <span className="leading-snug text-[#c8d2e4]">{source.note}</span>
         </div>
       )}
     </div>
@@ -542,9 +542,9 @@ type FinancialFoundation = {
 };
 
 const VERDICT_META: Record<Verdict, { label: string; pill: string; accent: string; border: string; bg: string; text: string; dot: string; diamond: string }> = {
-  VIABLE:     { label: "VIABLE",     pill: "bg-emerald-500 text-[#050506]", accent: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-950/20", text: "text-emerald-500/80", dot: "bg-emerald-500", diamond: "border-emerald-500" },
-  MARGINAL:   { label: "MARGINAL",   pill: "bg-amber-500 text-[#050506]",   accent: "text-amber-400",   border: "border-amber-500/30",   bg: "bg-amber-950/20",   text: "text-amber-500/80",   dot: "bg-amber-500",   diamond: "border-amber-500" },
-  NON_VIABLE: { label: "NON-VIABLE", pill: "bg-red-500 text-[#050506]",     accent: "text-red-400",     border: "border-red-500/30",     bg: "bg-red-950/20",     text: "text-red-500/80",     dot: "bg-red-500",     diamond: "border-red-500" },
+  VIABLE:     { label: "VIABLE",     pill: "bg-[hsl(var(--good))] text-[#050506]", accent: "text-[hsl(var(--good))]", border: "border-[rgba(122,232,180,0.3)]", bg: "bg-[rgba(122,232,180,0.04)]", text: "text-[hsl(var(--good))]/80", dot: "bg-[hsl(var(--good))]", diamond: "border-[hsl(var(--good))]" },
+  MARGINAL:   { label: "MARGINAL",   pill: "bg-[hsl(var(--watch))] text-[#050506]",   accent: "text-[hsl(var(--watch))]",   border: "border-[rgba(255,184,77,0.3)]",   bg: "bg-[rgba(255,184,77,0.04)]",   text: "text-[hsl(var(--watch))]/80",   dot: "bg-[hsl(var(--watch))]",   diamond: "border-[hsl(var(--watch))]" },
+  NON_VIABLE: { label: "NON-VIABLE", pill: "bg-[hsl(var(--bad))] text-[#050506]",     accent: "text-[hsl(var(--bad))]",     border: "border-[rgba(255,107,107,0.3)]",     bg: "bg-[rgba(255,107,107,0.04)]",     text: "text-[hsl(var(--bad))]/80",     dot: "bg-[hsl(var(--bad))]",     diamond: "border-[hsl(var(--bad))]" },
 };
 
 function useDemoFinancialFoundation(): FinancialFoundation {
@@ -574,16 +574,16 @@ function FinancialFoundationSection({ d }: { d: FinancialFoundation }) {
   const filledSlots = Math.min(runwaySlots, Math.floor(d.runwayMonths));
   const partialSlot = d.runwayMonths - filledSlots > 0 && filledSlots < runwaySlots;
   const runwayTone =
-    d.runwayMonths >= 9 ? "text-emerald-400" :
-    d.runwayMonths >= 4 ? "text-amber-400" :
-                          "text-red-400";
+    d.runwayMonths >= 9 ? "text-[hsl(var(--good))]" :
+    d.runwayMonths >= 4 ? "text-[hsl(var(--watch))]" :
+                          "text-[hsl(var(--bad))]";
   const runwayFill =
-    d.runwayMonths >= 9 ? "bg-emerald-600/80" :
-    d.runwayMonths >= 4 ? "bg-amber-500/80" :
-                          "bg-red-500/80";
+    d.runwayMonths >= 9 ? "bg-[hsl(var(--good))]/80" :
+    d.runwayMonths >= 4 ? "bg-[hsl(var(--watch))]/80" :
+                          "bg-[hsl(var(--bad))]/80";
 
   return (
-    <div className="w-full bg-[#050506] border border-zinc-800 relative overflow-hidden rounded-sm"
+    <div className="w-full bg-[#050506] border border-[rgba(148,170,215,0.12)] relative overflow-hidden rounded-sm"
          style={{ color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
       {/* Scanline overlay */}
       <div className="absolute inset-0 pointer-events-none z-10"
@@ -594,36 +594,36 @@ function FinancialFoundationSection({ d }: { d: FinancialFoundation }) {
            }} />
 
       {/* Header strip */}
-      <div className="flex items-center justify-between bg-zinc-900/50 border-b border-zinc-800 px-3 py-1.5 relative z-20">
+      <div className="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border-b border-[rgba(148,170,215,0.12)] px-3 py-1.5 relative z-20">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] text-zinc-500 tracking-tighter uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="w-2 h-2 bg-[hsl(var(--good))] animate-pulse" />
+          <span className="text-[10px] text-[#5f6b82] tracking-tighter uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             SEC_03 // FIN_FOUNDATION
           </span>
         </div>
-        <span className="text-[10px] text-zinc-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <span className="text-[10px] text-[#3a4258]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           V2.4.0_SYS
         </span>
       </div>
 
       <div className="p-4 relative z-20">
-        <h2 className="text-zinc-400 text-xs font-semibold tracking-[0.2em] mb-1 uppercase">Business Intelligence</h2>
+        <h2 className="text-[#c8d2e4] text-xs font-semibold tracking-[0.2em] mb-1 uppercase">Business Intelligence</h2>
         <p className="text-xl font-bold text-white tracking-tight mb-6 leading-none uppercase">
           L'acquisition est-elle financièrement viable ?
         </p>
 
         {/* High-level metrics */}
-        <div className="grid grid-cols-2 gap-px bg-zinc-800 border border-zinc-800 mb-6">
+        <div className="grid grid-cols-2 gap-px bg-[rgba(148,170,215,0.1)] border border-[rgba(148,170,215,0.12)] mb-6">
           <div className="bg-[#08080a] p-3">
-            <p className="text-[10px] text-zinc-500 uppercase mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Cash Disponible</p>
+            <p className="text-[10px] text-[#5f6b82] uppercase mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Cash Disponible</p>
             <p className="text-lg font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              {fmtEuro(d.cashAvailable)}<span className="text-zinc-600 ml-1">€</span>
+              {fmtEuro(d.cashAvailable)}<span className="text-[#3a4258] ml-1">€</span>
             </p>
           </div>
           <div className="bg-[#08080a] p-3">
-            <p className="text-[10px] text-zinc-500 uppercase mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Burn Mensuel</p>
-            <p className="text-lg font-bold text-red-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              -{fmtEuro(d.monthlyBurn)}<span className="text-red-900 ml-1">€</span>
+            <p className="text-[10px] text-[#5f6b82] uppercase mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Burn Mensuel</p>
+            <p className="text-lg font-bold text-[hsl(var(--bad))]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+              -{fmtEuro(d.monthlyBurn)}<span className="text-[hsl(var(--bad))] ml-1">€</span>
             </p>
           </div>
         </div>
@@ -631,20 +631,20 @@ function FinancialFoundationSection({ d }: { d: FinancialFoundation }) {
         {/* Runway visualizer */}
         <div className="mb-6">
           <div className="flex justify-between items-end mb-2">
-            <p className="text-[10px] text-zinc-500 uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            <p className="text-[10px] text-[#5f6b82] uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
               Runway Projection
             </p>
             <p className={`text-xl font-bold ${runwayTone}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              {d.runwayMonths.toFixed(1)} <span className="text-xs font-normal text-zinc-500">MOIS</span>
+              {d.runwayMonths.toFixed(1)} <span className="text-xs font-normal text-[#5f6b82]">MOIS</span>
             </p>
           </div>
-          <div className="h-2 bg-zinc-900 flex gap-0.5 p-0.5 border border-zinc-800">
+          <div className="h-2 bg-[rgba(255,255,255,0.02)] flex gap-0.5 p-0.5 border border-[rgba(148,170,215,0.12)]">
             {Array.from({ length: runwaySlots }).map((_, i) => {
               const filled = i < filledSlots;
               const partial = !filled && i === filledSlots && partialSlot;
               return (
                 <div key={i}
-                     className={`h-full flex-1 ${filled ? runwayFill : partial ? `${runwayFill} opacity-50` : "bg-zinc-800"}`} />
+                     className={`h-full flex-1 ${filled ? runwayFill : partial ? `${runwayFill} opacity-50` : "bg-[rgba(148,170,215,0.1)]"}`} />
               );
             })}
           </div>
@@ -654,22 +654,22 @@ function FinancialFoundationSection({ d }: { d: FinancialFoundation }) {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="space-y-3">
             <div>
-              <p className="text-[10px] text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>GROSS MARGIN</p>
-              <p className="text-md font-bold text-zinc-200">{d.grossMarginPct}%</p>
+              <p className="text-[10px] text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>GROSS MARGIN</p>
+              <p className="text-md font-bold text-foreground">{d.grossMarginPct}%</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>CONTRIB. MARGIN</p>
-              <p className="text-md font-bold text-zinc-200">{d.contribMarginPct}%</p>
+              <p className="text-[10px] text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>CONTRIB. MARGIN</p>
+              <p className="text-md font-bold text-foreground">{d.contribMarginPct}%</p>
             </div>
           </div>
-          <div className="space-y-3 border-l border-zinc-800 pl-4">
+          <div className="space-y-3 border-l border-[rgba(148,170,215,0.12)] pl-4">
             <div>
-              <p className="text-[10px] text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>PAYBACK PERIOD</p>
-              <p className="text-md font-bold text-zinc-200">{d.paybackMonths.toFixed(1)} MOIS</p>
+              <p className="text-[10px] text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>PAYBACK PERIOD</p>
+              <p className="text-md font-bold text-foreground">{d.paybackMonths.toFixed(1)} MOIS</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>SAFETY SPEND CAP</p>
-              <p className="text-md font-bold text-cyan-400">{fmtEuro(d.safetySpendCap)}€/MO</p>
+              <p className="text-[10px] text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>SAFETY SPEND CAP</p>
+              <p className="text-md font-bold text-[#9ec8ff]">{fmtEuro(d.safetySpendCap)}€/MO</p>
             </div>
           </div>
         </div>
@@ -696,30 +696,30 @@ function FinancialFoundationSection({ d }: { d: FinancialFoundation }) {
 
           <div className={`flex items-start gap-2 pt-3 border-t ${v.border}`}>
             <div className={`mt-1 w-1.5 h-1.5 border ${v.diamond} rotate-45 flex-shrink-0`} />
-            <p className="text-[11px] leading-relaxed text-zinc-400 font-medium">
+            <p className="text-[11px] leading-relaxed text-[#c8d2e4] font-medium">
               {d.reason}
             </p>
           </div>
         </div>
 
         {d.missing && d.missing.length > 0 && (
-          <div className="mt-3 flex items-start gap-2 border-l-2 border-amber-500/60 pl-2 py-1">
-            <AlertTriangle className="w-3 h-3 text-amber-400 flex-shrink-0 mt-px" />
-            <div className="text-[10px] text-zinc-300 leading-snug">
-              Saisies manquantes : <span className="text-amber-300">{d.missing.join(" · ")}</span>
+          <div className="mt-3 flex items-start gap-2 border-l-2 border-[hsl(var(--watch))]/60 pl-2 py-1">
+            <AlertTriangle className="w-3 h-3 text-[hsl(var(--watch))] flex-shrink-0 mt-px" />
+            <div className="text-[10px] text-[#c8d2e4] leading-snug">
+              Saisies manquantes : <span className="text-[hsl(var(--watch))]">{d.missing.join(" · ")}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 flex justify-between items-center bg-[#08080a] border-t border-zinc-800 relative z-20">
+      <div className="px-4 py-3 flex justify-between items-center bg-[#08080a] border-t border-[rgba(148,170,215,0.12)] relative z-20">
         <div className="flex gap-1">
-          <div className="w-1 h-3 bg-zinc-800" />
-          <div className="w-1 h-3 bg-zinc-700" />
-          <div className="w-1 h-3 bg-zinc-600" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.1)]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.08)]" />
+          <div className="w-1 h-3 bg-[rgba(148,170,215,0.15)]" />
         </div>
-        <p className="text-[9px] text-zinc-600 tracking-widest uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <p className="text-[9px] text-[#3a4258] tracking-widest uppercase" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           Profit-First Analytics Engine · 03/09
         </p>
       </div>
@@ -734,23 +734,23 @@ function SectionPlaceholder({
   n, title, question,
 }: { n: string; title: string; question: string }) {
   return (
-    <div className="w-full border border-dashed border-zinc-800 bg-zinc-900/30 rounded-sm p-5"
+    <div className="w-full border border-dashed border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)]/30 rounded-sm p-5"
          style={{ color: "#e0e0e0", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
       <div className="flex justify-between items-start gap-4 mb-2">
         <div className="min-w-0">
-          <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Section {n}</div>
+          <div className="text-[10px] text-[#5f6b82] uppercase tracking-widest mb-1">Section {n}</div>
           <h2 className="text-lg font-bold text-white truncate" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
             {title.toUpperCase()}
           </h2>
         </div>
-        <div className="text-[9px] text-zinc-600 uppercase tracking-widest border border-zinc-800 px-2 py-1 rounded-sm flex-shrink-0">
+        <div className="text-[9px] text-[#3a4258] uppercase tracking-widest border border-[rgba(148,170,215,0.12)] px-2 py-1 rounded-sm flex-shrink-0">
           À designer
         </div>
       </div>
-      <div className="text-[11px] text-zinc-500 italic mt-2">
+      <div className="text-[11px] text-[#5f6b82] italic mt-2">
         Question business : {question}
       </div>
-      <div className="mt-3 text-[10px] text-zinc-600 uppercase tracking-widest">
+      <div className="mt-3 text-[10px] text-[#3a4258] uppercase tracking-widest">
         En attente de validation du design →
       </div>
     </div>
@@ -775,16 +775,16 @@ type GrowthDiagnosis = {
 };
 
 const SEV_META: Record<DiagSeverity, { ring: string; text: string; glow: string; radial: string; label: string }> = {
-  HIGH:   { ring: "border-red-400",    text: "text-red-400",    glow: "shadow-[0_0_30px_rgba(248,113,113,0.25)]", radial: "radial-gradient(ellipse at top left, rgba(127,29,29,0.35), transparent 60%)", label: "HIGH" },
-  MEDIUM: { ring: "border-amber-400",  text: "text-amber-400",  glow: "shadow-[0_0_30px_rgba(251,191,36,0.22)]",  radial: "radial-gradient(ellipse at top left, rgba(120,53,15,0.35), transparent 60%)",  label: "MED" },
-  LOW:    { ring: "border-emerald-400",text: "text-emerald-400",glow: "shadow-[0_0_30px_rgba(52,211,153,0.22)]",  radial: "radial-gradient(ellipse at top left, rgba(6,78,59,0.35), transparent 60%)",    label: "LOW" },
+  HIGH:   { ring: "border-[rgba(255,107,107,0.4)]",    text: "text-[hsl(var(--bad))]",    glow: "shadow-[0_0_30px_rgba(248,113,113,0.25)]", radial: "radial-gradient(ellipse at top left, rgba(127,29,29,0.35), transparent 60%)", label: "HIGH" },
+  MEDIUM: { ring: "border-[rgba(255,184,77,0.4)]",  text: "text-[hsl(var(--watch))]",  glow: "shadow-[0_0_30px_rgba(251,191,36,0.22)]",  radial: "radial-gradient(ellipse at top left, rgba(120,53,15,0.35), transparent 60%)",  label: "MED" },
+  LOW:    { ring: "border-[rgba(122,232,180,0.4)]",text: "text-[hsl(var(--good))]",glow: "shadow-[0_0_30px_rgba(52,211,153,0.22)]",  radial: "radial-gradient(ellipse at top left, rgba(6,78,59,0.35), transparent 60%)",    label: "LOW" },
 };
 
-const TONE_TEXT: Record<"bad"|"warn"|"ok", string> = { bad: "text-red-400", warn: "text-amber-400", ok: "text-emerald-400" };
+const TONE_TEXT: Record<"bad"|"warn"|"ok", string> = { bad: "text-[hsl(var(--bad))]", warn: "text-[hsl(var(--watch))]", ok: "text-[hsl(var(--good))]" };
 const TONE_BAR: Record<"bad"|"warn"|"ok", string> = {
-  bad:  "bg-gradient-to-r from-amber-500 to-red-400",
-  warn: "bg-gradient-to-r from-amber-500 to-amber-300",
-  ok:   "bg-gradient-to-r from-emerald-600 to-emerald-400",
+  bad:  "bg-[linear-gradient(90deg,hsl(var(--watch)),hsl(var(--bad)))]",
+  warn: "bg-[linear-gradient(90deg,hsl(var(--watch)),rgba(255,184,77,0.7))]",
+  ok:   "bg-[linear-gradient(90deg,hsl(var(--good)),rgba(122,232,180,0.7))]",
 };
 
 function useDemoGrowthDiagnosis(): GrowthDiagnosis {
@@ -811,39 +811,39 @@ function useDemoGrowthDiagnosis(): GrowthDiagnosis {
 function GrowthDiagnosisSection({ d }: { d: GrowthDiagnosis }) {
   const sev = SEV_META[d.severity];
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
       {/* Section strip */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #f87171" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>04</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Growth Diagnosis</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Where is growth breaking?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>04</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Growth Diagnosis</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Where is growth breaking?</span>
       </div>
 
       {/* Hero — bottleneck spotlight */}
-      <div className="flex items-center gap-5 p-6 border-b border-zinc-800" style={{ background: sev.radial }}>
+      <div className="flex items-center gap-5 p-6 border-b border-[rgba(148,170,215,0.12)]" style={{ background: sev.radial }}>
         <div className={`w-20 h-20 rounded-full border-2 ${sev.ring} ${sev.glow} flex flex-col items-center justify-center flex-shrink-0`}
              style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           <span className={`text-[11px] font-bold tracking-[0.1em] ${sev.text}`}>{sev.label}</span>
           <span className={`text-[13px] font-bold ${sev.text}`}>{d.confidencePct}%</span>
         </div>
         <div className="min-w-0">
-          <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             Primary bottleneck detected
           </div>
           <div className="text-[22px] font-bold text-white leading-tight break-words" style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.02em" }}>
             {d.bottleneckHeadline}
           </div>
-          <div className="text-[13px] text-zinc-400 mt-1.5">{d.bottleneckSubtitle}</div>
+          <div className="text-[13px] text-[#c8d2e4] mt-1.5">{d.bottleneckSubtitle}</div>
         </div>
       </div>
 
       {/* Metrics row */}
       <div className="grid grid-cols-3">
         {d.metrics.map((m, i) => (
-          <div key={m.key} className={`p-5 ${i < d.metrics.length - 1 ? "border-r border-zinc-800" : ""}`}>
-            <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div key={m.key} className={`p-5 ${i < d.metrics.length - 1 ? "border-r border-[rgba(148,170,215,0.12)]" : ""}`}>
+            <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
               {m.label}
             </div>
             <div className="text-[20px] font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -857,15 +857,15 @@ function GrowthDiagnosisSection({ d }: { d: GrowthDiagnosis }) {
       </div>
 
       {/* Contributing factors weighted */}
-      <div className="px-6 py-5 border-t border-zinc-800" style={{ background: "#07070c" }}>
-        <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-3" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+      <div className="px-6 py-5 border-t border-[rgba(148,170,215,0.12)]" style={{ background: "#07070c" }}>
+        <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-3" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           Contributing factors · weighted
         </div>
         <div className="space-y-2">
           {d.factors.map((f) => (
             <div key={f.label} className="flex items-center gap-3">
-              <div className="w-40 text-[12px] text-zinc-300 flex-shrink-0">{f.label}</div>
-              <div className="flex-1 h-1 bg-zinc-800 rounded-sm overflow-hidden">
+              <div className="w-40 text-[12px] text-[#c8d2e4] flex-shrink-0">{f.label}</div>
+              <div className="flex-1 h-1 bg-[rgba(148,170,215,0.1)] rounded-sm overflow-hidden">
                 <div className={`h-full ${TONE_BAR[f.tone]}`} style={{ width: `${Math.round(f.weight * 100)}%` }} />
               </div>
               <div className={`w-12 text-right text-[11px] font-bold ${TONE_TEXT[f.tone]}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -877,9 +877,9 @@ function GrowthDiagnosisSection({ d }: { d: GrowthDiagnosis }) {
       </div>
 
       {/* Action bar */}
-      <div className="flex items-center justify-between gap-4 px-6 py-4 border-t border-zinc-800"
+      <div className="flex items-center justify-between gap-4 px-6 py-4 border-t border-[rgba(148,170,215,0.12)]"
            style={{ background: "#0a0f1c" }}>
-        <div className="text-[13px] font-semibold text-blue-300 min-w-0 truncate">
+        <div className="text-[13px] font-semibold text-[#9ec8ff] min-w-0 truncate">
           ▸ {d.recommendedFocus}
         </div>
         <button className="px-4 py-2 rounded-sm text-[11px] font-bold tracking-[0.12em] uppercase flex-shrink-0"
@@ -908,9 +908,9 @@ type SpendPlan = {
 };
 
 const DECISION_META: Record<SpendDecision, { label: string; light: 0 | 1 | 2; accent: string; ring: string; dot: string; radial: string }> = {
-  SCALE: { label: "SCALE — SAFELY", light: 2, accent: "text-emerald-400", ring: "border-emerald-500/40", dot: "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]", radial: "radial-gradient(ellipse at right, rgba(6,78,59,0.35), transparent 55%)" },
-  HOLD:  { label: "HOLD — STABILIZE", light: 1, accent: "text-amber-400",  ring: "border-amber-500/40",   dot: "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]",  radial: "radial-gradient(ellipse at right, rgba(120,53,15,0.35), transparent 55%)" },
-  CUT:   { label: "CUT — PROTECT",    light: 0, accent: "text-red-400",    ring: "border-red-500/40",     dot: "bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.6)]",   radial: "radial-gradient(ellipse at right, rgba(127,29,29,0.35), transparent 55%)" },
+  SCALE: { label: "SCALE — SAFELY", light: 2, accent: "text-[hsl(var(--good))]", ring: "border-[rgba(122,232,180,0.4)]", dot: "bg-[hsl(var(--good))] shadow-[0_0_12px_rgba(52,211,153,0.6)]", radial: "radial-gradient(ellipse at right, rgba(6,78,59,0.35), transparent 55%)" },
+  HOLD:  { label: "HOLD — STABILIZE", light: 1, accent: "text-[hsl(var(--watch))]",  ring: "border-[rgba(255,184,77,0.4)]",   dot: "bg-[hsl(var(--watch))] shadow-[0_0_12px_rgba(251,191,36,0.6)]",  radial: "radial-gradient(ellipse at right, rgba(120,53,15,0.35), transparent 55%)" },
+  CUT:   { label: "CUT — PROTECT",    light: 0, accent: "text-[hsl(var(--bad))]",    ring: "border-[rgba(255,107,107,0.4)]",     dot: "bg-[hsl(var(--bad))] shadow-[0_0_12px_rgba(248,113,113,0.6)]",   radial: "radial-gradient(ellipse at right, rgba(127,29,29,0.35), transparent 55%)" },
 };
 
 function useDemoSpendPlan(): SpendPlan {
@@ -934,60 +934,60 @@ function SpendDecisionSection({ d }: { d: SpendPlan }) {
   const m = DECISION_META[d.decision];
   const headroom = d.safetyCapDaily - d.currentDaily;
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
       {/* Section strip */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #34d399" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>05</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Profit-First Spend Decision</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Combien peut-on dépenser en sécurité ?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>05</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Profit-First Spend Decision</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Combien peut-on dépenser en sécurité ?</span>
       </div>
 
       {/* Hero */}
-      <div className="flex items-center gap-5 p-6 border-b border-zinc-800" style={{ background: m.radial }}>
+      <div className="flex items-center gap-5 p-6 border-b border-[rgba(148,170,215,0.12)]" style={{ background: m.radial }}>
         <div className={`flex flex-col gap-1.5 p-2.5 rounded-sm border ${m.ring} flex-shrink-0`}>
           {[2, 1, 0].map((slot) => (
             <span key={slot}
-                  className={`w-3.5 h-3.5 rounded-full border border-zinc-800 ${m.light === slot ? m.dot : "bg-zinc-900"}`} />
+                  className={`w-3.5 h-3.5 rounded-full border border-[rgba(148,170,215,0.12)] ${m.light === slot ? m.dot : "bg-[rgba(255,255,255,0.02)]"}`} />
           ))}
         </div>
         <div className="min-w-0">
-          <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             Spend decision · engine
           </div>
           <div className={`text-[22px] font-bold ${m.accent}`} style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.02em" }}>
             {m.label}
           </div>
-          <div className="text-[13px] text-zinc-400 mt-1.5">{d.subtitle}</div>
+          <div className="text-[13px] text-[#c8d2e4] mt-1.5">{d.subtitle}</div>
         </div>
       </div>
 
       {/* Body : cap+guardrails / blockers */}
       <div className="grid md:grid-cols-[1.15fr_1fr]">
-        <div className="p-5 md:border-r border-zinc-800">
-          <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="p-5 md:border-r border-[rgba(148,170,215,0.12)]">
+          <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-1.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             Safety spend cap
           </div>
           <div className={`text-[32px] font-bold ${m.accent}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-            ${fmtEuro(d.safetyCapDaily)}<span className="text-[14px] text-zinc-500 ml-2">/ day</span>
+            ${fmtEuro(d.safetyCapDaily)}<span className="text-[14px] text-[#5f6b82] ml-2">/ day</span>
           </div>
           <div className="mt-4 space-y-0">
             {[
               { k: "Current daily", v: `$${fmtEuro(d.currentDaily)}`, tone: "text-white" },
-              { k: "Headroom",      v: `+$${fmtEuro(headroom)}`,      tone: "text-emerald-400" },
+              { k: "Headroom",      v: `+$${fmtEuro(headroom)}`,      tone: "text-[hsl(var(--good))]" },
               { k: "Max allowed CAC", v: `$${d.maxAllowedCac}`,       tone: "text-white" },
               { k: "Payback (mois)",  v: d.paybackMonths.toFixed(1),  tone: "text-white" },
             ].map((r) => (
-              <div key={r.k} className="flex justify-between items-center py-2 border-b border-dashed border-zinc-800 text-[13px] text-zinc-300">
+              <div key={r.k} className="flex justify-between items-center py-2 border-b border-dashed border-[rgba(148,170,215,0.12)] text-[13px] text-[#c8d2e4]">
                 <span>{r.k}</span>
                 <span className={`font-bold ${r.tone}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>{r.v}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="p-5 border-t md:border-t-0 border-zinc-800" style={{ background: "#07070c" }}>
-          <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-3" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="p-5 border-t md:border-t-0 border-[rgba(148,170,215,0.12)]" style={{ background: "#07070c" }}>
+          <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-3" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             Scale blockers
           </div>
           <div className="space-y-2">
@@ -1006,7 +1006,7 @@ function SpendDecisionSection({ d }: { d: SpendPlan }) {
               );
             })}
             {d.blockers.length === 0 && (
-              <div className="text-[12px] text-zinc-500 italic">Aucun blocker détecté.</div>
+              <div className="text-[12px] text-[#5f6b82] italic">Aucun blocker détecté.</div>
             )}
           </div>
         </div>
@@ -1082,25 +1082,25 @@ function ForecastSection({ d }: { d: ForecastData }) {
   const fmtK = (n: number) => `$${Math.round(n / 1000)}k`;
 
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
       {/* Section strip */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #22d3ee" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>06</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Forecast &amp; Targets</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Que doit-il se passer si le plan est exécuté ?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>06</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Forecast &amp; Targets</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Que doit-il se passer si le plan est exécuté ?</span>
       </div>
 
       <div className="p-5">
         {/* Headline */}
         <div className="flex justify-between items-end mb-3 gap-4">
           <div>
-            <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
               Revenue projection · 90 days
             </div>
-            <div className="text-[28px] font-bold text-cyan-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              ${d.expectedRevenue.toLocaleString("fr-FR")} <span className="text-[14px] text-zinc-500">expected</span>
+            <div className="text-[28px] font-bold text-[#9ec8ff]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+              ${d.expectedRevenue.toLocaleString("fr-FR")} <span className="text-[14px] text-[#5f6b82]">expected</span>
             </div>
           </div>
           <span className="text-[10px] tracking-[0.14em] uppercase px-2 py-1 rounded-sm border"
@@ -1110,7 +1110,7 @@ function ForecastSection({ d }: { d: ForecastData }) {
         </div>
 
         {/* Chart */}
-        <div className="relative border border-zinc-800 rounded-sm p-2.5"
+        <div className="relative border border-[rgba(148,170,215,0.12)] rounded-sm p-2.5"
              style={{ background: "linear-gradient(180deg,#07070c,#0a0a10)" }}>
           <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-[180px]">
             <defs>
@@ -1138,7 +1138,7 @@ function ForecastSection({ d }: { d: ForecastData }) {
         </div>
 
         {/* Legend */}
-        <div className="flex gap-4 flex-wrap mt-3 text-[10px] text-zinc-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="flex gap-4 flex-wrap mt-3 text-[10px] text-[#c8d2e4]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           {[
             { c: "#94a3b8", l: "Actuals" },
             { c: "#22d3ee", l: "Forecast (P50)" },
@@ -1155,12 +1155,12 @@ function ForecastSection({ d }: { d: ForecastData }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mt-4">
           {[
             { k: "P10 · pessimist", v: fmtK(d.p10), tone: "text-white" },
-            { k: "P50 · expected",  v: fmtK(d.p50), tone: "text-cyan-400" },
+            { k: "P50 · expected",  v: fmtK(d.p50), tone: "text-[#9ec8ff]" },
             { k: "P90 · optimist",  v: fmtK(d.p90), tone: "text-white" },
-            { k: "Hit target prob", v: `${d.hitProbPct}%`, tone: "text-emerald-400" },
+            { k: "Hit target prob", v: `${d.hitProbPct}%`, tone: "text-[hsl(var(--good))]" },
           ].map((c) => (
-            <div key={c.k} className="border border-zinc-800 rounded-sm p-3" style={{ background: "#07070c" }}>
-              <div className="text-[9px] tracking-[0.14em] uppercase text-zinc-500 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.k}</div>
+            <div key={c.k} className="border border-[rgba(148,170,215,0.12)] rounded-sm p-3" style={{ background: "#07070c" }}>
+              <div className="text-[9px] tracking-[0.14em] uppercase text-[#5f6b82] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.k}</div>
               <div className={`text-[16px] font-bold ${c.tone}`} style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.v}</div>
             </div>
           ))}
@@ -1179,14 +1179,14 @@ type Mission = { id: string; priority: MissionPriority; title: string; impact: s
 type ExecutionPlan = { cycleLabel: string; focusLine: string; missions: Mission[] };
 
 const PRIO_META: Record<MissionPriority, { bg: string; text: string; border: string }> = {
-  P0: { bg: "bg-red-950/40",    text: "text-red-400",    border: "border-red-500/40" },
-  P1: { bg: "bg-amber-950/40",  text: "text-amber-400",  border: "border-amber-500/40" },
-  P2: { bg: "bg-slate-800",     text: "text-blue-300",   border: "border-blue-500/40" },
+  P0: { bg: "bg-[rgba(255,107,107,0.06)]",    text: "text-[hsl(var(--bad))]",    border: "border-[rgba(255,107,107,0.4)]" },
+  P1: { bg: "bg-[rgba(255,184,77,0.06)]",  text: "text-[hsl(var(--watch))]",  border: "border-[rgba(255,184,77,0.4)]" },
+  P2: { bg: "bg-[rgba(148,170,215,0.08)]",     text: "text-[#9ec8ff]",   border: "border-[rgba(77,159,255,0.4)]" },
 };
 const MISSION_STATUS_META: Record<MissionStatus, { label: string; bg: string; text: string; border: string }> = {
-  TODO:  { label: "Todo",  bg: "bg-slate-800",       text: "text-blue-300",    border: "border-blue-500/40" },
-  DOING: { label: "Doing", bg: "bg-amber-950/40",    text: "text-amber-400",   border: "border-amber-500/40" },
-  DONE:  { label: "Done",  bg: "bg-emerald-950/40",  text: "text-emerald-400", border: "border-emerald-500/40" },
+  TODO:  { label: "Todo",  bg: "bg-[rgba(148,170,215,0.08)]",       text: "text-[#9ec8ff]",    border: "border-[rgba(77,159,255,0.4)]" },
+  DOING: { label: "Doing", bg: "bg-[rgba(255,184,77,0.06)]",    text: "text-[hsl(var(--watch))]",   border: "border-[rgba(255,184,77,0.4)]" },
+  DONE:  { label: "Done",  bg: "bg-[rgba(122,232,180,0.06)]",  text: "text-[hsl(var(--good))]", border: "border-[rgba(122,232,180,0.4)]" },
 };
 
 function useDemoExecutionPlan(): ExecutionPlan {
@@ -1211,19 +1211,19 @@ function ExecutionPlanSection({ d }: { d: ExecutionPlan }) {
   d.missions.forEach((m) => (counts[m.priority] += 1));
 
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #a78bfa" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>07</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Execution Plan</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Que doit faire l'engineer cette semaine ?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>07</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Execution Plan</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Que doit faire l'engineer cette semaine ?</span>
       </div>
 
-      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-zinc-800">
+      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-[rgba(148,170,215,0.12)]">
         <div className="text-[16px] font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           This week · {total} missions
-          <span className="text-[12px] text-violet-400 ml-2">· {counts.P0} P0 · {counts.P1} P1 · {counts.P2} P2</span>
+          <span className="text-[12px] text-[#c8d2e4] ml-2">· {counts.P0} P0 · {counts.P1} P1 · {counts.P2} P2</span>
         </div>
         <span className="text-[10px] tracking-[0.14em] uppercase px-2 py-1 rounded-sm border"
               style={{ fontFamily: "'JetBrains Mono', monospace", background: "rgba(30,16,48,1)", color: "#a78bfa", borderColor: "rgba(167,139,250,0.35)" }}>
@@ -1237,7 +1237,7 @@ function ExecutionPlanSection({ d }: { d: ExecutionPlan }) {
           const s = MISSION_STATUS_META[m.status];
           return (
             <div key={m.id}
-                 className="grid gap-3 items-center px-5 py-3.5 border-b border-zinc-900"
+                 className="grid gap-3 items-center px-5 py-3.5 border-b border-[rgba(148,170,215,0.1)]"
                  style={{ gridTemplateColumns: "44px 1fr auto auto" }}>
               <div className={`w-9 h-9 rounded-md border flex items-center justify-center font-bold text-[13px] ${p.bg} ${p.text} ${p.border}`}
                    style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -1245,9 +1245,9 @@ function ExecutionPlanSection({ d }: { d: ExecutionPlan }) {
               </div>
               <div className="min-w-0">
                 <div className="text-[14px] text-white font-semibold truncate">{m.title}</div>
-                <div className="text-[12px] text-zinc-400 mt-0.5">▸ {m.impact}</div>
+                <div className="text-[12px] text-[#c8d2e4] mt-0.5">▸ {m.impact}</div>
               </div>
-              <div className="text-[11px] text-zinc-300 hidden sm:block" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.owner}</div>
+              <div className="text-[11px] text-[#c8d2e4] hidden sm:block" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.owner}</div>
               <div className={`text-[10px] px-2 py-1 rounded-sm border ${s.bg} ${s.text} ${s.border} tracking-[0.1em] uppercase text-center`}
                    style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {s.label}
@@ -1257,12 +1257,12 @@ function ExecutionPlanSection({ d }: { d: ExecutionPlan }) {
         })}
       </div>
 
-      <div className="flex justify-between items-center gap-3 px-5 py-3 border-t border-zinc-800"
+      <div className="flex justify-between items-center gap-3 px-5 py-3 border-t border-[rgba(148,170,215,0.12)]"
            style={{ background: "#0a0f1c" }}>
-        <div className="text-[13px] font-semibold text-blue-300 min-w-0 truncate">▸ {d.focusLine}</div>
+        <div className="text-[13px] font-semibold text-[#9ec8ff] min-w-0 truncate">▸ {d.focusLine}</div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-24 h-1 bg-zinc-800 rounded-sm overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${pct}%` }} />
+          <div className="w-24 h-1 bg-[rgba(148,170,215,0.1)] rounded-sm overflow-hidden">
+            <div className="h-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)]" style={{ width: `${pct}%` }} />
           </div>
           <span className="text-[11px] font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{pct}% complete</span>
         </div>
@@ -1336,20 +1336,20 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 
 function LiveControlSection({ d }: { d: LiveControl }) {
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #34d399" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>08</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Live Control</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Est-ce que le plan fonctionne aujourd'hui ?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>08</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Live Control</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Est-ce que le plan fonctionne aujourd'hui ?</span>
       </div>
 
-      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-zinc-800">
+      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-[rgba(148,170,215,0.12)]">
         <div className="text-[16px] font-bold text-white flex items-center gap-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="inline-block w-2 h-2 rounded-full bg-[hsl(var(--good))] animate-pulse" />
           Vital Signs
-          <span className="text-[12px] text-emerald-400 ml-1">· {d.updatedLabel}</span>
+          <span className="text-[12px] text-[hsl(var(--good))] ml-1">· {d.updatedLabel}</span>
         </div>
         <span className="text-[10px] tracking-[0.14em] uppercase px-2 py-1 rounded-sm border"
               style={{ fontFamily: "'JetBrains Mono', monospace", background: "rgba(6,44,32,1)", color: "#34d399", borderColor: "rgba(52,211,153,0.35)" }}>
@@ -1357,13 +1357,13 @@ function LiveControlSection({ d }: { d: LiveControl }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-zinc-900">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[rgba(255,255,255,0.02)]">
         {d.vitals.map((v) => {
           const t = TREND_META[v.trend];
           return (
             <div key={v.id} className="p-3 flex flex-col gap-1.5" style={{ background: "#0a0a10" }}>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{v.label}</span>
+                <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{v.label}</span>
                 <span className="text-[9px] px-1.5 py-0.5 rounded-sm border" style={{ fontFamily: "'JetBrains Mono', monospace", color: t.color, background: t.bg, borderColor: t.border }}>
                   {t.glyph}
                 </span>
@@ -1376,20 +1376,20 @@ function LiveControlSection({ d }: { d: LiveControl }) {
         })}
       </div>
 
-      <div className="border-t border-zinc-800">
-        <div className="flex items-center gap-2 px-5 py-2 border-b border-zinc-900"
+      <div className="border-t border-[rgba(148,170,215,0.12)]">
+        <div className="flex items-center gap-2 px-5 py-2 border-b border-[rgba(148,170,215,0.1)]"
              style={{ background: "#140a0a" }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-          <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-red-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Alerts · {d.alerts.length}</span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--bad))] animate-pulse" />
+          <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-[hsl(var(--bad))]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Alerts · {d.alerts.length}</span>
         </div>
         {d.alerts.map((a) => (
-          <div key={a.id} className="flex items-start gap-3 px-5 py-2.5 border-b border-zinc-900">
-            <span className={`text-[9px] px-1.5 py-0.5 rounded-sm border tracking-[0.1em] ${a.severity === "HIGH" ? "text-red-400 border-red-500/40 bg-red-950/40" : "text-amber-400 border-amber-500/40 bg-amber-950/30"}`}
+          <div key={a.id} className="flex items-start gap-3 px-5 py-2.5 border-b border-[rgba(148,170,215,0.1)]">
+            <span className={`text-[9px] px-1.5 py-0.5 rounded-sm border tracking-[0.1em] ${a.severity === "HIGH" ? "text-[hsl(var(--bad))] border-[rgba(255,107,107,0.4)] bg-[rgba(255,107,107,0.06)]" : "text-[hsl(var(--watch))] border-[rgba(255,184,77,0.4)] bg-[rgba(255,184,77,0.05)]"}`}
                   style={{ fontFamily: "'JetBrains Mono', monospace" }}>
               {a.severity}
             </span>
-            <div className="flex-1 min-w-0 text-[13px] text-zinc-200">▸ {a.text}</div>
-            <span className="text-[10px] text-zinc-500 flex-shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{a.time}</span>
+            <div className="flex-1 min-w-0 text-[13px] text-foreground">▸ {a.text}</div>
+            <span className="text-[10px] text-[#5f6b82] flex-shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{a.time}</span>
           </div>
         ))}
       </div>
@@ -1443,19 +1443,19 @@ function useDemoLearning(): Learning {
 
 function MeasurementLearningSection({ d }: { d: Learning }) {
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", color: "#e0e0e0", fontFamily: "'Rajdhani', sans-serif" }}>
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg,#0b0b0f,#050506)", borderLeft: "3px solid #34d399" }}>
-        <span className="text-[10px] tracking-[0.18em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>09</span>
-        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-zinc-100" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Measurement & Learning</span>
-        <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Qu'a-t-on appris ?</span>
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>09</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-bold text-foreground" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Measurement & Learning</span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· Qu'a-t-on appris ?</span>
       </div>
 
-      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-zinc-800">
+      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-[rgba(148,170,215,0.12)]">
         <div className="text-[16px] font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           Scorecard
-          <span className="text-[12px] text-zinc-500 ml-2 font-normal">· {d.cycleLabel}</span>
+          <span className="text-[12px] text-[#5f6b82] ml-2 font-normal">· {d.cycleLabel}</span>
         </div>
         <span className="text-[10px] tracking-[0.14em] uppercase px-2 py-1 rounded-sm border"
               style={{ fontFamily: "'JetBrains Mono', monospace", background: "rgba(6,44,32,1)", color: "#34d399", borderColor: "rgba(52,211,153,0.35)" }}>
@@ -1463,37 +1463,37 @@ function MeasurementLearningSection({ d }: { d: Learning }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-zinc-900">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[rgba(255,255,255,0.02)]">
         {d.scores.map((s) => {
           const t = SCORE_META[s.trend];
           return (
             <div key={s.id} className="p-3 flex flex-col gap-1.5" style={{ background: "#0a0a10" }}>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
+                <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</span>
                 <span className="text-[9px] px-1.5 py-0.5 rounded-sm border" style={{ fontFamily: "'JetBrains Mono', monospace", color: t.color, background: t.bg, borderColor: t.border }}>
                   {t.glyph}
                 </span>
               </div>
               <div className="text-[22px] font-bold leading-none" style={{ color: t.color, fontFamily: "'JetBrains Mono', monospace" }}>{s.value}</div>
-              <div className="text-[10px] text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.delta}</div>
+              <div className="text-[10px] text-[#5f6b82]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.delta}</div>
             </div>
           );
         })}
       </div>
 
-      <div className="border-t border-zinc-800">
-        <div className="flex items-center gap-2 px-5 py-2 border-b border-zinc-900"
+      <div className="border-t border-[rgba(148,170,215,0.12)]">
+        <div className="flex items-center gap-2 px-5 py-2 border-b border-[rgba(148,170,215,0.1)]"
              style={{ background: "#0a1414" }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-emerald-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Learning Log · {d.insights.length}</span>
-          <span className="text-[10px] tracking-[0.14em] uppercase text-zinc-500 ml-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· insights réutilisables</span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--good))]" />
+          <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-[hsl(var(--good))]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Learning Log · {d.insights.length}</span>
+          <span className="text-[10px] tracking-[0.14em] uppercase text-[#5f6b82] ml-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>· insights réutilisables</span>
         </div>
         {d.insights.map((i) => {
           const c = CONF_META[i.confidence];
           return (
-            <div key={i.id} className="px-5 py-3 border-b border-zinc-900 last:border-b-0">
+            <div key={i.id} className="px-5 py-3 border-b border-[rgba(148,170,215,0.1)] last:border-b-0">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[9px] px-1.5 py-0.5 rounded-sm border tracking-[0.1em] text-zinc-300 border-zinc-700 bg-zinc-900"
+                <span className="text-[9px] px-1.5 py-0.5 rounded-sm border tracking-[0.1em] text-[#c8d2e4] border-[rgba(148,170,215,0.1)] bg-[rgba(255,255,255,0.02)]"
                       style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                   {i.tag}
                 </span>
@@ -1502,8 +1502,8 @@ function MeasurementLearningSection({ d }: { d: Learning }) {
                   CONF {i.confidence}
                 </span>
               </div>
-              <div className="text-[13px] text-zinc-200 leading-snug mb-1">▸ {i.text}</div>
-              <div className="text-[10px] text-emerald-400/80" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{i.reuse}</div>
+              <div className="text-[13px] text-foreground leading-snug mb-1">▸ {i.text}</div>
+              <div className="text-[10px] text-[hsl(var(--good))]/80" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{i.reuse}</div>
             </div>
           );
         })}
@@ -1677,12 +1677,12 @@ function AdaptiveWorkflowHub({
   const outcomes = buildNewClientOutcomes(clientRoute);
 
   return (
-    <section className="border border-zinc-800 rounded-sm overflow-hidden" style={{ background: "#08080d", color: "#e5e7eb", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
-      <div className="px-4 py-3 border-b border-zinc-800 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between" style={{ background: "#0d0d15" }}>
+    <section className="border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden" style={{ background: "#08080d", color: "#e5e7eb", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+      <div className="px-4 py-3 border-b border-[rgba(148,170,215,0.12)] flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between" style={{ background: "#0d0d15" }}>
         <div>
-          <div className="text-[10px] text-cyan-400 tracking-[0.18em] uppercase font-bold">Vue adaptive Profit-First</div>
+          <div className="text-[10px] text-[#9ec8ff] tracking-[0.18em] uppercase font-bold">Vue adaptive Profit-First</div>
           <h2 className="mt-1 text-xl text-white font-bold" style={{ fontFamily: "'Rajdhani', sans-serif" }}>{active.label}</h2>
-          <p className="mt-1 text-xs text-zinc-400 leading-relaxed max-w-4xl">{active.description}</p>
+          <p className="mt-1 text-xs text-[#c8d2e4] leading-relaxed max-w-4xl">{active.description}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-full lg:min-w-[520px]">
           {(Object.keys(MODE_META) as ProfitWorkspaceMode[]).map((key) => {
@@ -1699,7 +1699,7 @@ function AdaptiveWorkflowHub({
                   color: isActive ? "#67e8f9" : "#d4d4d8",
                 }}
               >
-                <div className="text-[9px] tracking-[0.16em] uppercase text-zinc-500">{MODE_META[key].eyebrow}</div>
+                <div className="text-[9px] tracking-[0.16em] uppercase text-[#5f6b82]">{MODE_META[key].eyebrow}</div>
                 <div className="mt-1 text-[12px] font-bold">{MODE_META[key].label}</div>
               </button>
             );
@@ -1708,12 +1708,12 @@ function AdaptiveWorkflowHub({
       </div>
 
       {mode === "new-client" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-zinc-900">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-[rgba(255,255,255,0.02)]">
           {outcomes.map((card) => (
             <Link key={card.label} to={card.to ?? "#"} className="p-4 no-underline block" style={{ background: "#0a0a10", color: "inherit" }}>
-              <div className="text-[9px] tracking-[0.14em] uppercase text-zinc-500">{card.label}</div>
+              <div className="text-[9px] tracking-[0.14em] uppercase text-[#5f6b82]">{card.label}</div>
               <div className="mt-2 text-[16px] font-bold text-white" style={{ fontFamily: "'Rajdhani', sans-serif" }}>{card.value}</div>
-              <div className="mt-1 text-[11px] text-cyan-300/80 leading-snug">{card.source}</div>
+              <div className="mt-1 text-[11px] text-[#9ec8ff]/80 leading-snug">{card.source}</div>
             </Link>
           ))}
         </div>
@@ -1721,24 +1721,24 @@ function AdaptiveWorkflowHub({
 
       <div className="p-4 md:p-5 space-y-4">
         {groups.map((group) => (
-          <div key={group.title} className="border border-zinc-800 rounded-sm overflow-hidden" style={{ background: "#050506" }}>
-            <div className="px-4 py-3 border-b border-zinc-800">
+          <div key={group.title} className="border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden" style={{ background: "#050506" }}>
+            <div className="px-4 py-3 border-b border-[rgba(148,170,215,0.12)]">
               <div className="text-[14px] font-bold text-white" style={{ fontFamily: "'Rajdhani', sans-serif" }}>{group.title}</div>
-              <div className="mt-1 text-[11px] text-zinc-500">{group.description}</div>
+              <div className="mt-1 text-[11px] text-[#5f6b82]">{group.description}</div>
             </div>
-            <div className="divide-y divide-zinc-900">
+            <div className="divide-y divide-[rgba(148,170,215,0.1)]">
               {group.items.map((item, index) => (
                 <Link
                   key={`${group.title}-${item.section}-${index}`}
                   to={item.to ?? "#"}
-                  className="grid grid-cols-1 lg:grid-cols-[56px_minmax(180px,260px)_1fr_1fr_auto] gap-3 px-4 py-3 no-underline items-start hover:bg-zinc-900/50"
+                  className="grid grid-cols-1 lg:grid-cols-[56px_minmax(180px,260px)_1fr_1fr_auto] gap-3 px-4 py-3 no-underline items-start hover:bg-[rgba(255,255,255,0.02)]"
                   style={{ color: "inherit" }}
                 >
-                  <div className="text-[10px] text-zinc-500 tracking-[0.16em] uppercase">{item.badge ?? String(index + 1).padStart(2, "0")}</div>
-                  <div className="text-[13px] font-bold text-zinc-100">{item.section}</div>
-                  <div className="text-[12px] text-zinc-300 leading-snug">{item.action}</div>
-                  <div className="text-[12px] text-zinc-500 leading-snug">{item.reason}</div>
-                  <div className="text-[10px] text-cyan-300 tracking-[0.12em] uppercase whitespace-nowrap">Ouvrir</div>
+                  <div className="text-[10px] text-[#5f6b82] tracking-[0.16em] uppercase">{item.badge ?? String(index + 1).padStart(2, "0")}</div>
+                  <div className="text-[13px] font-bold text-foreground">{item.section}</div>
+                  <div className="text-[12px] text-[#c8d2e4] leading-snug">{item.action}</div>
+                  <div className="text-[12px] text-[#5f6b82] leading-snug">{item.reason}</div>
+                  <div className="text-[10px] text-[#9ec8ff] tracking-[0.12em] uppercase whitespace-nowrap">Ouvrir</div>
                 </Link>
               ))}
             </div>
@@ -1809,48 +1809,48 @@ function WorkspaceProgress({ highlight }: { highlight: number }) {
   const pct = Math.round((done / total) * 100);
 
   return (
-    <div className="w-full border border-zinc-800 rounded-sm overflow-hidden"
+    <div className="w-full border border-[rgba(148,170,215,0.12)] rounded-sm overflow-hidden"
          style={{ background: "#0a0a10", fontFamily: "'Rajdhani', sans-serif" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800"
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg, #10101a 0%, #0a0a10 100%)" }}>
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <div className="text-[10px] text-emerald-400 tracking-[0.2em] font-bold" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--good))] animate-pulse" />
+        <div className="text-[10px] text-[hsl(var(--good))] tracking-[0.2em] font-bold" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           WORKSPACE PROGRESS
         </div>
         <div className="flex-1" />
-        <div className="text-[10px] text-zinc-500 tracking-[0.15em]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="text-[10px] text-[#5f6b82] tracking-[0.15em]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           CYCLE W28
         </div>
       </div>
 
       {/* Title + counter */}
-      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-zinc-800">
+      <div className="flex justify-between items-baseline gap-4 px-5 py-4 border-b border-[rgba(148,170,215,0.12)]">
         <div>
           <div className="text-[16px] font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             {done}/{total} SECTIONS COMPLETE
           </div>
-          <div className="text-[11px] text-zinc-500 mt-0.5">Cycle bouclé · Prêt pour le prochain cycle</div>
+          <div className="text-[11px] text-[#5f6b82] mt-0.5">Cycle bouclé · Prêt pour le prochain cycle</div>
         </div>
         <div className="text-right">
-          <div className="text-[28px] font-bold text-emerald-400 leading-none" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="text-[28px] font-bold text-[hsl(var(--good))] leading-none" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             {pct}%
           </div>
-          <div className="text-[9px] text-zinc-500 tracking-[0.15em] mt-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="text-[9px] text-[#5f6b82] tracking-[0.15em] mt-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             COMPLETION
           </div>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="px-5 py-3 border-b border-zinc-800">
-        <div className="w-full h-1.5 bg-zinc-900 rounded-sm overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400" style={{ width: `${pct}%` }} />
+      <div className="px-5 py-3 border-b border-[rgba(148,170,215,0.12)]">
+        <div className="w-full h-1.5 bg-[rgba(255,255,255,0.02)] rounded-sm overflow-hidden">
+          <div className="h-full bg-[linear-gradient(90deg,hsl(var(--good)),#4d9fff)] shadow-[0_0_10px_rgba(77,159,255,0.4)]" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
       {/* Section stepper */}
-      <div className="grid grid-cols-3 sm:grid-cols-9 gap-px bg-zinc-900">
+      <div className="grid grid-cols-3 sm:grid-cols-9 gap-px bg-[rgba(255,255,255,0.02)]">
         {WORKSPACE_SECTIONS.map((s) => {
           const isHighlight = s.n === highlight;
           return (
@@ -1862,13 +1862,13 @@ function WorkspaceProgress({ highlight }: { highlight: number }) {
               }}
             >
               {isHighlight && (
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-emerald-400" />
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-[hsl(var(--good))]" />
               )}
               <div
                 className={`w-7 h-7 rounded-sm border flex items-center justify-center font-bold text-[11px] ${
                   isHighlight
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/60"
-                    : "bg-emerald-500/10 text-emerald-400/80 border-emerald-500/30"
+                    ? "bg-[hsl(var(--good))]/20 text-[hsl(var(--good))] border-[hsl(var(--good))]/60"
+                    : "bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))]/80 border-[rgba(122,232,180,0.3)]"
                 }`}
                 style={{ fontFamily: "'JetBrains Mono', monospace" }}
               >
@@ -1876,7 +1876,7 @@ function WorkspaceProgress({ highlight }: { highlight: number }) {
               </div>
               <div
                 className={`text-[9px] text-center leading-tight tracking-wide uppercase ${
-                  isHighlight ? "text-emerald-300 font-bold" : "text-zinc-500"
+                  isHighlight ? "text-[hsl(var(--good))] font-bold" : "text-[#5f6b82]"
                 }`}
                 style={{ fontFamily: "'JetBrains Mono', monospace" }}
               >
@@ -1888,15 +1888,15 @@ function WorkspaceProgress({ highlight }: { highlight: number }) {
       </div>
 
       {/* Highlight footer */}
-      <div className="flex items-center gap-3 px-5 py-3 border-t border-zinc-800"
+      <div className="flex items-center gap-3 px-5 py-3 border-t border-[rgba(148,170,215,0.12)]"
            style={{ background: "linear-gradient(90deg, rgba(52,211,153,0.06) 0%, transparent 100%)" }}>
-        <div className="text-[10px] text-emerald-400 font-bold tracking-[0.15em]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="text-[10px] text-[hsl(var(--good))] font-bold tracking-[0.15em]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           NEW ▸
         </div>
         <div className="text-[13px] text-white font-semibold flex-1 truncate">
           Section 09 — Learning Log + Scorecard
         </div>
-        <div className="text-[10px] text-emerald-400/80 tracking-[0.1em] hidden sm:block" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="text-[10px] text-[hsl(var(--good))]/80 tracking-[0.1em] hidden sm:block" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           CYCLE CLOSED → NEXT CYCLE
         </div>
       </div>

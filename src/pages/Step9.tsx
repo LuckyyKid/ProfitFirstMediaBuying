@@ -4,7 +4,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ArrowLeft, ArrowRight, Sparkles, Rocket, PartyPopper } from "lucide-react";
+import { CheckCircle2, ArrowLeft, ArrowRight, Rocket } from "lucide-react";
 import { useSound } from "@/hooks/useSound";
 import { useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
@@ -92,18 +92,13 @@ const Step9 = () => {
   }, [info?.client?.client_code]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-primary/10 relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Single Premium radial halo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-40 right-20 w-72 h-72 bg-primary-glow/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-40 right-1/3 w-64 h-64 bg-primary-glow/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-        
-        {/* Floating particles */}
-        <Sparkles className="absolute top-32 left-1/4 h-8 w-8 text-primary/30 animate-pulse" style={{ animationDelay: '0.3s' }} />
-        <Sparkles className="absolute top-64 right-1/3 h-6 w-6 text-primary-glow/40 animate-pulse" style={{ animationDelay: '0.8s' }} />
-        <Sparkles className="absolute bottom-48 left-1/3 h-7 w-7 text-primary/25 animate-pulse" style={{ animationDelay: '1.2s' }} />
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[500px]"
+          style={{ background: "radial-gradient(600px 250px at 50% 0%, rgba(47,107,255,0.18), transparent 60%)" }}
+        />
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -122,13 +117,11 @@ const Step9 = () => {
           {/* Celebration Header */}
           <div className="text-center space-y-6 animate-fade-in">
             <div className="flex justify-center gap-4 mb-6">
-              <PartyPopper className="h-14 w-14 text-primary animate-bounce" style={{ animationDelay: '0.1s' }} />
-              <Rocket className="h-16 w-16 text-primary-glow animate-bounce" />
-              <PartyPopper className="h-14 w-14 text-primary animate-bounce" style={{ animationDelay: '0.2s' }} />
+              <Rocket className="h-16 w-16 text-[#9ec8ff]" />
             </div>
-            
-            <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary-glow to-primary bg-clip-text text-transparent animate-scale-in">
-              {t.congratulations}
+
+            <h2 className="text-5xl md:text-6xl font-medium tracking-[-0.02em] text-foreground animate-scale-in">
+              <span className="font-serif italic text-[#9ec8ff]">{t.congratulations}</span>
             </h2>
             
             <h3 className="text-3xl md:text-4xl font-semibold text-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>

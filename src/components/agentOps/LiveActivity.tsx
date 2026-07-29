@@ -8,8 +8,8 @@ export function PulseDot({ active, className }: { active?: boolean; className?: 
   }
   return (
     <span className={cn("relative inline-flex h-2.5 w-2.5", className)}>
-      <span className="absolute inset-0 rounded-full bg-sky-400/70 animate-ping" />
-      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_12px_hsl(200_90%_60%)]" />
+      <span className="absolute inset-0 rounded-full bg-[rgba(77,159,255,0.5)] animate-ping" />
+      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#4d9fff] shadow-[0_0_12px_hsl(200_90%_60%)]" />
     </span>
   );
 }
@@ -44,7 +44,7 @@ export function LiveEventFeed({ events, sseStatus }: { events: FeedItem[]; sseSt
       <ScanlineOverlay active={sseStatus === "open"} />
       <div className="flex items-center justify-between mb-3 relative">
         <div className="flex items-center gap-2">
-          <Radio className={cn("h-4 w-4", sseStatus === "open" ? "text-sky-400 animate-pulse" : "text-muted-foreground")} />
+          <Radio className={cn("h-4 w-4", sseStatus === "open" ? "text-[#9ec8ff] animate-pulse" : "text-muted-foreground")} />
           <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-primary/90">Live Telemetry</span>
           <PulseDot active={sseStatus === "open"} />
         </div>
@@ -73,11 +73,11 @@ export function LiveEventFeed({ events, sseStatus }: { events: FeedItem[]; sseSt
 /** Inline "agent is working" widget — Jarvis style. */
 export function ThinkingIndicator({ label = "Processing", className }: { label?: string; className?: string }) {
   return (
-    <div className={cn("inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-sky-300", className)}>
+    <div className={cn("inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#9ec8ff]", className)}>
       <span className="relative inline-flex h-4 w-4">
-        <span className="absolute inset-0 rounded-full border border-sky-400/40" />
-        <span className="absolute inset-0 rounded-full border-t border-sky-400 animate-orbit" />
-        <span className="absolute inset-1 rounded-full bg-sky-400/30" />
+        <span className="absolute inset-0 rounded-full border border-[rgba(77,159,255,0.4)]" />
+        <span className="absolute inset-0 rounded-full border-t border-[#4d9fff] animate-orbit" />
+        <span className="absolute inset-1 rounded-full bg-[#4d9fff]/30" />
       </span>
       <Activity className="h-3 w-3 animate-blink" />
       <span>{label}</span>

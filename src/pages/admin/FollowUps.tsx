@@ -198,7 +198,7 @@ const FollowUps = () => {
                   const sentHours = hoursSince(c.followup_sent_at);
                   const callback = !!c.callback_due_at;
                   return (
-                    <TableRow key={detailRef} className={callback ? "bg-amber-500/5" : ""}>
+                    <TableRow key={detailRef} className={callback ? "bg-[rgba(255,184,77,0.04)]" : ""}>
                       <TableCell>
                         <div className="font-medium">{c.client_name || "—"}</div>
                         <div className="text-xs text-muted-foreground font-mono">{c.client_code}</div>
@@ -211,12 +211,12 @@ const FollowUps = () => {
                       </TableCell>
                       <TableCell>
                         {callback ? (
-                          <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-amber-500/40 bg-amber-500/10 text-amber-300 font-medium">
-                            📞 À rappeler
+                          <span className="inline-block px-2 py-0.5 rounded-[6px] font-mono text-[9px] uppercase tracking-[0.16em] border border-[rgba(255,184,77,0.3)] bg-[rgba(255,184,77,0.06)] text-[hsl(var(--watch))]">
+                            À rappeler
                           </span>
                         ) : (
-                          <span className="inline-block px-2 py-0.5 rounded-md text-xs border border-sky-500/40 bg-sky-500/10 text-sky-300">
-                            ✉️ Suivi envoyé
+                          <span className="inline-block px-2 py-0.5 rounded-[6px] font-mono text-[9px] uppercase tracking-[0.16em] border border-[rgba(77,159,255,0.3)] bg-[rgba(77,159,255,0.06)] text-[#9ec8ff]">
+                            Suivi envoyé
                           </span>
                         )}
                       </TableCell>
@@ -231,7 +231,7 @@ const FollowUps = () => {
                       <TableCell className="text-sm">{c.followup_count || 0}×</TableCell>
                       <TableCell className="text-sm">
                         {callback ? (
-                          <span className={callbackHours && callbackHours >= 24 ? "text-amber-300 font-medium" : ""}>
+                          <span className={callbackHours && callbackHours >= 24 ? "text-[hsl(var(--watch))] font-medium" : ""}>
                             {timeAgo(c.callback_due_at)} ({callbackHours}h)
                           </span>
                         ) : "—"}
@@ -290,7 +290,7 @@ const StatCard = ({ label, value, tone, active, onClick }: { label: string; valu
     className={`p-4 glass-card cursor-pointer transition ${active ? "ring-2 ring-primary/60" : "hover:ring-1 hover:ring-primary/40"}`}
   >
     <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-    <div className={`text-2xl font-bold mt-1 ${tone === "amber" ? "text-amber-400" : tone === "sky" ? "text-sky-400" : ""}`}>
+    <div className={`text-2xl font-mono font-medium mt-1 ${tone === "amber" ? "text-[hsl(var(--watch))]" : tone === "sky" ? "text-[#9ec8ff]" : "text-foreground"}`}>
       {value}
     </div>
   </Card>

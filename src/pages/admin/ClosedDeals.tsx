@@ -774,10 +774,10 @@ const ClosedDeals = () => {
                       <div className="font-medium flex items-center gap-2">
                         {d.company_name}
                         <span
-                          className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                          className={`font-mono text-[9px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-[6px] border ${
                             d.business_type === "local_service"
-                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                              : "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                              ? "border-[rgba(255,184,77,0.25)] bg-[rgba(255,184,77,0.06)] text-[hsl(var(--watch))]"
+                              : "border-[rgba(77,159,255,0.25)] bg-[rgba(77,159,255,0.06)] text-[#9ec8ff]"
                           }`}
                         >
                           {d.business_type === "local_service" ? "Local Service" : "E-commerce"}

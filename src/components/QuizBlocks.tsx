@@ -195,7 +195,7 @@ export const QuizBlocks = ({
             onChange={(e) => setAnswer(q.id, e.target.value)}
             placeholder={q.placeholder ?? "Votre réponse..."}
             rows={4}
-            className="text-base leading-relaxed rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-5 py-4 shadow-sm transition-all duration-200 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 resize-none"
+            className="text-base leading-relaxed rounded-[12px] px-5 py-4 resize-none"
           />
         );
 
@@ -211,10 +211,10 @@ export const QuizBlocks = ({
                   type="button"
                   onClick={() => setAnswer(q.id, opt)}
                   className={cn(
-                    "w-full text-left px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-3",
+                    "w-full text-left px-4 py-3 rounded-[12px] border transition-all flex items-center gap-3",
                     active
-                      ? "border-primary bg-primary/10"
-                      : "border-border/60 bg-background/40 hover:border-primary/50",
+                      ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] shadow-[0_0_24px_rgba(47,107,255,0.12)]"
+                      : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(77,159,255,0.35)]",
                   )}
                 >
                   <span
@@ -247,10 +247,10 @@ export const QuizBlocks = ({
                   type="button"
                   onClick={() => toggleMulti(q.id, opt)}
                   className={cn(
-                    "w-full text-left px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-3",
+                    "w-full text-left px-4 py-3 rounded-[12px] border transition-all flex items-center gap-3",
                     active
-                      ? "border-primary bg-primary/10"
-                      : "border-border/60 bg-background/40 hover:border-primary/50",
+                      ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] shadow-[0_0_24px_rgba(47,107,255,0.12)]"
+                      : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(77,159,255,0.35)]",
                   )}
                 >
                   <span
@@ -294,10 +294,10 @@ export const QuizBlocks = ({
                     type="button"
                     onClick={() => setAnswer(q.id, String(n))}
                     className={cn(
-                      "flex-1 h-12 md:h-14 rounded-xl border-2 text-lg font-bold transition-all",
+                      "flex-1 h-12 md:h-14 rounded-[12px] border font-mono text-lg font-normal transition-all",
                       active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border/60 bg-background/40 text-foreground hover:border-primary/50",
+                        ? "border-transparent bg-[linear-gradient(135deg,#4d9fff,#2f6bff)] text-white shadow-[0_8px_28px_rgba(47,107,255,0.35)]"
+                        : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] text-foreground hover:border-[rgba(77,159,255,0.35)]",
                     )}
                   >
                     {n}
@@ -318,7 +318,7 @@ export const QuizBlocks = ({
             value={(value as string) ?? ""}
             onChange={(e) => setAnswer(q.id, e.target.value)}
             placeholder={q.placeholder ?? "Votre réponse..."}
-            className="text-base h-12 rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-5 shadow-sm transition-all duration-200 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+            className="text-base h-12 rounded-[12px] px-5"
           />
         );
     }
@@ -334,9 +334,9 @@ export const QuizBlocks = ({
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+        <div className="h-[3px] w-full rounded-full bg-[rgba(148,170,215,0.12)] overflow-hidden">
           <motion.div
-            className="h-full bg-primary"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)]"
             initial={false}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -360,14 +360,14 @@ export const QuizBlocks = ({
                 }}
                 disabled={i > blockIndex}
                 className={cn(
-                  "px-3 py-1 rounded-full text-xs font-medium border transition-all",
+                  "px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-[0.16em] border transition-all",
                   active &&
-                    "border-primary bg-primary text-primary-foreground",
+                    "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] text-[#9ec8ff]",
                   done &&
-                    "border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20",
+                    "border-[rgba(77,159,255,0.25)] bg-[rgba(77,159,255,0.06)] text-[#c8d2e4] hover:bg-[rgba(77,159,255,0.1)]",
                   !active &&
                     !done &&
-                    "border-border/60 bg-background/40 text-muted-foreground cursor-not-allowed",
+                    "border-[rgba(148,170,215,0.12)] bg-transparent text-[#5f6b82] cursor-not-allowed",
                 )}
               >
                 {done && <Check className="inline h-3 w-3 mr-1" />}
@@ -416,7 +416,7 @@ export const QuizBlocks = ({
       </div>
 
       {/* Nav */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center pt-4 border-t border-border/40">
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center pt-4 border-t border-[rgba(148,170,215,0.12)]">
         <Button
           variant="outline"
           size="lg"

@@ -8,40 +8,51 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 45% 8%;
-    --foreground: 210 40% 98%;
+    /* Premium Dark — TDIA / Profit First Media Buying */
+    --background: 220 45% 4%;              /* #060910 */
+    --foreground: 218 43% 96%;             /* #eef2fa */
 
-    --card: 220 45% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 40% 7%;                    /* surface élevée */
+    --card-foreground: 218 43% 96%;
 
-    --popover: 220 45% 14%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 40% 7%;
+    --popover-foreground: 218 43% 96%;
 
-    --primary: 210 92% 53%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 213 100% 65%;               /* #4d9fff */
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 224 100% 59%;          /* #2f6bff */
 
-    --secondary: 220 45% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 30% 10%;
+    --secondary-foreground: 218 43% 96%;
 
-    --muted: 220 45% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 25% 10%;
+    --muted-foreground: 218 17% 61%;       /* #8b97ad */
 
-    --accent: 210 92% 53%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 220 30% 12%;
+    --accent-foreground: 218 43% 96%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 71%;             /* #ff6b6b */
+    --destructive-foreground: 220 45% 6%;
 
-    --border: 220 45% 25%;
-    --input: 220 45% 20%;
-    --ring: 210 92% 53%;
+    --good: 156 69% 55%;                   /* #3ddc97 */
+    --watch: 38 89% 63%;                   /* #f5b74e */
+    --bad: 0 100% 71%;                     /* #ff6b6b */
+    --faint: 224 15% 44%;                  /* #5f6b82 */
 
-    --radius: 1rem;
-    
-    --gradient-primary: linear-gradient(135deg, hsl(220, 45%, 8%), hsl(220, 50%, 6%));
-    --gradient-card: linear-gradient(135deg, hsl(220, 45%, 14%) 0%, hsl(220, 45%, 12%) 100%);
-    --shadow-glow: 0 0 40px hsl(210 92% 53% / 0.2);
-    --shadow-card: 0 10px 40px -10px hsl(210 92% 53% / 0.15);
+    --border: 219 30% 15%;                 /* hairline (via border-border) */
+    --input: 220 30% 12%;
+    --ring: 213 100% 65%;
+
+    --radius: 0.875rem;                    /* 14px */
+
+    /* Gradients / shadows premium */
+    --gradient-primary: linear-gradient(135deg, #4d9fff, #2f6bff);
+    --gradient-surface-elevated: linear-gradient(135deg, #0b1322, #080d18);
+    --gradient-card: linear-gradient(135deg, rgba(77,159,255,.08), rgba(47,107,255,.02));
+    --shadow-glow: 0 0 40px rgba(47,107,255,.20);
+    --shadow-card: 0 24px 80px rgba(47,107,255,.18);
+    --shadow-btn-primary: 0 8px 28px rgba(47,107,255,.4), inset 0 1px 0 rgba(255,255,255,.25);
+    --shadow-overlay: 0 40px 100px rgba(0,0,0,.6);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
@@ -62,33 +73,34 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 220 45% 8%;
-    --foreground: 210 40% 98%;
+    /* Alias sur le thème premium — le site n'a qu'un seul mode. */
+    --background: 220 45% 4%;
+    --foreground: 218 43% 96%;
 
-    --card: 220 45% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 40% 7%;
+    --card-foreground: 218 43% 96%;
 
-    --popover: 220 45% 14%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 40% 7%;
+    --popover-foreground: 218 43% 96%;
 
-    --primary: 210 92% 53%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 213 100% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 45% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 30% 10%;
+    --secondary-foreground: 218 43% 96%;
 
-    --muted: 220 45% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 25% 10%;
+    --muted-foreground: 218 17% 61%;
 
-    --accent: 210 92% 53%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 220 30% 12%;
+    --accent-foreground: 218 43% 96%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 71%;
+    --destructive-foreground: 220 45% 6%;
 
-    --border: 220 45% 25%;
-    --input: 220 45% 20%;
-    --ring: 210 92% 53%;
+    --border: 219 30% 15%;
+    --input: 220 30% 12%;
+    --ring: 213 100% 65%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -107,66 +119,122 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: var(--gradient-primary);
+    background:
+      radial-gradient(1200px 500px at 30% -10%, rgba(47, 107, 255, 0.14), transparent 60%),
+      #060910;
+    color: #eef2fa;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.005em;
     min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    color: #eef2fa;
+    letter-spacing: -0.02em;
+    font-weight: 500;
   }
 }
 
 @layer utilities {
+  /* Carte premium : surface légère + hairline bleutée + inset highlight. */
+  .card-premium {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(148, 170, 215, 0.12);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  /* Carte héro : liseré dégradé bleu autour d'une surface élevée. */
+  .card-highlight {
+    background: linear-gradient(135deg, rgba(77, 159, 255, 0.45), rgba(77, 159, 255, 0.05) 40%, rgba(148, 170, 215, 0.1));
+    border-radius: 18px;
+    padding: 1px;
+    box-shadow: 0 24px 80px rgba(47, 107, 255, 0.18);
+  }
+  .card-highlight > * {
+    background: linear-gradient(135deg, #0b1322, #080d18);
+    border-radius: 17px;
+  }
+
+  /* Encart « lecture du système ». */
+  .card-insight {
+    background: linear-gradient(135deg, rgba(77, 159, 255, 0.08), rgba(47, 107, 255, 0.02));
+    border: 1px solid rgba(77, 159, 255, 0.2);
+    border-radius: 14px;
+  }
+
+  /* Alerte bloquante. */
+  .card-alert {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.06), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 107, 107, 0.25);
+    border-radius: 14px;
+  }
+
+  /* Bouton primaire — gradient bleu + glow. */
+  .btn-primary-gradient {
+    background: linear-gradient(135deg, #4d9fff, #2f6bff);
+    box-shadow: 0 8px 28px rgba(47, 107, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-primary-gradient:hover { filter: brightness(1.05); }
+
+  /* Bouton secondaire — surface plane + hairline. */
+  .btn-secondary-hairline {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(148, 170, 215, 0.2);
+    color: #c8d2e4;
+  }
+  .btn-secondary-hairline:hover { background: rgba(255, 255, 255, 0.04); }
+
+  /* Ligne 1px bleutée translucide. */
+  .hairline { border-color: rgba(148, 170, 215, 0.12); }
+
+  /* Séparateur dégradé. */
+  .hairline-gradient {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(148, 170, 215, 0.15), transparent);
+  }
+
+  /* Élément actif (nav, étape en cours). */
+  .active-blue {
+    background: linear-gradient(135deg, rgba(77, 159, 255, 0.14), rgba(47, 107, 255, 0.05));
+    border: 1px solid rgba(77, 159, 255, 0.25);
+    box-shadow: 0 0 24px rgba(47, 107, 255, 0.12);
+    color: #9ec8ff;
+  }
+
+  /* Point de statut discret. */
+  .status-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 999px;
+  }
+  .status-dot.good  { background: #3ddc97; box-shadow: 0 0 8px rgba(61, 220, 151, 0.8); }
+  .status-dot.watch { background: #f5b74e; box-shadow: 0 0 8px rgba(245, 183, 78, 0.8); }
+  .status-dot.bad   { background: #ff6b6b; box-shadow: 0 0 8px rgba(255, 107, 107, 0.8); }
+  .status-dot.info  { background: #4d9fff; box-shadow: 0 0 8px rgba(77, 159, 255, 0.8); }
+
+  /* Alias historique — les composants actuels utilisent .glass-card. */
   .glass-card {
-    background: var(--gradient-card);
-    backdrop-filter: blur(10px);
-    border: 1px solid hsl(var(--border) / 0.3);
-    box-shadow: var(--shadow-card);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(148, 170, 215, 0.12);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: none;
   }
 
   .glow-effect {
     box-shadow: var(--shadow-glow);
   }
 
-  /* TDIA Premium Dark — admin onboarding shell.
-     Wraps admin pages (Dashboard/ClientDetail/ClosedDeals/FollowUps/ContractCreator)
-     to re-skin the shared shadcn tokens without touching CRM or the client-facing side. */
+  /* Alias historique — les tokens Premium Dark sont désormais globaux.
+     Cette classe reste comme no-op pour ne pas casser les wrappers existants
+     (Admin Dashboard, ClientDetail, ClosedDeals, FollowUps, ContractCreator). */
   .premium-shell {
-    /* shadcn overrides (HSL triplets, unwrapped — shadcn wraps with hsl()) */
-    --background: 220 50% 4%;
-    --foreground: 220 45% 96%;
-    --card: 220 40% 6%;
-    --card-foreground: 220 45% 96%;
-    --popover: 220 40% 7%;
-    --popover-foreground: 220 45% 96%;
-    --primary: 211 100% 65%;
-    --primary-foreground: 220 50% 6%;
-    --secondary: 220 30% 10%;
-    --secondary-foreground: 220 45% 96%;
-    --muted: 220 25% 10%;
-    --muted-foreground: 219 15% 61%;
-    --accent: 220 30% 12%;
-    --accent-foreground: 220 45% 96%;
-    --destructive: 0 100% 71%;
-    --destructive-foreground: 220 50% 6%;
-    --border: 219 30% 15%;
-    --input: 220 30% 12%;
-    --ring: 211 100% 65%;
-
-    color: #eef2fa;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
-    background:
-      radial-gradient(1200px 500px at 30% -10%, rgba(47, 107, 255, 0.14), transparent 60%),
-      #060910;
-    letter-spacing: -0.005em;
   }
-  .premium-shell h1,
-  .premium-shell h2,
-  .premium-shell h3 { color: #eef2fa; letter-spacing: -0.01em; }
   .premium-shell [class*="border"] { border-color: rgba(148, 170, 215, 0.12); }
-  .premium-shell .glass-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(148, 170, 215, 0.12);
-    backdrop-filter: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  }
 
   .font-data {
     font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -185,49 +253,6 @@ All colors MUST be HSL.
     color: #8b97ad;
     font-weight: 400;
   }
-}
-
-/* Static stars background */
-.stars-bg {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.stars-bg::before,
-.stars-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(1px 1px at 10% 15%, hsl(210 40% 98% / 0.25), transparent),
-    radial-gradient(1px 1px at 25% 40%, hsl(210 40% 98% / 0.15), transparent),
-    radial-gradient(1.5px 1.5px at 45% 10%, hsl(210 40% 98% / 0.3), transparent),
-    radial-gradient(1px 1px at 60% 70%, hsl(210 40% 98% / 0.2), transparent),
-    radial-gradient(1px 1px at 75% 25%, hsl(210 40% 98% / 0.15), transparent),
-    radial-gradient(1.5px 1.5px at 85% 55%, hsl(210 40% 98% / 0.25), transparent),
-    radial-gradient(1px 1px at 5% 80%, hsl(210 40% 98% / 0.2), transparent),
-    radial-gradient(1px 1px at 35% 90%, hsl(210 40% 98% / 0.15), transparent),
-    radial-gradient(1.5px 1.5px at 92% 85%, hsl(210 40% 98% / 0.2), transparent),
-    radial-gradient(1px 1px at 50% 50%, hsl(210 40% 98% / 0.1), transparent),
-    radial-gradient(1px 1px at 15% 60%, hsl(210 40% 98% / 0.18), transparent),
-    radial-gradient(1px 1px at 70% 45%, hsl(210 40% 98% / 0.12), transparent);
-}
-
-.stars-bg::after {
-  background-image:
-    radial-gradient(1px 1px at 18% 35%, hsl(210 92% 53% / 0.15), transparent),
-    radial-gradient(1px 1px at 42% 65%, hsl(210 40% 98% / 0.12), transparent),
-    radial-gradient(1.5px 1.5px at 68% 12%, hsl(210 40% 98% / 0.22), transparent),
-    radial-gradient(1px 1px at 88% 38%, hsl(210 40% 98% / 0.1), transparent),
-    radial-gradient(1px 1px at 30% 75%, hsl(210 92% 53% / 0.12), transparent),
-    radial-gradient(1px 1px at 55% 28%, hsl(210 40% 98% / 0.16), transparent),
-    radial-gradient(1.5px 1.5px at 78% 92%, hsl(210 40% 98% / 0.14), transparent),
-    radial-gradient(1px 1px at 8% 48%, hsl(210 40% 98% / 0.18), transparent),
-    radial-gradient(1px 1px at 95% 68%, hsl(210 92% 53% / 0.1), transparent),
-    radial-gradient(1px 1px at 62% 88%, hsl(210 40% 98% / 0.13), transparent);
 }
 
 /* --- Global scrollbar hide -------------------------------------------------

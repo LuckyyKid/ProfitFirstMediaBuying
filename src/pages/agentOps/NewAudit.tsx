@@ -243,7 +243,7 @@ export default function NewAudit() {
                     href={selectedClient.website}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[12px] text-sky-300 hover:text-sky-200"
+                    className="inline-flex items-center gap-1.5 text-[12px] text-[#9ec8ff] hover:text-[#c8d2e4]"
                   >
                     <Globe className="h-3 w-3" /> {selectedClient.website}
                   </a>

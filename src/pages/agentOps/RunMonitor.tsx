@@ -159,27 +159,27 @@ export default function RunMonitor() {
   return (
     <div className="space-y-5">
       {/* === Mission Header === */}
-      <div className="relative rounded-2xl border border-white/5 bg-[#0a1226]/60 backdrop-blur-xl overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(34,211,238,0.1),transparent_60%)] pointer-events-none" />
+      <div className="relative rounded-[14px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(600px 200px at 80% 30%, rgba(47,107,255,0.1), transparent 60%)" }} />
         <div className="relative px-5 py-4 flex items-center gap-4 flex-wrap">
           <button
             onClick={() => nav("/admin/ops")}
-            className="h-9 w-9 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-300 shrink-0"
+            className="h-9 w-9 rounded-[10px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)] flex items-center justify-center text-[#c8d2e4] shrink-0 transition-colors"
             aria-label="Retour"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-cyan-300">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#9ec8ff]">
               <span className={cn("h-1.5 w-1.5 rounded-full", toneDotClass(tone))} />
               {humanStatusLabel(run.status)}
             </div>
-            <div className="text-lg md:text-xl font-semibold text-slate-100 mt-0.5 tracking-tight truncate">
+            <div className="text-lg md:text-xl font-medium text-foreground mt-0.5 tracking-[-0.02em] truncate">
               Audit {run.client_id}
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5 font-mono">
+            <div className="flex items-center gap-2 text-[11px] text-[#5f6b82] mt-0.5 font-mono">
               <span>{run.id.slice(0, 8)}…</span>
-              <button onClick={() => navigator.clipboard.writeText(run.id)} className="hover:text-cyan-300" title="Copier le Run ID">
+              <button onClick={() => navigator.clipboard.writeText(run.id)} className="hover:text-[#9ec8ff]" title="Copier le Run ID">
                 <Copy className="h-3 w-3" />
               </button>
               <span>·</span>
@@ -189,32 +189,31 @@ export default function RunMonitor() {
 
           <div className="flex items-center gap-2 ml-auto flex-wrap">
             {typeof run.progress === "number" && (
-              <div className="px-4 py-2 rounded-xl border border-white/5 bg-white/[0.02] min-w-[14rem]">
-                <div className="text-[10px] uppercase tracking-wider text-slate-500">Progression globale</div>
+              <div className="px-4 py-2 rounded-[12px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] min-w-[14rem]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#5f6b82]">Progression globale</div>
                 <div className="mt-1 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                  <div className="flex-1 h-[3px] rounded-full bg-[rgba(148,170,215,0.12)] overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-cyan-400 via-sky-400 to-violet-400 transition-[width] duration-700"
+                      className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)] transition-[width] duration-700"
                       style={{ width: `${run.progress}%` }}
                     />
                   </div>
-                  <span className="text-xs font-mono text-cyan-300">{Math.round(run.progress)}%</span>
+                  <span className="text-xs font-mono text-[#9ec8ff]">{Math.round(run.progress)}%</span>
                 </div>
               </div>
             )}
-            <div className="px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02]">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Durée</div>
-              <div className="text-sm font-mono text-slate-100 mt-0.5">{elapsed}</div>
+            <div className="px-3 py-2 rounded-[12px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)]">
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#5f6b82] flex items-center gap-1"><Clock className="h-3 w-3" /> Durée</div>
+              <div className="text-sm font-mono text-foreground mt-0.5">{elapsed}</div>
             </div>
-            <div className="px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02]">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 flex items-center gap-1"><Target className="h-3 w-3" /> MAJ</div>
-              <div className="text-sm font-mono text-slate-100 mt-0.5">il y a {Math.floor((Date.now() - lastUpdate) / 1000)}s</div>
+            <div className="px-3 py-2 rounded-[12px] border border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)]">
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#5f6b82] flex items-center gap-1"><Target className="h-3 w-3" /> MAJ</div>
+              <div className="text-sm font-mono text-foreground mt-0.5">il y a {Math.floor((Date.now() - lastUpdate) / 1000)}s</div>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={refresh}
-              className="border-white/10 bg-white/5 hover:bg-white/10 text-slate-200"
             >
               <RefreshCw className={cn("h-4 w-4 mr-1.5", runQ.isFetching && "animate-spin")} />
               Rafraîchir
@@ -225,9 +224,9 @@ export default function RunMonitor() {
 
       {/* Completed CTA */}
       {tone === "completed" && (
-        <Card className="glass-card p-5 border-emerald-500/30">
+        <Card className="p-5 border-[rgba(122,232,180,0.25)] bg-[linear-gradient(135deg,rgba(122,232,180,0.06),rgba(255,255,255,0.015))]">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-0.5" />
+            <CheckCircle2 className="h-5 w-5 text-[hsl(var(--good))] mt-0.5" />
             <div className="flex-1">
               <div className="font-semibold">Audit terminé</div>
               <div className="text-sm text-muted-foreground mt-0.5">Les livrables sont disponibles.</div>
@@ -369,11 +368,11 @@ function PipelineSection({
           <div className="flex items-center gap-2">
             {isLive && (
               <span className="relative inline-flex h-2.5 w-2.5">
-                <span className="absolute inset-0 rounded-full bg-sky-400/70 animate-ping" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_12px_hsl(200_90%_60%)]" />
+                <span className="absolute inset-0 rounded-full bg-[rgba(77,159,255,0.5)] animate-ping" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#4d9fff] shadow-[0_0_12px_rgba(77,159,255,0.6)]" />
               </span>
             )}
-            <h2 className={cn("text-xs font-semibold uppercase tracking-[0.25em]", isLive ? "text-sky-300" : "text-muted-foreground")}>
+            <h2 className={cn("font-mono text-[10px] font-semibold uppercase tracking-[0.25em]", isLive ? "text-[#9ec8ff]" : "text-[#5f6b82]")}>
               {isLive ? (showAll ? "Pipeline · vue complète" : "Pipeline en cours") : "Pipeline"}
             </h2>
           </div>
@@ -391,7 +390,7 @@ function PipelineSection({
               variant="outline"
               size="sm"
               onClick={() => setShowAll((v) => !v)}
-              className="border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 h-8 text-xs"
+              className="h-8 text-xs"
             >
               {showAll ? "Focus pipeline actif" : "Voir tout le pipeline"}
             </Button>
@@ -436,10 +435,10 @@ function NowWorkingPanel({ engines, agents, supervisors, events }: { engines: En
   const lastEvent = events.slice().sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))[0];
 
   return (
-    <Card className="glass-card p-5 border-sky-500/30">
+    <Card className="p-5 border-[rgba(77,159,255,0.25)] bg-[linear-gradient(135deg,rgba(77,159,255,0.06),rgba(255,255,255,0.015))]">
       <div className="flex items-center gap-2 mb-3">
-        <span className="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-sky-300">En cours maintenant</h2>
+        <span className="h-2 w-2 rounded-full bg-[#4d9fff] animate-pulse shadow-[0_0_6px_rgba(77,159,255,0.6)]" />
+        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-[#9ec8ff]">En cours maintenant</h2>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
         <Field label="Engine" value={currentEngine ? ENGINE_LABELS[currentEngine.name] ?? currentEngine.name : "—"} />
@@ -479,11 +478,11 @@ function SectionDivider({ label, sub, live }: { label: string; sub?: string; liv
         <div className="flex items-center gap-2">
           {live && (
             <span className="relative inline-flex h-2.5 w-2.5">
-              <span className="absolute inset-0 rounded-full bg-sky-400/70 animate-ping" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-400 shadow-[0_0_12px_hsl(200_90%_60%)]" />
+              <span className="absolute inset-0 rounded-full bg-[rgba(77,159,255,0.5)] animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#4d9fff] shadow-[0_0_12px_rgba(77,159,255,0.6)]" />
             </span>
           )}
-          <h2 className={cn("text-xs font-semibold uppercase tracking-[0.25em]", live ? "text-sky-300" : "text-muted-foreground")}>{label}</h2>
+          <h2 className={cn("font-mono text-[10px] font-semibold uppercase tracking-[0.25em]", live ? "text-[#9ec8ff]" : "text-[#5f6b82]")}>{label}</h2>
         </div>
         {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
       </div>
@@ -522,23 +521,23 @@ function StatCard({ label, main, hint }: { label: string; main: string; hint: st
 function AgentEntity({ a }: { a: AgentRun }) {
   const initials = (a.agent_definition_id ?? "??").split(/[-_ ]/).map(s => s[0]).join("").slice(0, 2).toUpperCase();
   return (
-    <div className="relative flex items-center gap-3 rounded-md border border-sky-500/40 bg-gradient-to-br from-sky-500/[0.08] via-card/40 to-purple-500/[0.06] p-3 overflow-hidden animate-pulse-glow">
+    <div className="relative flex items-center gap-3 rounded-[10px] border border-[rgba(77,159,255,0.3)] bg-[linear-gradient(135deg,rgba(77,159,255,0.08),rgba(47,107,255,0.03))] p-3 overflow-hidden animate-pulse-glow">
       {/* scan line */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute inset-y-0 -inset-x-1/2 w-1/2 bg-gradient-to-r from-transparent via-sky-400/20 to-transparent blur-md animate-scan-line" />
+        <div className="absolute inset-y-0 -inset-x-1/2 w-1/2 bg-[linear-gradient(90deg,transparent,rgba(77,159,255,0.2),transparent)] blur-md animate-scan-line" />
       </div>
       {/* orbiting avatar */}
       <div className="relative h-10 w-10 shrink-0">
-        <span className="absolute inset-0 rounded-full border border-sky-400/30" />
-        <span className="absolute inset-0 rounded-full border-t-2 border-sky-400 animate-orbit" />
-        <span className="absolute inset-1 rounded-full bg-sky-500/20 backdrop-blur flex items-center justify-center font-mono text-[10px] text-sky-200 tracking-wider">
+        <span className="absolute inset-0 rounded-full border border-[rgba(77,159,255,0.25)]" />
+        <span className="absolute inset-0 rounded-full border-t-2 border-[#4d9fff] animate-orbit" />
+        <span className="absolute inset-1 rounded-full bg-[rgba(77,159,255,0.15)] backdrop-blur flex items-center justify-center font-mono text-[10px] text-[#9ec8ff] tracking-wider">
           {initials}
         </span>
       </div>
       <div className="relative min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-sky-200 truncate">{a.agent_definition_id}</span>
-          <span className="text-[9px] uppercase font-mono text-sky-300/80 animate-blink">● live</span>
+          <span className="font-mono text-[11px] text-[#9ec8ff] truncate">{a.agent_definition_id}</span>
+          <span className="text-[9px] uppercase font-mono text-[#9ec8ff]/80 animate-blink">● live</span>
         </div>
         <div className="text-xs text-foreground/85 truncate mt-0.5">{a.safe_summary ?? "…analyse en cours"}</div>
         {typeof a.progress === "number" && <Progress value={a.progress} className="h-0.5 mt-1.5" />}
@@ -571,25 +570,25 @@ function EnginesTimeline({ engines, agents, supervisors, live }: { engines: Engi
           <Collapsible key={name} defaultOpen={live && isRunning}>
             <div className={cn(
               "rounded-md border bg-card/40 relative overflow-hidden",
-              isRunning ? "border-sky-500/50 animate-pulse-glow" : "border-border/40"
+              isRunning ? "border-[rgba(77,159,255,0.4)] animate-pulse-glow" : "border-[rgba(148,170,215,0.12)]"
             )}>
               {isRunning && (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                  <div className="absolute inset-y-0 -inset-x-1/2 w-1/2 bg-gradient-to-r from-transparent via-sky-400/15 to-transparent blur-md animate-scan-line" />
+                  <div className="absolute inset-y-0 -inset-x-1/2 w-1/2 bg-[linear-gradient(90deg,transparent,rgba(77,159,255,0.15),transparent)] blur-md animate-scan-line" />
                 </div>
               )}
-              <CollapsibleTrigger className="relative w-full flex items-center gap-3 p-3 hover:bg-card/60 transition text-left">
+              <CollapsibleTrigger className="relative w-full flex items-center gap-3 p-3 hover:bg-[rgba(255,255,255,0.03)] transition text-left">
                 <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-90 shrink-0" />
                 <span className="text-[10px] text-muted-foreground font-mono w-6">{String(idx + 1).padStart(2, "0")}</span>
-                <span className={cn("h-2 w-2 rounded-full shrink-0", toneDotClass(tone), isRunning && "animate-pulse shadow-[0_0_10px_hsl(200_90%_60%)]")} />
+                <span className={cn("h-2 w-2 rounded-full shrink-0", toneDotClass(tone), isRunning && "animate-pulse shadow-[0_0_10px_rgba(77,159,255,0.6)]")} />
                 <div className="flex-1 min-w-0">
-                  <div className={cn("font-medium text-sm truncate", isRunning && "text-sky-200")}>{ENGINE_LABELS[name] ?? name}</div>
+                  <div className={cn("font-medium text-sm truncate", isRunning && "text-[#9ec8ff]")}>{ENGINE_LABELS[name] ?? name}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5 flex flex-wrap gap-x-2">
                     <span>{shortStatusLabel(status)}</span>
                     {e?.started_at && <span>· démarré {timeAgo(e.started_at)}</span>}
                     {duration !== "—" && <span>· {duration}</span>}
                     {lastSup?.decision && <span>· verdict {lastSup.decision}{lastSup.score != null ? ` (${lastSup.score})` : ""}</span>}
-                    {isRunning && runningAgents.length > 0 && <span className="text-sky-300">· {runningAgents.length} agent(s) en activité</span>}
+                    {isRunning && runningAgents.length > 0 && <span className="text-[#9ec8ff]">· {runningAgents.length} agent(s) en activité</span>}
                   </div>
                 </div>
                 <Badge variant="outline" className={cn("text-[10px] uppercase shrink-0", toneClasses(tone))}>{shortStatusLabel(status)}</Badge>
@@ -689,9 +688,9 @@ function SupervisorsTable({ supervisors }: { supervisors: SupervisorRun[] }) {
                 <td className="py-2 pr-3">
                   <Badge variant="outline" className={cn(
                     "text-[9px] uppercase",
-                    isHR ? "bg-orange-500/15 text-orange-300 border-orange-500/30" :
-                    isFail ? "bg-red-500/15 text-red-300 border-red-500/30" :
-                    s.decision === "PASS" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" :
+                    isHR ? "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]" :
+                    isFail ? "bg-[rgba(255,107,107,0.08)] text-[hsl(var(--bad))] border-[rgba(255,107,107,0.3)]" :
+                    s.decision === "PASS" ? "bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))] border-[rgba(122,232,180,0.3)]" :
                     "bg-secondary text-foreground/80 border-border/40"
                   )}>{s.decision}</Badge>
                 </td>
@@ -762,11 +761,11 @@ function HumanReviewCard({ run, engines, supervisors }: { run: WorkflowRun; engi
   const blockingEngine = engines.find(e => statusTone(e.status) === "human_review")
     ?? engines.find(e => e.name === hrSup?.target_stage);
   return (
-    <Card className="glass-card p-5 border-orange-500/30">
+    <Card className="p-5 border-[rgba(255,184,77,0.3)] bg-[linear-gradient(135deg,rgba(255,184,77,0.06),rgba(255,255,255,0.015))]">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-orange-400 mt-0.5" />
+        <AlertTriangle className="h-5 w-5 text-[hsl(var(--watch))] mt-0.5" />
         <div className="flex-1">
-          <div className="font-semibold text-orange-200">Intervention humaine requise</div>
+          <div className="font-semibold text-[hsl(var(--watch))]">Intervention humaine requise</div>
           <div className="text-sm text-muted-foreground mt-0.5">
             Le run est en pause en attente d'une décision humaine.
           </div>
@@ -797,11 +796,11 @@ function FailureCard({ run, engines, agents, events }: { run: WorkflowRun; engin
     ?? failedAgent?.safe_summary
     ?? "Erreur non spécifiée.";
   return (
-    <Card className="glass-card p-5 border-red-500/30">
+    <Card className="p-5 border-[rgba(255,107,107,0.3)] bg-[linear-gradient(135deg,rgba(255,107,107,0.06),rgba(255,255,255,0.015))]">
       <div className="flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
+        <AlertCircle className="h-5 w-5 text-[hsl(var(--bad))] mt-0.5" />
         <div className="flex-1">
-          <div className="font-semibold text-red-200">Le run a échoué</div>
+          <div className="font-semibold text-[hsl(var(--bad))]">Le run a échoué</div>
           <div className="text-sm text-muted-foreground mt-0.5 break-words">{errMsg}</div>
           <div className="mt-3 grid sm:grid-cols-2 gap-3 text-sm">
             <Field label="Engine concerné" value={failedEngine ? (ENGINE_LABELS[failedEngine.name] ?? failedEngine.name) : "—"} />

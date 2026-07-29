@@ -399,7 +399,7 @@ const ClientDetail = () => {
                 const ts = client[s.flag];
                 return (
                   <div key={s.key} className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0">
-                    <span className={`h-6 w-6 rounded-full flex items-center justify-center ${done ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-600/30 text-zinc-400"}`}>
+                    <span className={`h-6 w-6 rounded-full flex items-center justify-center border ${done ? "border-[rgba(122,232,180,0.25)] bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))]" : "border-[rgba(148,170,215,0.12)] bg-[rgba(255,255,255,0.02)] text-[#5f6b82]"}`}>
                       {done ? <Check className="h-4 w-4" /> : <X className="h-3 w-3" />}
                     </span>
                     <div className="flex-1">
@@ -523,7 +523,7 @@ const ClientDetail = () => {
                   <div className="flex-1">
                     <div className="font-medium">{l.event_type} {l.status && <span className="text-xs text-muted-foreground">— {l.status}</span>}</div>
                     {l.details && <pre className="text-xs text-muted-foreground whitespace-pre-wrap">{JSON.stringify(l.details, null, 0)}</pre>}
-                    {l.error && <div className="text-xs text-red-400">{l.error}</div>}
+                    {l.error && <div className="text-xs text-[hsl(var(--bad))]">{l.error}</div>}
                   </div>
                 </div>
               ))}

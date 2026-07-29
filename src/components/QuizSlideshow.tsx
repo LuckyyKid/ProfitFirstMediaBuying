@@ -190,7 +190,7 @@ export const QuizSlideshow = ({
 
   const renderInput = () => {
     const inputClass =
-      "text-base md:text-lg h-14 rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-5 shadow-sm transition-all duration-200 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60";
+      "text-base md:text-lg h-14 rounded-[12px] px-5";
 
     switch (current.type) {
       case "long":
@@ -200,7 +200,7 @@ export const QuizSlideshow = ({
             onChange={(e) => setAnswer(e.target.value)}
             placeholder={current.placeholder ?? "Votre réponse..."}
             rows={5}
-            className="text-base md:text-lg leading-relaxed rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-5 py-4 shadow-sm transition-all duration-200 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 resize-none"
+            className="text-base md:text-lg leading-relaxed rounded-[12px] px-5 py-4 resize-none"
             autoFocus
           />
         );
@@ -217,19 +217,19 @@ export const QuizSlideshow = ({
                   type="button"
                   onClick={() => setAnswer(opt)}
                   className={cn(
-                    "w-full text-left px-5 py-4 rounded-2xl border-2 transition-all duration-200 flex items-center gap-3",
+                    "w-full text-left px-5 py-4 rounded-[12px] border transition-all duration-200 flex items-center gap-3",
                     active
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-border/60 bg-background/40 hover:border-primary/50 hover:bg-background/60"
+                      ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] shadow-[0_0_24px_rgba(47,107,255,0.12)]"
+                      : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(77,159,255,0.35)]"
                   )}
                 >
                   <span
                     className={cn(
-                      "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                      active ? "border-primary bg-primary" : "border-border"
+                      "h-5 w-5 rounded-full border flex items-center justify-center shrink-0 transition-all",
+                      active ? "border-transparent bg-[linear-gradient(135deg,#4d9fff,#2f6bff)]" : "border-[rgba(148,170,215,0.25)]"
                     )}
                   >
-                    {active && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
+                    {active && <span className="h-2 w-2 rounded-full bg-white" />}
                   </span>
                   <span className="text-base md:text-lg text-foreground">{opt}</span>
                 </button>
@@ -261,19 +261,19 @@ export const QuizSlideshow = ({
                   type="button"
                   onClick={() => toggleMulti(opt)}
                   className={cn(
-                    "w-full text-left px-5 py-4 rounded-2xl border-2 transition-all duration-200 flex items-center gap-3",
+                    "w-full text-left px-5 py-4 rounded-[12px] border transition-all duration-200 flex items-center gap-3",
                     active
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-border/60 bg-background/40 hover:border-primary/50 hover:bg-background/60"
+                      ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))] shadow-[0_0_24px_rgba(47,107,255,0.12)]"
+                      : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(77,159,255,0.35)]"
                   )}
                 >
                   <span
                     className={cn(
-                      "h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
-                      active ? "border-primary bg-primary" : "border-border"
+                      "h-5 w-5 rounded-md border flex items-center justify-center shrink-0 transition-all",
+                      active ? "border-transparent bg-[linear-gradient(135deg,#4d9fff,#2f6bff)]" : "border-[rgba(148,170,215,0.25)]"
                     )}
                   >
-                    {active && <Check className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={3} />}
+                    {active && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
                   </span>
                   <span className="text-base md:text-lg text-foreground">{opt}</span>
                 </button>
@@ -282,16 +282,16 @@ export const QuizSlideshow = ({
             {current.allowOther && (
               <div
                 className={cn(
-                  "rounded-2xl border-2 transition-all px-5 py-4 space-y-3",
+                  "rounded-[12px] border transition-all px-5 py-4 space-y-3",
                   otherValues[current.id]
-                    ? "border-primary bg-primary/10"
-                    : "border-border/60 bg-background/40"
+                    ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))]"
+                    : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)]"
                 )}
               >
                 <label className="flex items-center gap-3 cursor-text text-base md:text-lg text-foreground">
-                  <span className="h-5 w-5 rounded-md border-2 border-border flex items-center justify-center shrink-0">
+                  <span className="h-5 w-5 rounded-md border border-[rgba(148,170,215,0.25)] flex items-center justify-center shrink-0">
                     {!!otherValues[current.id] && (
-                      <Check className="h-3.5 w-3.5 text-primary" strokeWidth={3} />
+                      <Check className="h-3.5 w-3.5 text-[#9ec8ff]" strokeWidth={3} />
                     )}
                   </span>
                   Autre :
@@ -302,7 +302,6 @@ export const QuizSlideshow = ({
                     setOtherValues((o) => ({ ...o, [current.id]: e.target.value }))
                   }
                   placeholder="Précisez..."
-                  className="bg-background/60"
                 />
               </div>
             )}
@@ -330,10 +329,10 @@ export const QuizSlideshow = ({
                     type="button"
                     onClick={() => setAnswer(String(n))}
                     className={cn(
-                      "flex-1 h-16 md:h-20 rounded-2xl border-2 text-xl md:text-2xl font-bold transition-all duration-200",
+                      "flex-1 h-16 md:h-20 rounded-[12px] border font-mono text-xl md:text-2xl font-normal transition-all duration-200",
                       active
-                        ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
-                        : "border-border/60 bg-background/40 text-foreground hover:border-primary/50"
+                        ? "border-transparent bg-[linear-gradient(135deg,#4d9fff,#2f6bff)] text-white shadow-[0_8px_28px_rgba(47,107,255,0.35)] scale-105"
+                        : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)] text-foreground hover:border-[rgba(77,159,255,0.35)]"
                     )}
                   >
                     {n}
@@ -358,7 +357,7 @@ export const QuizSlideshow = ({
                     onChange={(e) => setCompositeField(f.key, e.target.value)}
                     placeholder={f.placeholder ?? ""}
                     rows={3}
-                    className="text-base rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-4 py-3"
+                    className="text-base rounded-[12px] px-4 py-3"
                   />
                 ) : (
                   <Input
@@ -366,7 +365,7 @@ export const QuizSlideshow = ({
                     value={obj[f.key] ?? ""}
                     onChange={(e) => setCompositeField(f.key, e.target.value)}
                     placeholder={f.placeholder ?? ""}
-                    className="text-base h-12 rounded-2xl border-2 border-border/60 bg-background/40 backdrop-blur-sm px-4"
+                    className="text-base h-12 rounded-[12px] px-4"
                   />
                 )}
               </div>
@@ -404,9 +403,9 @@ export const QuizSlideshow = ({
           <span>Question {index + 1} / {questions.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+        <div className="h-[3px] w-full rounded-full bg-[rgba(148,170,215,0.12)] overflow-hidden">
           <motion.div
-            className="h-full bg-primary"
+            className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)]"
             initial={false}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -520,8 +519,10 @@ const OtherRow = ({
 }) => (
   <div
     className={cn(
-      "rounded-2xl border-2 transition-all px-5 py-4 space-y-3",
-      active ? "border-primary bg-primary/10" : "border-border/60 bg-background/40"
+      "rounded-[12px] border transition-all px-5 py-4 space-y-3",
+      active
+        ? "border-[rgba(77,159,255,0.35)] bg-[linear-gradient(135deg,rgba(77,159,255,0.14),rgba(47,107,255,0.05))]"
+        : "border-[rgba(148,170,215,0.15)] bg-[rgba(255,255,255,0.02)]"
     )}
   >
     <button
@@ -531,11 +532,11 @@ const OtherRow = ({
     >
       <span
         className={cn(
-          "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0",
-          active ? "border-primary bg-primary" : "border-border"
+          "h-5 w-5 rounded-full border flex items-center justify-center shrink-0",
+          active ? "border-transparent bg-[linear-gradient(135deg,#4d9fff,#2f6bff)]" : "border-[rgba(148,170,215,0.25)]"
         )}
       >
-        {active && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
+        {active && <span className="h-2 w-2 rounded-full bg-white" />}
       </span>
       Autre :
     </button>

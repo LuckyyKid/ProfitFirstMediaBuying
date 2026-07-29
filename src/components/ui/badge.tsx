@@ -4,14 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+        default:
+          "border-[rgba(77,159,255,0.25)] bg-[rgba(77,159,255,0.08)] text-[#9ec8ff]",
+        secondary:
+          "border-[rgba(148,170,215,0.2)] bg-[rgba(255,255,255,0.02)] text-[#c8d2e4]",
+        destructive:
+          "border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.08)] text-[#ff6b6b]",
+        outline:
+          "border-[rgba(148,170,215,0.2)] text-[#c8d2e4]",
+        good:
+          "border-[rgba(61,220,151,0.3)] bg-[rgba(61,220,151,0.08)] text-[#3ddc97]",
+        watch:
+          "border-[rgba(245,183,78,0.3)] bg-[rgba(245,183,78,0.08)] text-[#f5b74e]",
+        bad:
+          "border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.08)] text-[#ff6b6b]",
+        muted:
+          "border-[rgba(148,170,215,0.15)] bg-transparent text-[#8b97ad]",
       },
     },
     defaultVariants: {

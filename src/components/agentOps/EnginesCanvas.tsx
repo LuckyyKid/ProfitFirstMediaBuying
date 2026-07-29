@@ -53,22 +53,22 @@ const ACCENT: Record<Accent, { stroke: string; glow: string }> = {
 
 function toneText(tone: Tone) {
   switch (tone) {
-    case "completed": return "text-emerald-300";
-    case "running": return "text-cyan-300";
-    case "human_review": return "text-fuchsia-300";
-    case "failed": return "text-rose-300";
-    case "warning": return "text-amber-300";
-    default: return "text-slate-400";
+    case "completed": return "text-[hsl(var(--good))]";
+    case "running": return "text-[#9ec8ff]";
+    case "human_review": return "text-[hsl(var(--watch))]";
+    case "failed": return "text-[hsl(var(--bad))]";
+    case "warning": return "text-[hsl(var(--watch))]";
+    default: return "text-[#c8d2e4]";
   }
 }
 function toneDot(tone: Tone) {
   switch (tone) {
-    case "completed": return "bg-emerald-400";
-    case "running": return "bg-cyan-400 animate-pulse";
-    case "human_review": return "bg-fuchsia-400 animate-pulse";
-    case "failed": return "bg-rose-400";
-    case "warning": return "bg-amber-400 animate-pulse";
-    default: return "bg-slate-500";
+    case "completed": return "bg-[hsl(var(--good))]";
+    case "running": return "bg-[#4d9fff] animate-pulse";
+    case "human_review": return "bg-[hsl(var(--watch))] animate-pulse";
+    case "failed": return "bg-[hsl(var(--bad))]";
+    case "warning": return "bg-[hsl(var(--watch))] animate-pulse";
+    default: return "bg-[rgba(148,170,215,0.15)]";
   }
 }
 
@@ -122,21 +122,21 @@ function EngineNode({
       className={cn(
         "group relative w-[170px] shrink-0 rounded-2xl border bg-[#0c1530]/80 backdrop-blur-xl text-left p-3.5 transition-all",
         "border-white/5",
-        active && "border-cyan-400/40 ring-1 ring-cyan-400/30",
-        review && "border-fuchsia-400/40 ring-1 ring-fuchsia-400/30",
-        failed && "border-rose-400/40 ring-1 ring-rose-400/30",
-        completed && "border-emerald-400/20",
+        active && "border-[rgba(77,159,255,0.4)] ring-1 ring-[rgba(77,159,255,0.3)]",
+        review && "border-[rgba(255,184,77,0.4)] ring-1 ring-[rgba(255,184,77,0.3)]",
+        failed && "border-[rgba(255,107,107,0.4)] ring-1 ring-[rgba(255,107,107,0.3)]",
+        completed && "border-[rgba(122,232,180,0.2)]",
         pending && "opacity-70",
-        selected && "ring-2 ring-cyan-300/60 border-cyan-400/60",
+        selected && "ring-2 ring-[rgba(158,200,255,0.6)] border-[rgba(77,159,255,0.6)]",
         (active || review) && tokens.glow,
       )}
     >
-      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-[#0a1226] border border-white/10 text-[10px] font-mono text-slate-400">
+      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-[#0a1226] border border-white/10 text-[10px] font-mono text-[#c8d2e4]">
         {String(data.order).padStart(2, "0")}
       </div>
 
       <div className="text-center mt-0.5">
-        <div className="text-[13px] font-medium text-slate-100 leading-tight">{data.label}</div>
+        <div className="text-[13px] font-medium text-foreground leading-tight">{data.label}</div>
       </div>
 
       <div className="relative mx-auto my-3 h-14 w-14 rounded-full flex items-center justify-center">
@@ -173,7 +173,7 @@ function EngineNode({
       </div>
 
       <div className="mt-2.5 pt-2.5 border-t border-white/5 min-h-[34px]">
-        <div className="text-[11px] text-slate-400 text-center truncate">
+        <div className="text-[11px] text-[#c8d2e4] text-center truncate">
           {runningAgent?.safe_summary ??
             (completed
               ? data.lastSupervisor?.decision === "PASS"
@@ -377,8 +377,8 @@ export function EngineDetailsPanel({
   return (
     <div className="rounded-2xl border border-white/5 bg-[#0a1226]/70 backdrop-blur-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-slate-500">Engine sélectionné</div>
-        <button onClick={onClose} className="text-slate-500 hover:text-slate-200 text-xs">Fermer</button>
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#5f6b82]">Engine sélectionné</div>
+        <button onClick={onClose} className="text-[#5f6b82] hover:text-foreground text-xs">Fermer</button>
       </div>
       <div className="px-4 py-4 flex items-center gap-3 border-b border-white/5">
         <div
@@ -388,7 +388,7 @@ export function EngineDetailsPanel({
           <Icon className="h-5 w-5" style={{ color: tokens.stroke }} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-slate-100 truncate">{ENGINE_LABELS[engineName] ?? engineName}</div>
+          <div className="text-sm font-semibold text-foreground truncate">{ENGINE_LABELS[engineName] ?? engineName}</div>
           <div className={cn("text-[11px] flex items-center gap-1.5 mt-0.5", toneText(tone))}>
             <span className={cn("h-1.5 w-1.5 rounded-full", toneDot(tone))} />
             {shortStatusLabel(engine?.status ?? "queued")} · {duration}
@@ -397,19 +397,19 @@ export function EngineDetailsPanel({
       </div>
       <div className="px-4 py-3 space-y-3 text-xs">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1.5 flex items-center gap-1.5">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-[#5f6b82] mb-1.5 flex items-center gap-1.5">
             <Users className="h-3 w-3" /> Agents ({engineAgents.length})
           </div>
-          {engineAgents.length === 0 && <div className="text-slate-500">Aucun agent associé.</div>}
+          {engineAgents.length === 0 && <div className="text-[#5f6b82]">Aucun agent associé.</div>}
           <div className="space-y-1.5">
             {engineAgents.slice(0, 8).map((a) => {
               const t = statusTone(a.status);
               return (
                 <div key={a.id} className="flex items-center gap-2">
                   <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", toneDot(t))} />
-                  <span className="font-mono text-[11px] text-slate-300 truncate">{a.agent_definition_id}</span>
+                  <span className="font-mono text-[11px] text-[#c8d2e4] truncate">{a.agent_definition_id}</span>
                   {typeof a.progress === "number" && (
-                    <span className="ml-auto text-[10px] font-mono text-cyan-300">{Math.round(a.progress)}%</span>
+                    <span className="ml-auto text-[10px] font-mono text-[#9ec8ff]">{Math.round(a.progress)}%</span>
                   )}
                 </div>
               );
@@ -418,12 +418,12 @@ export function EngineDetailsPanel({
         </div>
         {lastSup && (
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1.5 flex items-center gap-1.5">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#5f6b82] mb-1.5 flex items-center gap-1.5">
               <Code2 className="h-3 w-3" /> Superviseur
             </div>
-            <div className="text-slate-300">
+            <div className="text-[#c8d2e4]">
               {lastSup.name} · <span className="font-mono">{lastSup.decision}</span>
-              {lastSup.score != null && <span className="ml-1 text-slate-500">({lastSup.score.toFixed(2)})</span>}
+              {lastSup.score != null && <span className="ml-1 text-[#5f6b82]">({lastSup.score.toFixed(2)})</span>}
             </div>
           </div>
         )}
