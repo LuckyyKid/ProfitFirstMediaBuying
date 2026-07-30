@@ -275,24 +275,24 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="overflow-x-auto overflow-y-hidden admin-clients-scroll">
+            <Table className="min-w-[1800px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Entreprise</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Closer</TableHead>
-                  <TableHead>Deal</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Étape</TableHead>
-                  <TableHead className="w-[160px]">Progression</TableHead>
-                  <TableHead>Paiement</TableHead>
-                  <TableHead>Contrat</TableHead>
-                  <TableHead>Kick-off</TableHead>
-                  <TableHead>Activité</TableHead>
-                  <TableHead>Suivi</TableHead>
-                  <TableHead>Risque</TableHead>
+                  <TableHead className="whitespace-nowrap">Client</TableHead>
+                  <TableHead className="whitespace-nowrap">Entreprise</TableHead>
+                  <TableHead className="whitespace-nowrap">Contact</TableHead>
+                  <TableHead className="whitespace-nowrap">Closer</TableHead>
+                  <TableHead className="whitespace-nowrap">Deal</TableHead>
+                  <TableHead className="whitespace-nowrap">Statut</TableHead>
+                  <TableHead className="whitespace-nowrap">Étape</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">Progression</TableHead>
+                  <TableHead className="whitespace-nowrap">Paiement</TableHead>
+                  <TableHead className="whitespace-nowrap">Contrat</TableHead>
+                  <TableHead className="whitespace-nowrap">Kick-off</TableHead>
+                  <TableHead className="whitespace-nowrap">Activité</TableHead>
+                  <TableHead className="whitespace-nowrap">Suivi</TableHead>
+                  <TableHead className="whitespace-nowrap">Risque</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>

@@ -267,3 +267,26 @@ All colors MUST be HSL.
 *::-webkit-scrollbar { width: 0; height: 0; display: none; } /* Chromium / WebKit */
 html, body { scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* --- Opt-in visible horizontal scrollbar (admin clients table) ------------- */
+.admin-clients-scroll {
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+  scrollbar-color: rgba(148, 170, 215, 0.35) transparent;
+}
+.admin-clients-scroll::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+  display: block;
+}
+.admin-clients-scroll::-webkit-scrollbar-track {
+  background: rgba(148, 170, 215, 0.06);
+  border-radius: 999px;
+}
+.admin-clients-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 170, 215, 0.35);
+  border-radius: 999px;
+}
+.admin-clients-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 170, 215, 0.55);
+}
