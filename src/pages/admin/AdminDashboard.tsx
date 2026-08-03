@@ -50,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, LayoutDashboard, LogOut, Mail, MailCheck, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -169,6 +169,40 @@ const AdminDashboard = () => {
     else toast.message("Aucun email envoyé (vérifie l'email du client)");
   };
 
+  const onResendSlackInvite = async (c: any) => {
+    if (!c.email) { toast.error("Aucun email pour ce client"); return; }
+    if (!c.company_name && !c.brand_name) { toast.error("Aucun nom de compagnie"); return; }
+    const t = toast.loading("Envoi de l'invitation Slack…");
+    const { data, error } = await supabase.functions.invoke("setup-slack-onboarding", {
+      body: {
+        email: c.email,
+        companyName: c.company_name || c.brand_name,
+        clientId: c.client_id,
+        clientCode: c.client_code,
+        // Explicit channelId lets the function skip the lookup/creation step
+        // and go straight to invite (fixes case where bot was removed from channel).
+        channelId: c.slack_channel_id ?? undefined,
+      },
+    });
+    toast.dismiss(t);
+    // Always log the full response so we can debug from the console.
+    console.log("[setup-slack-onboarding response]", { data, error });
+    if (error) {
+      toast.error(error.message || "Échec de l'appel");
+      return;
+    }
+    const r = data as { channelId?: string | null; slackUserId?: string | null; inviteUrl?: string | null; errors?: string[] };
+    if (r.errors && r.errors.length > 0) {
+      toast.error(`Slack errors: ${r.errors.join(" | ")}`, { duration: 15000 });
+    } else if (r.inviteUrl) {
+      toast.success(`Invitation Slack envoyée à ${c.email}`);
+    } else if (r.slackUserId) {
+      toast.success(`Client déjà membre du workspace, ajouté au canal`);
+    } else {
+      toast.message("Appel exécuté sans erreur, mais aucun inviteUrl ni slackUserId retourné — vérifier logs edge function", { duration: 15000 });
+    }
+  };
+
 
   const counts = useMemo(() => ({
     total: clients.length,
@@ -191,7 +225,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
-      <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="w-full mx-auto space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Admin Onboarding Dashboard</h1>
@@ -275,11 +309,11 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto overflow-y-hidden admin-clients-scroll">
+          <div className="admin-clients-scroll">
             <Table className="min-w-[1800px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">Client</TableHead>
+                  <TableHead className="sticky left-0 z-30 bg-background whitespace-nowrap w-[220px] shadow-[8px_0_16px_-8px_rgba(0,0,0,0.4)]">Client</TableHead>
                   <TableHead className="whitespace-nowrap">Entreprise</TableHead>
                   <TableHead className="whitespace-nowrap">Contact</TableHead>
                   <TableHead className="whitespace-nowrap">Closer</TableHead>
@@ -293,7 +327,7 @@ const AdminDashboard = () => {
                   <TableHead className="whitespace-nowrap">Activité</TableHead>
                   <TableHead className="whitespace-nowrap">Suivi</TableHead>
                   <TableHead className="whitespace-nowrap">Risque</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead className="sticky right-0 z-30 bg-background whitespace-nowrap w-[160px] shadow-[-8px_0_16px_-8px_rgba(0,0,0,0.4)]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -312,7 +346,7 @@ const AdminDashboard = () => {
                   const archived = Boolean(c.archived_at);
                   return (
                     <TableRow key={detailRef} className={archived ? "opacity-60" : ""}>
-                      <TableCell>
+                      <TableCell className="sticky left-0 z-20 bg-background w-[220px] shadow-[8px_0_16px_-8px_rgba(0,0,0,0.4)]">
                         <div className="font-medium flex items-center gap-2">
                           {c.client_name || "—"}
                           {archived && <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">archivé</span>}
@@ -348,7 +382,7 @@ const AdminDashboard = () => {
                           {risk}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="sticky right-0 z-20 bg-background w-[160px] shadow-[-8px_0_16px_-8px_rgba(0,0,0,0.4)]">
                         <div className="flex items-center gap-1">
                           <Button asChild size="sm" variant="outline">
                             <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>
@@ -372,6 +406,10 @@ const AdminDashboard = () => {
                               <DropdownMenuItem onClick={() => onSendFollowUp(c)} disabled={!c.email}>
                                 <Send className="h-4 w-4 mr-2" />
                                 {c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => onResendSlackInvite(c)} disabled={!c.email || (!c.company_name && !c.brand_name)}>
+                                <Hash className="h-4 w-4 mr-2" />
+                                Renvoyer invitation Slack
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onArchive(c)}>

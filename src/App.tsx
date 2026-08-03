@@ -8,6 +8,10 @@ import ClientOnboarding from "./pages/ClientOnboarding";
 import Step2 from "./pages/Step2";
 import Step3 from "./pages/Step3";
 import VoiceOnboarding from "./pages/VoiceOnboarding";
+import PortalClient from "./pages/PortalClient";
+import PortalLogin from "./pages/portal/PortalLogin";
+import PortalSignup from "./pages/portal/PortalSignup";
+import PortalAuthGate from "./components/PortalAuthGate";
 import Step4 from "./pages/Step4";
 import Step5 from "./pages/Step5";
 import Step6 from "./pages/Step6";
@@ -130,6 +134,25 @@ const App = () => (
           <Route path="/step7" element={<Step7 />} />
           <Route path="/step8" element={<Step8 />} />
           <Route path="/step9" element={<Step9 />} />
+
+          <Route path="/portail/login" element={<PortalLogin />} />
+          <Route path="/portail/signup" element={<PortalSignup />} />
+          <Route
+            path="/portail"
+            element={
+              <PortalAuthGate>
+                {({ clientCode, logout }) => <PortalClient clientCode={clientCode} onLogout={logout} />}
+              </PortalAuthGate>
+            }
+          />
+          <Route
+            path="/portal"
+            element={
+              <PortalAuthGate>
+                {({ clientCode, logout }) => <PortalClient clientCode={clientCode} onLogout={logout} />}
+              </PortalAuthGate>
+            }
+          />
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />

@@ -3,12 +3,15 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SLACK = "https://slack.com/api";
 const TOKEN = Deno.env.get("SLACK_BOT_TOKEN");
+// Second Slack app dedicated to Slack Connect email invitations.
+// Falls back to the main token if not configured.
+const INVITE_TOKEN = Deno.env.get("SLACK_INVITATION_BOT") ?? TOKEN;
 
-async function slack(method: string, body: Record<string, unknown>) {
+async function slack(method: string, body: Record<string, unknown>, token: string | undefined = TOKEN) {
   const res = await fetch(`${SLACK}/${method}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${TOKEN}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json; charset=utf-8",
     },
     body: JSON.stringify(body),
@@ -23,6 +26,17 @@ async function slackGet(method: string, qs: Record<string, string> = {}) {
     headers: { Authorization: `Bearer ${TOKEN}` },
   });
   return await res.json();
+}
+
+// Resolve the invitation app's bot user id (so we can invite it into the freshly-created channel).
+async function getInviteBotUserId(): Promise<string | null> {
+  if (!INVITE_TOKEN || INVITE_TOKEN === TOKEN) return null;
+  try {
+    const auth = await slack("auth.test", {}, INVITE_TOKEN);
+    return auth.ok ? (auth.user_id as string) : null;
+  } catch (_) {
+    return null;
+  }
 }
 
 function normalizeChannelName(companyName: string): string {
@@ -199,13 +213,38 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 5) Generate a shared invite link for the channel
+    // 4.5) If a dedicated invitation app is configured, make sure its bot is
+    // in the channel (Slack Connect calls require the calling app to be a member).
+    if (result.channelId && INVITE_TOKEN && INVITE_TOKEN !== TOKEN) {
+      try {
+        const inviteBotId = await getInviteBotUserId();
+        if (inviteBotId) {
+          const inv = await slack("conversations.invite", {
+            channel: result.channelId,
+            users: inviteBotId,
+          });
+          if (!inv.ok && inv.error !== "already_in_channel") {
+            result.errors.push(`invite_bot_b:${inv.error}`);
+          }
+        } else {
+          result.errors.push("invite_bot_b:auth_test_failed");
+        }
+      } catch (e) {
+        result.errors.push(`invite_bot_b_exception:${(e as Error).message}`);
+      }
+    }
+
+    // 5) Slack Connect email invitation to the client (uses dedicated app if provided).
     if (result.channelId) {
       try {
-        const shared = await slack("conversations.inviteShared", {
-          channel: result.channelId,
-          ...(email ? { user_emails: [email] } : {}),
-        });
+        const shared = await slack(
+          "conversations.inviteShared",
+          {
+            channel: result.channelId,
+            ...(email ? { user_emails: [email] } : {}),
+          },
+          INVITE_TOKEN,
+        );
         if (shared.ok) {
           result.inviteUrl = shared.invite_link ?? null;
         } else {

@@ -56,7 +56,10 @@
       "Bash(npx tsx *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(cp \"src/pages/admin/gos/ProfitFirstWorkspace.tsx\" \"src/pages/admin/gos/ProfitFirstWorkspace.tsx.bak\")",
+      "Bash(sed -i -e s/text-zinc-100/text-foreground/g -e 's/text-zinc-300/text-[#c8d2e4]/g' -e 's/text-zinc-400/text-[#c8d2e4]/g' -e 's/text-zinc-500/text-[#5f6b82]/g' -e 's/text-zinc-600/text-[#3a4258]/g' -e 's/text-zinc-700/text-[#3a4258]/g' -e 's/border-zinc-800/border-[rgba\\(148,170,215,0.12\\)]/g' -e 's/border-zinc-700/border-[rgba\\(148,170,215,0.1\\)]/g' -e 's/bg-zinc-950\\\\/80/bg-[rgba\\(8,12,20,0.6\\)]/g' -e 's/bg-zinc-950\\\\/70/bg-[rgba\\(8,12,20,0.5\\)]/g' -e 's/bg-zinc-950\\\\/60/bg-[rgba\\(8,12,20,0.4\\)]/g' -e 's/bg-zinc-950\\\\/50/bg-[rgba\\(8,12,20,0.4\\)]/g' -e 's/bg-zinc-950\\\\/40/bg-[rgba\\(8,12,20,0.35\\)]/g' -e 's/bg-zinc-950\\\\/30/bg-[rgba\\(8,12,20,0.3\\)]/g' -e 's/bg-zinc-950/bg-[#080d18]/g' -e 's/bg-zinc-900\\\\/50/bg-[rgba\\(255,255,255,0.02\\)]/g' -e 's/bg-zinc-900/bg-[rgba\\(255,255,255,0.02\\)]/g' -e 's/bg-zinc-800\\\\/70/bg-[rgba\\(148,170,215,0.1\\)]/g' -e 's/bg-zinc-800\\\\/60/bg-[rgba\\(148,170,215,0.08\\)]/g' -e 's/bg-zinc-800/bg-[rgba\\(148,170,215,0.1\\)]/g' -e 's/bg-zinc-700/bg-[rgba\\(148,170,215,0.08\\)]/g' -e 's/border-zinc-800\\\\/70/border-[rgba\\(148,170,215,0.1\\)]/g' src/pages/admin/gos/ProfitFirstWorkspace.tsx)",
+      "Bash(cmd.exe *)"
     ]
   }
 }
