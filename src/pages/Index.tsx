@@ -71,11 +71,11 @@ const Index = () => {
         <LanguageSwitcher language={language} onLanguageChange={setLanguage} />
       </div>
 
-      <main className="container mx-auto min-h-screen px-4 py-20 md:py-28 flex items-center justify-center">
+      <main className="container mx-auto min-h-screen px-4 py-16 sm:py-20 md:py-28 flex items-center justify-center">
         <div className="w-full max-w-5xl space-y-10 text-center">
           <div className="space-y-4">
             <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">TDIA</p>
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground tracking-tight">
               {t.greeting}
             </h1>
             <p className="max-w-2xl mx-auto text-base md:text-lg text-muted-foreground leading-relaxed">

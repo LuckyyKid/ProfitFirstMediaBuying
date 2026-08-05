@@ -59,7 +59,7 @@ export function DecisionScoringTab({ clientId }: { clientId: string }) {
               ))}
           </SelectContent>
         </Select>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {CRITERIA.map(([k, label]) => (
             <div key={k}>
               <Label className="text-xs">{label}</Label>

@@ -37,7 +37,7 @@ export function LiveOptTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-4 border-border shadow-none">
         <h3 className="font-semibold mb-3">Nouvelle revue live</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Input placeholder="Période (ex 2026-W27)" value={f.review_period ?? ""} onChange={(e) => setF({ ...f, review_period: e.target.value })} />
           {METRIC_KEYS.map((k) => (
             <div key={k}>

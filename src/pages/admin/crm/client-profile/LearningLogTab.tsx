@@ -27,7 +27,7 @@ export function LearningLogTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-4 border-border shadow-none">
         <h3 className="font-semibold mb-3">Log d'apprentissage</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {TEXT_KEYS.map((k) => (
             <Input key={k} placeholder={k} value={f[k] ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} />
           ))}

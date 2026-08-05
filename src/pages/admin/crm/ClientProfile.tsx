@@ -495,7 +495,7 @@ function DecisionScoringTab({ clientId }: { clientId: string }) {
             ))}
           </SelectContent>
         </Select>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {[
             ["business_impact","Impact business"],["goal_alignment","Goal alignment"],["evidence_strength","Evidence"],
             ["confidence_score","Confidence"],["ease_of_execution","Ease"],["urgency","Urgency"],
@@ -571,7 +571,7 @@ function ForecastTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-5">
         <h3 className="font-semibold mb-3">Nouveau forecast</h3>
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           <Input placeholder="Nom" value={meta.forecast_name} onChange={e => setMeta({ ...meta, forecast_name: e.target.value })} />
           <Input placeholder="Période (ex 90d)" value={meta.forecast_period} onChange={e => setMeta({ ...meta, forecast_period: e.target.value })} />
           <Input placeholder="Goal" value={meta.goal} onChange={e => setMeta({ ...meta, goal: e.target.value })} />
@@ -585,7 +585,7 @@ function ForecastTab({ clientId }: { clientId: string }) {
             </label>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <div><Label className="text-xs">Overlap</Label>
             <Select value={overlap} onValueChange={(v: any) => setOverlap(v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -601,7 +601,7 @@ function ForecastTab({ clientId }: { clientId: string }) {
           <div>Range: <b>{fc.expected_lift_low}%</b> / <b>{fc.expected_lift_base}%</b> / <b>{fc.expected_lift_high}%</b></div>
         </div>
         <h4 className="font-semibold mb-2 text-sm">Confidence scoring</h4>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {["data_quality","evidence_strength","goal_alignment","execution_readiness","tracking_confidence","historical_similarity","risk_penalty","dependency_penalty"].map(k => (
             <div key={k}>
               <Label className="text-xs">{k}</Label>
@@ -694,7 +694,7 @@ function GrowthMapTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-5">
         <h3 className="font-semibold mb-3">Nouvelle semaine</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Input type="number" placeholder="Semaine #" value={f.week_number ?? ""} onChange={e => setF({ ...f, week_number: Number(e.target.value) })} />
           <Input placeholder="Weekly goal" value={f.weekly_goal ?? ""} onChange={e => setF({ ...f, weekly_goal: e.target.value })} />
           <Input placeholder="Key milestone" value={f.key_milestone ?? ""} onChange={e => setF({ ...f, key_milestone: e.target.value })} />
@@ -740,7 +740,7 @@ function LiveOptTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-5">
         <h3 className="font-semibold mb-3">Nouvelle revue live</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Input placeholder="Période (ex 2026-W27)" value={f.review_period ?? ""} onChange={e => setF({ ...f, review_period: e.target.value })} />
           {["revenue_target","revenue_actual","spend_target","spend_actual","cac_target","cac_actual","mer_target","mer_actual","ctr_actual","cvr_actual","atc_actual"].map(k => (
             <div key={k}><Label className="text-xs">{k}</Label><Input type="number" value={f[k] ?? ""} onChange={e => setF({ ...f, [k]: Number(e.target.value) })} /></div>
@@ -789,7 +789,7 @@ function LearningLogTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-5">
         <h3 className="font-semibold mb-3">Log d'apprentissage</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {["industry","creative_angle","offer","cro_module","expected_lift","actual_lift","result","time_to_signal","time_to_result","decision"].map(k => (
             <Input key={k} placeholder={k} value={f[k] ?? ""} onChange={e => setF({ ...f, [k]: e.target.value })} />
           ))}

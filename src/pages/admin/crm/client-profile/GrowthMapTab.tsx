@@ -28,7 +28,7 @@ export function GrowthMapTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-4 border-border shadow-none">
         <h3 className="font-semibold mb-3">Nouvelle semaine</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Input type="number" placeholder="Semaine #" value={f.week_number ?? ""} onChange={(e) => setF({ ...f, week_number: Number(e.target.value) })} />
           <Input placeholder="Weekly goal" value={f.weekly_goal ?? ""} onChange={(e) => setF({ ...f, weekly_goal: e.target.value })} />
           <Input placeholder="Key milestone" value={f.key_milestone ?? ""} onChange={(e) => setF({ ...f, key_milestone: e.target.value })} />

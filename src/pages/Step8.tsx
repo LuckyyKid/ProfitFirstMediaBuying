@@ -73,13 +73,13 @@ const Step8 = () => {
 
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-medium tracking-[-0.02em] text-foreground">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-[-0.02em] text-foreground">
               <span className="font-serif italic text-[#9ec8ff]">{t.title}</span>
             </h2>
-            <p className="text-xl font-semibold text-primary">{t.subtitle}</p>
+            <p className="text-lg sm:text-xl font-semibold text-primary">{t.subtitle}</p>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-8 space-y-6">
+          <div className="bg-card border border-border rounded-lg p-5 sm:p-8 space-y-6">
             <p className="text-foreground whitespace-pre-line leading-relaxed">
               {t.description}
             </p>
@@ -88,7 +88,7 @@ const Step8 = () => {
               <h3 className="text-xl font-semibold text-foreground">
                 {t.scheduleCall}
               </h3>
-              <div className="w-full h-[700px] rounded-lg overflow-hidden border border-border">
+              <div className="w-full h-[520px] sm:h-[600px] md:h-[700px] rounded-lg overflow-hidden border border-border">
                 <iframe
                   src="https://calendly.com/tdiaagency/30min?month=2025-11&embed=true"
                   width="100%"

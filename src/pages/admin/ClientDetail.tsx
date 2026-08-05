@@ -295,16 +295,16 @@ const ClientDetail = () => {
         </Card>
 
         <Tabs defaultValue="info" className="space-y-4">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="info">Infos</TabsTrigger>
-            <TabsTrigger value="progress">Progression</TabsTrigger>
-            <TabsTrigger value="platforms">Plateformes</TabsTrigger>
-            <TabsTrigger value="quiz">Quiz intégration</TabsTrigger>
-            <TabsTrigger value="founder">Founder Scan</TabsTrigger>
-            <TabsTrigger value="payment">Paiement</TabsTrigger>
-            <TabsTrigger value="contract">Contrat</TabsTrigger>
-            <TabsTrigger value="kickoff">Kick-off</TabsTrigger>
-            <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="info" className="text-xs sm:text-sm">Infos</TabsTrigger>
+            <TabsTrigger value="progress" className="text-xs sm:text-sm">Progression</TabsTrigger>
+            <TabsTrigger value="platforms" className="text-xs sm:text-sm">Plateformes</TabsTrigger>
+            <TabsTrigger value="quiz" className="text-xs sm:text-sm">Quiz intégration</TabsTrigger>
+            <TabsTrigger value="founder" className="text-xs sm:text-sm">Founder Scan</TabsTrigger>
+            <TabsTrigger value="payment" className="text-xs sm:text-sm">Paiement</TabsTrigger>
+            <TabsTrigger value="contract" className="text-xs sm:text-sm">Contrat</TabsTrigger>
+            <TabsTrigger value="kickoff" className="text-xs sm:text-sm">Kick-off</TabsTrigger>
+            <TabsTrigger value="logs" className="text-xs sm:text-sm">Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info">

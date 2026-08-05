@@ -142,7 +142,7 @@ const FollowUps = () => {
           </Button>
         </header>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <StatCard label="À rappeler" value={counts.callback} tone="amber" active={tab === "callback_due"} onClick={() => setTab("callback_due")} />
           <StatCard label="Suivi envoyé" value={counts.sent} tone="sky" active={tab === "followup_sent"} onClick={() => setTab("followup_sent")} />
           <StatCard label="Total en suivi" value={counts.total} active={tab === "all"} onClick={() => setTab("all")} />

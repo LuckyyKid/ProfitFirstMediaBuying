@@ -224,14 +224,14 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="premium-shell min-h-screen px-4 md:px-8 py-8">
+    <div className="premium-shell min-h-screen px-3 sm:px-4 md:px-8 py-6 sm:py-8">
       <div className="w-full mx-auto space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Admin Onboarding Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Onboarding Dashboard</h1>
             <p className="text-sm text-muted-foreground">TDIA — vue centrale équipe interne</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button asChild size="sm" variant="hero">
               <Link to="/admin/followups">
                 <BellRing className="h-4 w-4 mr-2" />
@@ -295,7 +295,7 @@ const AdminDashboard = () => {
               />
             </div>
             <Select value={filter} onValueChange={(v) => setFilter(v as FilterKey)}>
-              <SelectTrigger className="w-[220px]">
+              <SelectTrigger className="w-full sm:w-[220px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -28,10 +28,10 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 mb-8">
+    <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 mb-8">
       <div className="relative">
         {/* Progress Line — hairline + fill dégradé bleu */}
-        <div className="absolute top-5 left-0 right-0 h-[3px] rounded-full bg-[rgba(148,170,215,0.12)]">
+        <div className="absolute top-4 sm:top-5 left-0 right-0 h-[3px] rounded-full bg-[rgba(148,170,215,0.12)]">
           <div
             className="h-full rounded-full bg-[linear-gradient(90deg,#4d9fff,#2f6bff)] shadow-[0_0_12px_rgba(77,159,255,0.5)] transition-all duration-500"
             style={{ width: `${((currentDisplay - 1) / (total - 1)) * 100}%` }}
@@ -53,7 +53,7 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
               >
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center font-mono text-sm transition-all duration-300 border",
+                    "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-mono text-xs sm:text-sm transition-all duration-300 border",
                     isCompleted &&
                       "bg-[linear-gradient(135deg,#4d9fff,#2f6bff)] border-transparent text-white shadow-[0_4px_16px_rgba(47,107,255,0.35)]",
                     isCurrent &&
@@ -62,12 +62,12 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
                       "bg-background border-[rgba(148,170,215,0.12)] text-[#5f6b82]"
                   )}
                 >
-                  {isCompleted ? <Check className="w-5 h-5" /> : displayNumber}
+                  {isCompleted ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : displayNumber}
                 </div>
 
                 <span
                   className={cn(
-                    "text-xs font-medium text-center max-w-[90px] transition-colors duration-300",
+                    "hidden sm:block text-[10px] sm:text-xs font-medium text-center max-w-[90px] transition-colors duration-300",
                     isCurrent && "text-[#9ec8ff]",
                     isCompleted && "text-[#c8d2e4]",
                     !isCurrent && !isCompleted && "text-[#5f6b82]"
@@ -75,6 +75,11 @@ export const ProgressBar = ({ currentStep, language }: ProgressBarProps) => {
                 >
                   {label}
                 </span>
+                {isCurrent && (
+                  <span className="sm:hidden text-[10px] font-medium text-center text-[#9ec8ff] whitespace-nowrap">
+                    {label}
+                  </span>
+                )}
               </div>
             );
           })}

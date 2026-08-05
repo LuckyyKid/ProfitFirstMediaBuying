@@ -60,7 +60,7 @@ export function ForecastTab({ clientId }: { clientId: string }) {
     <div className="space-y-4">
       <Card className="p-4 border-border shadow-none">
         <h3 className="font-semibold mb-3">Nouveau forecast</h3>
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           <Input placeholder="Nom" value={meta.forecast_name} onChange={(e) => setMeta({ ...meta, forecast_name: e.target.value })} />
           <Input placeholder="Période (ex 90d)" value={meta.forecast_period} onChange={(e) => setMeta({ ...meta, forecast_period: e.target.value })} />
           <Input placeholder="Goal" value={meta.goal} onChange={(e) => setMeta({ ...meta, goal: e.target.value })} />
@@ -78,7 +78,7 @@ export function ForecastTab({ clientId }: { clientId: string }) {
             </label>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <div>
             <Label className="text-xs">Overlap</Label>
             <Select value={overlap} onValueChange={(v) => setOverlap(v as Overlap)}>
@@ -95,7 +95,7 @@ export function ForecastTab({ clientId }: { clientId: string }) {
           <div>Range: <b>{fc.expected_lift_low}%</b> / <b>{fc.expected_lift_base}%</b> / <b>{fc.expected_lift_high}%</b></div>
         </div>
         <h4 className="font-semibold mb-2 text-sm">Confidence scoring</h4>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {CONFIDENCE_KEYS.map((k) => (
             <div key={k}>
               <Label className="text-xs">{k}</Label>
