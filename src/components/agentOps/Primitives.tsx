@@ -14,7 +14,7 @@ export function BackendErrorBanner({ message, className }: { message?: string; c
       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
       <div>
         <div className="font-semibold">Backend unavailable</div>
-        <div className="text-red-200/80 text-xs mt-0.5">{message ?? "Could not reach api.tdiaconnect.ca through the proxy. Check that TDIA_API_TOKEN is valid and the backend is online."}</div>
+        <div className="text-red-200/80 text-xs mt-0.5">{message ?? "Could not reach tdia-audit through the proxy. Check that TDIA_API_TOKEN is valid and the FastAPI backend is online."}</div>
       </div>
     </div>
   );

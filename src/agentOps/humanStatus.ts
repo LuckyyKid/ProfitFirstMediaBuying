@@ -1,13 +1,13 @@
 // Human-friendly status labels + tone classes for TDIA run/engine/agent statuses.
 
-export type Tone = "completed" | "running" | "queued" | "human_review" | "failed" | "warning" | "neutral";
+export type Tone = "completed" | "running" | "queued" | "stalled" | "failed" | "warning" | "neutral";
 
 export function statusTone(status?: string | null): Tone {
   const s = (status ?? "").toLowerCase();
-  if (s === "completed" || s === "succeeded") return "completed";
+  if (s === "completed" || s === "succeeded" || s === "done") return "completed";
   if (s === "running" || s === "in_progress") return "running";
   if (s === "queued" || s === "pending" || s === "waiting") return "queued";
-  if (s === "human_review" || s === "needs_review") return "human_review";
+  if (s === "stalled") return "stalled";
   if (s === "failed" || s === "error") return "failed";
   if (s === "retry" || s === "retrying") return "warning";
   return "neutral";
@@ -18,7 +18,7 @@ export function humanStatusLabel(status?: string | null): string {
     case "completed": return "Audit terminé";
     case "running": return "Audit en cours";
     case "queued": return "En file d'attente";
-    case "human_review": return "Intervention humaine requise";
+    case "stalled": return "Aucune activité récente";
     case "failed": return "Échec";
     case "warning": return "Nouvelle tentative";
     default: return status ?? "—";
@@ -30,7 +30,7 @@ export function shortStatusLabel(status?: string | null): string {
     case "completed": return "Terminé";
     case "running": return "En cours";
     case "queued": return "En attente";
-    case "human_review": return "Revue humaine";
+    case "stalled": return "Bloqué";
     case "failed": return "Échec";
     case "warning": return "Retry";
     default: return status ?? "—";
@@ -42,7 +42,7 @@ export function toneClasses(tone: Tone): string {
     case "completed": return "bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))] border-[rgba(122,232,180,0.3)]";
     case "running": return "bg-[rgba(77,159,255,0.08)] text-[#9ec8ff] border-[rgba(77,159,255,0.3)]";
     case "queued": return "bg-[rgba(148,170,215,0.06)] text-[#c8d2e4] border-[rgba(148,170,215,0.15)]";
-    case "human_review": return "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
+    case "stalled": return "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
     case "failed": return "bg-[rgba(255,107,107,0.08)] text-[hsl(var(--bad))] border-[rgba(255,107,107,0.3)]";
     case "warning": return "bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))] border-[rgba(255,184,77,0.3)]";
     default: return "bg-secondary text-foreground/80 border-border/40";
@@ -54,7 +54,7 @@ export function toneDotClass(tone: Tone): string {
     case "completed": return "bg-[hsl(var(--good))] shadow-[0_0_6px_rgba(122,232,180,0.5)]";
     case "running": return "bg-[#4d9fff] animate-pulse shadow-[0_0_6px_rgba(77,159,255,0.6)]";
     case "queued": return "bg-[rgba(148,170,215,0.3)]";
-    case "human_review": return "bg-[hsl(var(--watch))] shadow-[0_0_6px_rgba(255,184,77,0.5)]";
+    case "stalled": return "bg-[hsl(var(--watch))] shadow-[0_0_6px_rgba(255,184,77,0.5)]";
     case "failed": return "bg-[hsl(var(--bad))] shadow-[0_0_6px_rgba(255,107,107,0.5)]";
     case "warning": return "bg-[hsl(var(--watch))]";
     default: return "bg-muted-foreground";
@@ -63,7 +63,7 @@ export function toneDotClass(tone: Tone): string {
 
 export function isTerminal(status?: string | null): boolean {
   const t = statusTone(status);
-  return t === "completed" || t === "failed" || t === "human_review";
+  return t === "completed" || t === "failed";
 }
 
 export function isActive(status?: string | null): boolean {

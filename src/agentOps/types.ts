@@ -1,190 +1,73 @@
-// TDIA backend response models (source: live probes of api.tdiaconnect.ca).
+// Types alignes sur le pipeline FastAPI tdia-audit (app/main.py + storage.set_status).
+// Le pipeline actuel fait UNIQUEMENT la collecte de donnees et l'export
+// consolide reviews.xlsx + audit_data.xlsx — pas de PDF strategique.
 
-export type RunStatus = "queued" | "running" | "completed" | "failed" | string;
-export type SupervisorDecision = "PASS" | "RETRY" | "HUMAN_REVIEW" | "FAIL" | "PENDING" | string;
+export type AuditState = "queued" | "running" | "completed" | "failed" | "stalled";
+export type StepState = "running" | "done" | "error";
 
 export interface Client {
-  id: string;
+  slug: string;
   name: string;
   website?: string | null;
-  vertical?: string | null;
-  created_at: string;
+  audits_count: number;
+  latest_audit_id: string | null;
 }
 
-export interface WorkflowRun {
-  id: string;
-  client_id: string;
-  status: RunStatus;
-  progress?: number | null;
-  test_mode?: string | null;
-  workflow?: string | null;
-  mode?: string | null;
-  created_at: string;
-  started_at?: string | null;
-  completed_at?: string | null;
+export interface AuditStep {
+  state: StepState;
+  detail: string;
+  ts: number; // epoch seconds
 }
 
-export interface EngineRun {
-  id: string;
-  workflow_run_id: string;
-  name: string;
-  status: RunStatus;
-  started_at?: string | null;
-  completed_at?: string | null;
+export interface AuditSummary {
+  client: string;
+  audit_id: string;
+  state: AuditState;
+  current: string | null;
+  progress: number; // 0..100 derive de steps_done / steps_total
+  steps_total: number;
+  steps_done: number;
+  steps_error: number;
+  last_step_ts: number;
 }
 
-export interface AgentRun {
-  id: string;
-  workflow_run_id: string;
-  engine_run_id: string;
-  agent_definition_id: string;
-  supervisor_run_id?: string | null;
-  attempt: number;
-  status: RunStatus;
-  progress?: number | null;
-  input_artifacts: string[];
-  output_artifacts: string[];
-  safe_summary?: string | null;
-  started_at?: string | null;
-  completed_at?: string | null;
-  duration_ms?: number | null;
-}
-
-export interface SupervisorRun {
-  id: string;
-  workflow_run_id: string;
-  name: string;
-  decision: SupervisorDecision;
-  rubric_name?: string | null;
-  score?: number | null;
-  evidence: string[];
-  skills: string[];
-  attempt: number;
-  target_stage?: string | null;
-  created_at: string;
-}
-
-export interface Artifact {
-  id: string;
-  workflow_run_id: string;
-  agent_run_id?: string | null;
-  kind: string;
+export interface AuditArtifact {
+  kind: "reviews_xlsx" | "reviews_csv" | "audit_data_xlsx" | "business_context";
   title: string;
-  path?: string | null;
-  media_type?: string | null;
-  created_at: string;
+  path: string; // relatif au /audits/{c}/{id}/... (sert a construire l'URL)
 }
 
-export interface Source {
-  id: string;
-  workflow_run_id: string;
-  url: string;
-  title?: string | null;
-  source_type?: string | null;
-  metadata_json?: Record<string, unknown> | null;
+export interface AuditRun extends AuditSummary {
+  steps: Record<string, AuditStep>;
+  onboarding_name?: string | null;
+  onboarding_website?: string | null;
+  artifacts: AuditArtifact[];
 }
 
-export interface BenchmarkReport {
-  run_id: string;
-  overall_score: number;
-  verdict: string;
-  supervisors: SupervisorRun[];
-}
-
-export interface RunEvent {
-  id: number;
-  workflow_run_id: string;
-  event_type: string;
-  data: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface AgentDefinition {
-  id: string;
-  name: string;
-  mission: string;
-  engine: string;
-  type: string;
-  skills: string[];
-  model_provider?: string | null;
-  model_name?: string | null;
-  expected_inputs: string[];
-  expected_outputs: string[];
-  display_order: number;
-}
-
-export interface SupervisorDefinition {
-  name: string;
-  rubric: string;
-}
-
-export interface Incident {
-  id: string;
-  workflow_run_id?: string | null;
-  incident_type: string;
-  severity: string;
-  sanitized_diagnosis: string;
-  status: string;
-  created_at: string;
-}
-
-export interface Remediation {
-  id: string;
-  incident_record_id: string;
-  level: number;
-  action: string;
-  worktree_path?: string | null;
-  diff_path?: string | null;
-  report_path?: string | null;
-  tests_passed?: boolean | null;
-  merged?: boolean | null;
-  deployed?: boolean | null;
-  created_at: string;
-}
-
-export interface HumanReview {
-  id: string;
-  workflow_run_id: string;
-  status: string;
-  reason?: string | null;
-  created_at: string;
-  [key: string]: unknown;
-}
-
-export const ENGINE_ORDER = [
-  "website_audit",
-  "competitor_intelligence",
-  "market_research",
-  "offer_positioning",
-  "creative_strategy",
-  "strategic_roadmap",
-  "final_strategy_pack",
-] as const;
-
-export const ENGINE_LABELS: Record<string, string> = {
-  website_audit: "Website Audit",
-  competitor_intelligence: "Competitor Intelligence",
-  market_research: "Market & Customer Research",
-  offer_positioning: "Offer & Positioning",
-  creative_strategy: "Creative Strategy",
-  strategic_roadmap: "Strategic Roadmap & Kick-off",
-  final_strategy_pack: "Final Strategy Pack",
+// Labels humains pour les steps reels du pipeline (voir tdia-audit/app/pipeline.py).
+// Utilisation: STEP_LABELS[stepName] ?? stepName.
+export const STEP_LABELS: Record<string, string> = {
+  context: "Contexte business (LLM)",
+  collect_trustpilot: "Trustpilot",
+  collect_fb_ads: "Meta Ad Library",
+  collect_reddit: "Reddit (posts bruts)",
+  filter_reddit: "Reddit (filtre pertinence)",
+  collect_youtube: "YouTube",
+  collect_trends: "Google Trends",
+  collect_semrush: "SEMrush",
+  collect_client_pages: "Pages client",
+  collect_competitor_pages: "Pages competiteurs",
+  collect_articles: "Articles industrie",
+  collect_industry_us: "US Census MARTS",
+  collect_industry_ca: "StatCan",
+  collect_sec_filings: "SEC EDGAR",
+  collect_gmaps_reviews: "Google Maps reviews",
+  collect_widget_reviews: "Reviews widgets (Judge.me / Loox)",
+  export_excel: "Export reviews.xlsx (IA)",
+  excel: "Export audit_data.xlsx (AM)",
+  pipeline: "Fin du pipeline",
 };
 
-export const ENGINE_HIGHLIGHT = new Set([
-  "offer_positioning",
-  "market_research",
-  "creative_strategy",
-  "final_strategy_pack",
-]);
-
-export const WORKFLOWS = [
-  "full-prelaunch",
-  "website-audit",
-  "competitor-intelligence",
-  "market-research",
-  "offer-positioning",
-  "creative-strategy",
-  "strategic-roadmap",
-  "final-strategy-pack",
-] as const;
+// Un run est "stalled" si son dernier step remonte a plus de 5 minutes
+// et qu'il n'est ni completed ni failed.
+export const STALL_THRESHOLD_MS = 5 * 60 * 1000;

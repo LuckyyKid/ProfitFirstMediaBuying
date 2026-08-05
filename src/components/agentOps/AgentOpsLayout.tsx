@@ -76,7 +76,6 @@ function HeaderBar({ onLogout }: { onLogout: () => void }) {
         <nav className="flex items-center gap-1">
           {navItem("/admin/ops", "Audits", true)}
           {navItem("/admin/ops/clients", "Clients")}
-          {navItem("/admin/ops/pipeline", "Pipeline")}
         </nav>
       </div>
       <div className="flex items-center gap-4">

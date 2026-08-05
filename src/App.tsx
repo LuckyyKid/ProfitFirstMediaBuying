@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ClientOnboarding from "./pages/ClientOnboarding";
 import Step2 from "./pages/Step2";
@@ -32,8 +32,6 @@ import OpsClients from "./pages/agentOps/Clients";
 import OpsNewAudit from "./pages/agentOps/NewAudit";
 import OpsClientProfile from "./pages/agentOps/ClientProfile";
 import OpsRunMonitor from "./pages/agentOps/RunMonitor";
-import OpsPdfViewer from "./pages/agentOps/PdfViewer";
-import OpsPipeline from "./pages/agentOps/Pipeline";
 import CrmLayout from "./crm/CrmLayout";
 import CrmDashboard from "./pages/admin/crm/Dashboard";
 import CrmClients from "./pages/admin/crm/Clients";
@@ -103,18 +101,6 @@ import FinancialConsolidated from "./pages/admin/gos/FinancialConsolidated";
 
 const queryClient = new QueryClient();
 
-// Redirect legacy ?id=X workflow URL to /run/:id
-function LegacyWorkflowRedirect() {
-  const [sp] = useSearchParams();
-  const id = sp.get("id");
-  return <Navigate to={id ? `/admin/ops/run/${id}` : "/admin/ops"} replace />;
-}
-
-function LegacyClientRunRedirect() {
-  const { id } = useParams();
-  return <Navigate to={id ? `/admin/ops/run/${id}` : "/admin/ops"} replace />;
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -162,15 +148,16 @@ const App = () => (
           <Route path="/admin/clients/:clientCode" element={<ClientDetail />} />
           <Route path="/admin/ops" element={<AgentOpsLayout />}>
             <Route index element={<OpsDashboard />} />
-            <Route path="pipeline" element={<OpsPipeline />} />
             <Route path="new" element={<OpsNewAudit />} />
             <Route path="clients" element={<OpsClients />} />
             <Route path="clients/new" element={<OpsNewAudit />} />
             <Route path="clients/:clientId" element={<OpsClientProfile />} />
-            <Route path="run/:id" element={<OpsRunMonitor />} />
-            <Route path="workflow" element={<LegacyWorkflowRedirect />} />
-            <Route path="runs/:id" element={<LegacyClientRunRedirect />} />
-            <Route path="pdf" element={<OpsPdfViewer />} />
+            <Route path="run/:slug/:auditId" element={<OpsRunMonitor />} />
+            <Route path="run/:id" element={<Navigate to="/admin/ops" replace />} />
+            <Route path="runs/:id" element={<Navigate to="/admin/ops" replace />} />
+            <Route path="workflow" element={<Navigate to="/admin/ops" replace />} />
+            <Route path="pdf" element={<Navigate to="/admin/ops" replace />} />
+            <Route path="pipeline" element={<Navigate to="/admin/ops" replace />} />
           </Route>
           <Route path="/admin/crm" element={<CrmLayout />}>
             <Route index element={<CrmDashboard />} />

@@ -1,29 +1,42 @@
-// Tracks run IDs locally since the backend has no "list all runs" endpoint.
-import { sanitizeRunId } from "./runId";
+// Historique local des runs consultes (le backend n'a pas d'endpoint global).
+// Chaque entree est {slug, auditId} — cf. URL /admin/ops/run/:slug/:auditId.
 
 const KEY = "tdia.tracked_runs";
 
-export function getTrackedRuns(): string[] {
+export interface TrackedRun {
+  slug: string;
+  auditId: string;
+}
+
+function isValid(r: unknown): r is TrackedRun {
+  return !!r && typeof r === "object"
+    && typeof (r as TrackedRun).slug === "string"
+    && typeof (r as TrackedRun).auditId === "string"
+    && !!(r as TrackedRun).slug
+    && !!(r as TrackedRun).auditId;
+}
+
+export function getTrackedRuns(): TrackedRun[] {
   try {
-    const cleaned = (JSON.parse(localStorage.getItem(KEY) || "[]") as unknown[])
-      .map(sanitizeRunId)
-      .filter(Boolean);
-    localStorage.setItem(KEY, JSON.stringify(cleaned.slice(0, 25)));
+    const raw = JSON.parse(localStorage.getItem(KEY) || "[]") as unknown[];
+    const cleaned = raw.filter(isValid).slice(0, 25);
+    localStorage.setItem(KEY, JSON.stringify(cleaned));
     return cleaned;
   } catch {
     return [];
   }
 }
 
-export function trackRun(id: string) {
-  const cleanId = sanitizeRunId(id);
-  if (!cleanId) return;
-  const cur = getTrackedRuns().filter(x => x !== cleanId);
-  cur.unshift(cleanId);
+export function trackRun(slug: string, auditId: string) {
+  if (!slug || !auditId) return;
+  const cur = getTrackedRuns().filter(r => !(r.slug === slug && r.auditId === auditId));
+  cur.unshift({ slug, auditId });
   localStorage.setItem(KEY, JSON.stringify(cur.slice(0, 25)));
 }
 
-export function untrackRun(id: string) {
-  const cleanId = sanitizeRunId(id);
-  localStorage.setItem(KEY, JSON.stringify(getTrackedRuns().filter(x => x !== cleanId)));
+export function untrackRun(slug: string, auditId: string) {
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(getTrackedRuns().filter(r => !(r.slug === slug && r.auditId === auditId))),
+  );
 }
