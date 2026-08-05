@@ -21,6 +21,28 @@ function slugify(s: string): string {
     .slice(0, 21);
 }
 
+// Slack's `conversations.inviteShared` returns a `slack-connect-invite://TEAM/TOKEN…`
+// URI that only opens the desktop app — not clickable in email clients / browsers.
+// The web equivalent Slack itself sends by email is `https://join.slack.com/share/<payload>`,
+// so we rebuild that from the URI payload. Returns null when neither an https URL
+// nor a recognizable Slack Connect URI is available (caller should fall back to
+// "check your Slack invitation email" copy).
+export function toWebInviteUrl(u?: string | null): string | null {
+  if (!u || typeof u !== "string") return null;
+  const s = u.trim();
+  if (s.startsWith("https://")) return s;
+  const prefix = "slack-connect-invite://";
+  if (s.startsWith(prefix)) {
+    const rest = s.slice(prefix.length);
+    const slash = rest.indexOf("/");
+    if (slash < 0) return null;
+    const payload = rest.slice(slash + 1).replace(/^\/+/, "").trim();
+    if (!payload) return null;
+    return `https://join.slack.com/share/${payload}`;
+  }
+  return null;
+}
+
 // TDIA palette — Navy Trust (no purple/violet)
 const BG = "#020617";              // page background — near black navy
 const CARD = "#0B1327";            // card body
@@ -43,7 +65,15 @@ const MONO = "'SF Mono','Menlo','Consolas','Courier New',monospace";
 
 function shell(title: string, inner: string): string {
   return `<!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title></head>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="supported-color-schemes" content="dark light">
+<title>${esc(title)}</title>
+<style>
+  :root { color-scheme: dark light; supported-color-schemes: dark light; }
+  body, table, td, div, p, a, span { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+</style>
+</head>
 <body style="margin:0;padding:0;background:${BG};font-family:${SANS};-webkit-font-smoothing:antialiased;color:${BODY};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};padding:32px 12px;">
   <tr><td align="center">
@@ -159,9 +189,13 @@ export interface WelcomeEmailParams {
 }
 
 export function renderWelcomeEmail(p0: WelcomeEmailParams): string {
+  const slackHref = toWebInviteUrl(p0.slackInviteUrl);
   const channelLabel = p0.slackChannelName
     ? `#${esc(p0.slackChannelName)}`
     : (p0.companyName ? `#${esc(slugify(p0.companyName))}-tdia` : "votre canal Slack");
+  const slackCardBody = slackHref
+    ? `Votre équipe et la nôtre échangent en direct sur ${channelLabel}. <a href="${esc(slackHref)}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">Rejoindre le canal Slack</a> — vous recevrez aussi une invitation directe de Slack par email.`
+    : `Votre équipe et la nôtre échangent en direct sur ${channelLabel}. Slack vient de vous envoyer l'invitation par email — vérifiez votre boîte de réception (et vos spams).`;
 
   const inner = `
     ${headline("Bienvenue dans", "l'univers TDIA")}
@@ -173,13 +207,13 @@ export function renderWelcomeEmail(p0: WelcomeEmailParams): string {
 
     ${ctaStack(
       { url: p0.onboardingUrl, label: "Démarrer l'onboarding" },
-      p0.slackInviteUrl ? { url: p0.slackInviteUrl, label: "Rejoindre le Slack" } : undefined,
+      slackHref ? { url: slackHref, label: "Rejoindre le canal Slack" } : undefined,
     )}
 
     ${sectionLabel("Ce que votre compte débloque")}
 
     ${featureCard("◆", "Onboarding guidé", "Un formulaire clair, étape par étape, pour cadrer votre stratégie et vos accès plateformes.")}
-    ${featureCard("#", "Canal Slack dédié", `Votre équipe et la nôtre échangent en direct sur ${channelLabel}. Invitation envoyée séparément par Slack.`)}
+    ${featureCard("#", "Canal Slack dédié", slackCardBody)}
     ${featureCard("↗", "Hub de reporting", `Vérifications, rapports et feedbacks créatifs centralisés sur <a href="https://tdiahub.lovable.app" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">tdiahub.lovable.app</a>.`)}
     ${p0.paymentUrl ? featureCard("$", "Activation du service", `Réglez l'acompte pour lancer l'accompagnement : <a href="${esc(p0.paymentUrl)}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">payer maintenant</a>.`) : ""}
     ${featureCard("✎", "Contrat DocuSign", "Envoyé séparément — ou disponible depuis votre portail d'onboarding.")}
@@ -204,6 +238,7 @@ export interface FollowUpEmailParams {
 
 export function renderFollowUpEmail(p0: FollowUpEmailParams): string {
   const currentName = p0.stepNames[Math.max(0, p0.currentStep - 1)] ?? "votre étape actuelle";
+  const slackHref = toWebInviteUrl(p0.slackInviteUrl);
   const channelLabel = p0.slackChannelName
     ? `#${esc(p0.slackChannelName)}`
     : (p0.companyName ? `#${esc(slugify(p0.companyName))}-tdia` : "votre canal Slack");
@@ -225,7 +260,7 @@ export function renderFollowUpEmail(p0: FollowUpEmailParams): string {
 
     ${sectionLabel("On peut vous aider")}
 
-    ${featureCard("#", "Une question ?", `Échangez avec l'équipe sur ${channelLabel}${p0.slackInviteUrl ? ` — <a href="${esc(p0.slackInviteUrl)}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">rejoindre</a>` : ""}.`)}
+    ${featureCard("#", "Une question ?", `Échangez avec l'équipe sur ${channelLabel}${slackHref ? ` — <a href="${esc(slackHref)}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">rejoindre le canal Slack</a>` : ` — l'invitation Slack est dans votre boîte email`}.`)}
     ${p0.paymentUrl ? featureCard("$", "Paiement en attente", `Activez votre accompagnement : <a href="${esc(p0.paymentUrl)}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">payer maintenant</a>.`) : ""}
     ${featureCard("▶", "Difficulté à vous connecter ?", `<a href="${LOOM_TUTORIAL_URL}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">Regardez ce court tutoriel</a> (2 min).`)}
 

@@ -1,5 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { toWebInviteUrl } from "../_shared/email-design.ts";
 
 const SLACK = "https://slack.com/api";
 const TOKEN = Deno.env.get("SLACK_BOT_TOKEN");
@@ -241,17 +242,55 @@ Deno.serve(async (req) => {
           "conversations.inviteShared",
           {
             channel: result.channelId,
+            // Required to receive a clickable `url` in the response — Slack
+            // omits it when external_limited defaults to true.
+            external_limited: false,
             ...(email ? { user_emails: [email] } : {}),
           },
           INVITE_TOKEN,
         );
         if (shared.ok) {
-          result.inviteUrl = shared.invite_link ?? null;
+          // With user_emails, Slack sends its own invitation email and returns a
+          // `slack-connect-invite://TEAM/TOKEN` URI (opens only the desktop app).
+          // toWebInviteUrl rewrites that to `https://join.slack.com/share/TOKEN`
+          // which IS clickable in browsers/email clients.
+          const raw = typeof shared.url === "string" ? shared.url
+            : typeof shared.invite_link === "string" ? shared.invite_link
+            : null;
+          const webUrl = toWebInviteUrl(raw);
+          if (webUrl) {
+            result.inviteUrl = webUrl;
+          }
         } else {
           result.errors.push(`inviteShared:${shared.error}`);
         }
       } catch (e) {
         result.errors.push(`inviteShared_exception:${(e as Error).message}`);
+      }
+    }
+
+    // 5b) Fallback: if we still don't have a usable invite URL, ask Slack for a
+    // shareable link via conversations.inviteShared WITHOUT user_emails. Slack's
+    // own invitation email in step 5 already went out — this call is purely a
+    // secondary attempt to get a web URL we can embed as a button.
+    if (result.channelId && !result.inviteUrl) {
+      try {
+        const shareable = await slack(
+          "conversations.inviteShared",
+          { channel: result.channelId, external_limited: false },
+          INVITE_TOKEN,
+        );
+        if (shareable.ok) {
+          const raw = typeof shareable.url === "string" ? shareable.url
+            : typeof shareable.invite_link === "string" ? shareable.invite_link
+            : null;
+          const webUrl = toWebInviteUrl(raw);
+          if (webUrl) result.inviteUrl = webUrl;
+        } else {
+          result.errors.push(`inviteShared_link:${shareable.error}`);
+        }
+      } catch (e) {
+        result.errors.push(`inviteShared_link_exception:${(e as Error).message}`);
       }
     }
 
@@ -262,11 +301,14 @@ Deno.serve(async (req) => {
           Deno.env.get("SUPABASE_URL")!,
           Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
         );
-        const patch = {
+        const patch: Record<string, unknown> = {
           slack_channel_id: result.channelId,
           slack_channel_name: result.channelName,
           slack_user_id: result.slackUserId,
         };
+        if (result.inviteUrl && result.inviteUrl.startsWith("https://")) {
+          patch.slack_invite_url = result.inviteUrl;
+        }
         const q = supabase.from("client_progress").update(patch);
         const { error } = clientId
           ? await q.eq("client_id", clientId)
