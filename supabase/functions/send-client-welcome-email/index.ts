@@ -1,7 +1,7 @@
 // Sends the onboarding welcome email to the client right after a deal is closed.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { renderWelcomeEmail } from "../_shared/email-design.ts";
+import { normalizeLang, renderWelcomeEmail, welcomeEmailSubject } from "../_shared/email-design.ts";
 import { sendResendEmail } from "../_shared/resend.ts";
 
 const corsHeaders = {
@@ -9,7 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ONBOARDING_BASE = "https://tdiaonboarding.lovable.app";
+const ONBOARDING_BASE = "https://profit-first-media-buying.vercel.app";
 const FROM = Deno.env.get("EMAIL_FROM") || "TDIA <onboarding@resend.dev>";
 
 
@@ -19,7 +19,7 @@ serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
 
-    const { to, client_code, company_name, contact_name, slack_invite_url, slack_channel_name, payment_url } = await req.json();
+    const { to, client_code, company_name, contact_name, slack_invite_url, slack_channel_name, payment_url, language } = await req.json();
     if (!to || !client_code) throw new Error("`to` and `client_code` required");
 
     const sb = createClient(
@@ -27,11 +27,12 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Fallback: pull payment / slack info from DB if not provided by the caller
+    // Fallback: pull payment / slack info / language from DB if not provided by the caller
     let finalPaymentUrl: string | null = payment_url ?? null;
     let finalSlackInvite: string | null = slack_invite_url ?? null;
     let finalSlackChannel: string | null = slack_channel_name ?? null;
-    if (!finalPaymentUrl || !finalSlackInvite) {
+    let finalLanguage: string | null = language ?? null;
+    if (!finalPaymentUrl || !finalSlackInvite || !finalLanguage) {
       try {
         const { data: deal } = await sb
           .from("closed_deals")
@@ -43,19 +44,25 @@ serve(async (req) => {
         }
         const { data: cp } = await sb
           .from("client_progress")
-          .select("slack_invite_url")
+          .select("slack_invite_url, client_language")
           .eq("client_code", client_code)
           .maybeSingle();
         if (!finalSlackInvite && (cp as any)?.slack_invite_url) {
           finalSlackInvite = (cp as any).slack_invite_url as string;
+        }
+        if (!finalLanguage && (cp as any)?.client_language) {
+          finalLanguage = (cp as any).client_language as string;
         }
       } catch (e) {
         console.warn("[welcome] DB fallback lookup failed:", (e as Error).message);
       }
     }
 
-    const onboardingUrl = `${ONBOARDING_BASE}/?client=${encodeURIComponent(client_code)}`;
-    const subject = "Bienvenue chez TDIA — demarrez votre onboarding";
+    const lang = normalizeLang(finalLanguage);
+    // Welcome email → client hasn't signed up yet, send them to signup with their
+    // client_code pre-filled so they only need to enter email + password.
+    const onboardingUrl = `${ONBOARDING_BASE}/portail/signup?code=${encodeURIComponent(client_code)}`;
+    const subject = welcomeEmailSubject(lang);
 
     const html = renderWelcomeEmail({
       contactName: contact_name,
@@ -65,6 +72,7 @@ serve(async (req) => {
       slackInviteUrl: finalSlackInvite,
       slackChannelName: finalSlackChannel,
       paymentUrl: finalPaymentUrl,
+      language: lang,
     });
 
     const sendResult = await sendResendEmail({ apiKey: RESEND_API_KEY, from: FROM, to, subject, html });

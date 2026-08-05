@@ -16,6 +16,7 @@ import {
   WEBHOOK_URLS,
   type Question,
   type QuizBlock,
+  type Lang,
 } from "@/data/quizQuestions";
 import { cn } from "@/lib/utils";
 
@@ -28,9 +29,37 @@ interface QuizBlocksProps {
   brandName?: string | null;
   clientInfo?: Record<string, any> | null;
   onComplete: () => void;
+  language?: Lang;
 }
 
 type AnswerValue = string | string[];
+
+const UI_TEXT = {
+  fr: {
+    fillAllBlock: "Veuillez répondre à toutes les questions de ce bloc",
+    fillLastBlock: "Veuillez compléter le dernier bloc",
+    saved: "Réponses enregistrées !",
+    genericError: "Une erreur est survenue. Réessayez.",
+    yourAnswer: "Votre réponse...",
+    block: "Bloc",
+    prevBlock: "Bloc précédent",
+    nextBlock: "Bloc suivant",
+    sending: "Envoi...",
+    submit: "Envoyer mes réponses",
+  },
+  en: {
+    fillAllBlock: "Please answer every question in this block",
+    fillLastBlock: "Please complete the last block",
+    saved: "Answers saved!",
+    genericError: "Something went wrong. Please try again.",
+    yourAnswer: "Your answer...",
+    block: "Block",
+    prevBlock: "Previous block",
+    nextBlock: "Next block",
+    sending: "Sending...",
+    submit: "Send my answers",
+  },
+} as const;
 
 export const QuizBlocks = ({
   questions,
@@ -41,7 +70,9 @@ export const QuizBlocks = ({
   brandName,
   clientInfo,
   onComplete,
+  language = "fr",
 }: QuizBlocksProps) => {
+  const t = UI_TEXT[language];
   const [blockIndex, setBlockIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
@@ -86,7 +117,7 @@ export const QuizBlocks = ({
 
   const next = () => {
     if (!blockComplete) {
-      toast.error("Veuillez répondre à toutes les questions de ce bloc");
+      toast.error(t.fillAllBlock);
       return;
     }
     setDirection(1);
@@ -117,7 +148,7 @@ export const QuizBlocks = ({
 
   const handleSubmit = async () => {
     if (!blockComplete) {
-      toast.error("Veuillez compléter le dernier bloc");
+      toast.error(t.fillLastBlock);
       return;
     }
     setSubmitting(true);
@@ -168,11 +199,11 @@ export const QuizBlocks = ({
         if (error) console.error("mark-form-submitted error:", error);
       }
 
-      toast.success("Réponses enregistrées !");
+      toast.success(t.saved);
       onComplete();
     } catch (e) {
       console.error(e);
-      toast.error("Une erreur est survenue. Réessayez.");
+      toast.error(t.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -193,7 +224,7 @@ export const QuizBlocks = ({
           <Textarea
             value={(value as string) ?? ""}
             onChange={(e) => setAnswer(q.id, e.target.value)}
-            placeholder={q.placeholder ?? "Votre réponse..."}
+            placeholder={q.placeholder ?? t.yourAnswer}
             rows={4}
             className="text-base leading-relaxed rounded-[12px] px-5 py-4 resize-none"
           />
@@ -317,7 +348,7 @@ export const QuizBlocks = ({
             type={q.type === "url" ? "url" : "text"}
             value={(value as string) ?? ""}
             onChange={(e) => setAnswer(q.id, e.target.value)}
-            placeholder={q.placeholder ?? "Votre réponse..."}
+            placeholder={q.placeholder ?? t.yourAnswer}
             className="text-base h-12 rounded-[12px] px-5"
           />
         );
@@ -330,7 +361,7 @@ export const QuizBlocks = ({
       <div className="space-y-3">
         <div className="flex justify-between text-sm text-foreground/70">
           <span>
-            Bloc {blockIndex + 1} / {blocks.length} · {currentBlock.title}
+            {t.block} {blockIndex + 1} / {blocks.length} · {currentBlock.title}
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -425,7 +456,7 @@ export const QuizBlocks = ({
           className="w-full sm:w-auto"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Bloc précédent
+          {t.prevBlock}
         </Button>
 
         {isLastBlock ? (
@@ -439,12 +470,12 @@ export const QuizBlocks = ({
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi...
+                {t.sending}
               </>
             ) : (
               <>
                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                Envoyer mes réponses
+                {t.submit}
               </>
             )}
           </Button>
@@ -456,7 +487,7 @@ export const QuizBlocks = ({
             disabled={!blockComplete}
             className="w-full sm:w-auto"
           >
-            Bloc suivant
+            {t.nextBlock}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
@@ -10,8 +10,7 @@ import { markStepCompleted, useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
 import { useClientProgress } from "@/hooks/useClientProgress";
 import { QuizBlocks } from "@/components/QuizBlocks";
-import { getWelcomeQuestions } from "@/data/quizQuestions";
-import { stripVocalQuestions, stripVocalFromBlocks } from "@/data/voiceBlocks";
+import { getWelcomeQuestions, localizeBlock, localizeQuestion } from "@/data/quizQuestions";
 
 const translations = {
   en: {
@@ -44,8 +43,14 @@ const Step3 = () => {
   const businessType =
     (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce";
   const { questions: rawWelcomeQuestions, blocks: rawWelcomeBlocks } = getWelcomeQuestions(businessType);
-  const welcomeQuestions = stripVocalQuestions(rawWelcomeQuestions, "welcome", businessType);
-  const welcomeBlocks = stripVocalFromBlocks(rawWelcomeBlocks, "welcome", businessType);
+  const welcomeQuestions = rawWelcomeQuestions.map((q) => localizeQuestion(q, language));
+  const welcomeBlocks = rawWelcomeBlocks.map((b) => localizeBlock(b, language));
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   const handleComplete = () => {
     markStepCompleted(3);
@@ -106,6 +111,7 @@ const Step3 = () => {
                 email={progress?.email ?? (info as any)?.lead?.email ?? null}
                 brandName={progress?.brand_name ?? (info as any)?.client?.name ?? null}
                 clientInfo={info as any}
+                language={language}
                 onComplete={handleComplete}
               />
             )}

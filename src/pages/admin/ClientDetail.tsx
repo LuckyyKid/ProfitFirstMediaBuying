@@ -57,6 +57,25 @@ const ClientDetail = () => {
   const [emailDraft, setEmailDraft] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
   const [togglingComplete, setTogglingComplete] = useState(false);
+  const [savingLanguage, setSavingLanguage] = useState(false);
+
+  const saveLanguage = async (next: "fr" | "en") => {
+    if (!client?.client_code) return;
+    setSavingLanguage(true);
+    try {
+      const { error } = await (supabase as any)
+        .from("client_progress")
+        .update({ client_language: next })
+        .eq("client_code", client.client_code);
+      if (error) throw error;
+      toast.success(next === "en" ? "Langue mise à jour : Anglais" : "Langue mise à jour : Français");
+      refetch?.();
+    } catch (err: any) {
+      toast.error(err?.message || "Échec de la mise à jour");
+    } finally {
+      setSavingLanguage(false);
+    }
+  };
 
   const toggleOnboardingComplete = async () => {
     if (!client?.client_code) return;
@@ -360,6 +379,20 @@ const ClientDetail = () => {
               <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Client ID" value={client.client_id} />
                 <Field label="Client Code" value={client.client_code} />
+                <div>
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Langue du client (courriels + Slack + onboarding)</div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={client.client_language ?? "fr"}
+                      onChange={(e) => saveLanguage(e.target.value as "fr" | "en")}
+                      disabled={savingLanguage}
+                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                    >
+                      <option value="fr">Français</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
                 <Field label="Nom client" value={client.client_name} />
                 <Field label="Entreprise" value={client.company_name || client.brand_name} />
                 <Field label="Source du lead" value={client.lead_source} />

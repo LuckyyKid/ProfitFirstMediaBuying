@@ -94,6 +94,14 @@ const PortalLogin = () => {
           </Button>
           <Button
             type="button"
+            variant="link"
+            className="w-full text-sm text-muted-foreground"
+            onClick={() => navigate("/portail/forgot-password")}
+          >
+            Mot de passe oublié ?
+          </Button>
+          <Button
+            type="button"
             variant="ghost"
             className="w-full text-sm text-muted-foreground"
             onClick={() => navigate("/portail/signup")}

@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fetchClient, useClient } from "@/hooks/useClient";
 import { markStepCompleted } from "@/hooks/useStepProgress";
-import { upsertClientProgress } from "@/hooks/useClientProgress";
+import { upsertClientProgress, useClientProgress } from "@/hooks/useClientProgress";
 import { supabase } from "@/integrations/supabase/client";
 import { YouTubeTracker } from "@/components/YouTubeTracker";
 import { useVideoWatchStatus } from "@/hooks/useVideoWatchStatus";
@@ -84,9 +84,15 @@ const ClientOnboarding = () => {
   const t = translations[language];
   const navigate = useNavigate();
   const { playSuccessSound } = useSound();
-  const { isWatched, isCompleted, markWatched, markCompleted } = useVideoWatchStatus(
-    (info as any)?.client?.client_code ?? null
-  );
+  const clientCode = (info as any)?.client?.client_code ?? null;
+  const { progress } = useClientProgress(clientCode);
+  const { isWatched, isCompleted, markWatched, markCompleted } = useVideoWatchStatus(clientCode);
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   useEffect(() => {
     if (info && isCompleted(WELCOME_VIDEO_ID)) {
@@ -138,7 +144,6 @@ const ClientOnboarding = () => {
         if (p.video_watched) completed = Math.max(completed, 2);
         if (p.welcome_form_submitted) completed = Math.max(completed, 3);
         if (p.founder_scan_submitted) completed = Math.max(completed, 4);
-        if (p.business_deep_dive_submitted) completed = Math.max(completed, 5);
         if (p.paid || client.paid) completed = Math.max(completed, 6);
         if (p.contract_signed || client.contract_signed) completed = Math.max(completed, 7);
         if (p.kickoff_scheduled || client.kickoff_scheduled) completed = Math.max(completed, 8);
@@ -150,7 +155,9 @@ const ClientOnboarding = () => {
         playSuccessSound();
 
         if (completed > 1) {
-          const next = Math.min(completed + 1, 9);
+          // File step 5 no longer exists (Business Deep Dive removed) — jump to 6.
+          const raw = Math.min(completed + 1, 9);
+          const next = raw === 5 ? 6 : raw;
           setTimeout(() => navigate(`/step${next}`), 300);
           return;
         }

@@ -7,11 +7,15 @@ export type QuestionType =
   | "scale"
   | "composite";
 
+export type Lang = "fr" | "en";
+
 export interface CompositeField {
   key: string;
   label: string;
   placeholder?: string;
   type?: "short" | "long" | "url";
+  label_en?: string;
+  placeholder_en?: string;
 }
 
 export interface Question {
@@ -32,53 +36,80 @@ export interface Question {
   optional?: boolean;
   // Extra help/hint
   hint?: string;
+  // English translations (optional — falls back to FR)
+  label_en?: string;
+  placeholder_en?: string;
+  options_en?: string[];
+  hint_en?: string;
+  scaleMinLabel_en?: string;
+  scaleMaxLabel_en?: string;
+}
+
+// Returns a copy of the question with fields swapped to the target language when
+// EN translations are present. Falls back to FR text field-by-field.
+export function localizeQuestion(q: Question, lang: Lang): Question {
+  if (lang !== "en") return q;
+  return {
+    ...q,
+    label: q.label_en ?? q.label,
+    placeholder: q.placeholder_en ?? q.placeholder,
+    options: q.options_en ?? q.options,
+    hint: q.hint_en ?? q.hint,
+    scaleMinLabel: q.scaleMinLabel_en ?? q.scaleMinLabel,
+    scaleMaxLabel: q.scaleMaxLabel_en ?? q.scaleMaxLabel,
+    fields: q.fields?.map((f) => ({
+      ...f,
+      label: f.label_en ?? f.label,
+      placeholder: f.placeholder_en ?? f.placeholder,
+    })),
+  };
 }
 
 // Quiz « Compréhension de votre univers digital » — 43 questions (Étape 3)
 export const WELCOME_QUESTIONS: Question[] = [
-  { id: "mission", label: "Votre mission d'entreprise ?", type: "long" },
-  { id: "vision", label: "Où voyez-vous votre entreprise dans un an ? Et dans 10 ans ?", type: "long" },
-  { id: "best_solution", label: "Pourquoi pensez-vous être la meilleure solution sur le marché ?", type: "long" },
-  { id: "competitors", label: "Pouvez-vous nous citer 3 de vos compétiteurs ?", type: "long" },
-  { id: "acv", label: "Quel est votre argument clé de vente (ACV) ?", type: "long" },
-  { id: "vmc", label: "Quelle est votre valeur moyenne par commande (VMC) ?", type: "short" },
-  { id: "top_product", label: "Quel est le produit le plus acheté par vos clients ?", type: "short" },
-  { id: "last_agency", label: "Comment s'est passée votre dernière expérience en agence ?", type: "long" },
-  { id: "client_acquisition", label: "Jusqu'à maintenant, comment avez-vous obtenu vos clients ?", type: "long" },
-  { id: "monthly_revenue", label: "Votre chiffre d'affaires mensuel", type: "short" },
-  { id: "yearly_revenue", label: "Votre chiffre d'affaires annuel", type: "short" },
-  { id: "target_client", label: "Quel est votre client cible ? (le plus de détails possible)", type: "long" },
-  { id: "target_country", label: "Quel est votre pays cible ?", type: "short" },
-  { id: "weekly_budget", label: "Quel est votre budget hebdomadaire ?", type: "short" },
-  { id: "creatives_drive", label: "Le lien du Google Drive avec toutes vos anciennes créatives !", type: "url", placeholder: "https://drive.google.com/..." },
-  { id: "brand_colors", label: "Quelle est votre charte de couleurs ?", type: "short" },
-  { id: "assets_drive", label: "Le lien de vos Drives avec les logos, les vidéos que vous avez déjà tournées, et vos anciennes publicités.", type: "url", placeholder: "https://drive.google.com/..." },
-  { id: "marketing_goals", label: "Quels sont les principaux objectifs de votre stratégie marketing actuelle ?", type: "long" },
-  { id: "audience_profile", label: "Pouvez-vous décrire votre public cible en termes de démographie, d'intérêts et de comportements ?", type: "long" },
-  { id: "channels_perf", label: "Quels sont les canaux de marketing que vous utilisez actuellement et quelle est la performance de chaque canal ?", type: "long" },
-  { id: "main_message", label: "Quel est le message principal que vous souhaitez transmettre à votre audience ?", type: "long" },
-  { id: "uvp", label: "Avez-vous une proposition de valeur unique que vous mettez en avant dans vos campagnes publicitaires ?", type: "long" },
-  { id: "best_content", label: "Quels types de contenu performent le mieux sur vos réseaux sociaux (images, vidéos, carrousels, etc.) ?", type: "long" },
-  { id: "monthly_ad_budget", label: "Quel est votre budget mensuel moyen pour les publicités sur Facebook et TikTok ?", type: "short" },
-  { id: "past_campaigns", label: "Quelles sont les campagnes publicitaires passées qui ont été particulièrement réussies ou non, et pourquoi ?", type: "long" },
-  { id: "content_strategy", label: "Avez-vous une stratégie de contenu planifiée pour vos réseaux sociaux, et si oui, comment est-elle structurée ?", type: "long" },
-  { id: "competitor_diff", label: "Quels sont les principaux concurrents dans votre secteur, et comment vous différenciez-vous d'eux dans vos publicités ?", type: "long" },
-  { id: "seasonal_events", label: "Avez-vous des événements saisonniers ou des promotions spéciales qui nécessitent une attention particulière dans vos campagnes publicitaires ?", type: "long" },
-  { id: "posting_frequency", label: "Quelle est la fréquence de vos publications sur Facebook et TikTok, et comment planifiez-vous votre calendrier de contenu ?", type: "long" },
-  { id: "market_research", label: "Avez-vous réalisé des études de marché ou des analyses de la concurrence récemment ?", type: "long" },
-  { id: "engagement_mgmt", label: "Comment gérez-vous les commentaires et l'engagement des utilisateurs sur vos publicités et vos publications organiques ?", type: "long" },
-  { id: "testimonials", label: "Avez-vous des témoignages ou des études de cas que vous utilisez dans vos publicités pour renforcer la crédibilité ?", type: "long" },
-  { id: "targeting_approach", label: "Quelle est votre approche pour le ciblage et la segmentation de votre audience dans vos campagnes publicitaires ?", type: "long" },
-  { id: "partnerships", label: "Avez-vous des partenariats ou des collaborations avec d'autres marques ou influenceurs qui influencent votre stratégie marketing ?", type: "long" },
-  { id: "marketing_integration", label: "Comment intégrez-vous vos campagnes publicitaires sur Facebook et TikTok avec d'autres aspects de votre marketing digital (email marketing, SEO, etc.) ?", type: "long" },
-  { id: "tools", label: "Avez-vous des outils ou des plateformes spécifiques que vous utilisez pour gérer et analyser vos campagnes publicitaires ?", type: "long" },
-  { id: "ad_objectives", label: "Quels sont vos objectifs à court et long terme pour vos campagnes publicitaires sur Facebook et TikTok ?", type: "long" },
-  { id: "brand_focus", label: "Y a-t-il des aspects spécifiques de votre marque ou de votre produit que vous souhaitez mettre en avant dans vos futures campagnes publicitaires ?", type: "long" },
-  { id: "success_3m", label: "À quoi ressemble le succès pour vous dans 3 mois ?", type: "long" },
-  { id: "objections", label: "Quelles sont les objections les plus fréquentes de vos clients avant d'acheter ?", type: "long" },
-  { id: "tracking_tools", label: "Avez-vous mis en place des outils de suivi (Pixel, Analytics, etc.) ?", type: "long" },
-  { id: "crm", label: "Disposez-vous d'un CRM ou d'une base de données clients que nous pouvons exploiter ?", type: "long" },
-  { id: "biggest_challenge", label: "Quel a été jusqu'à présent votre plus grand défi marketing ?", type: "long" },
+  { id: "mission", label: "Votre mission d'entreprise ?", type: "long", label_en: "Your company mission?" },
+  { id: "vision", label: "Où voyez-vous votre entreprise dans un an ? Et dans 10 ans ?", type: "long", label_en: "Where do you see your company in 1 year? And in 10 years?" },
+  { id: "best_solution", label: "Pourquoi pensez-vous être la meilleure solution sur le marché ?", type: "long", label_en: "Why do you believe you're the best solution on the market?" },
+  { id: "competitors", label: "Pouvez-vous nous citer 3 de vos compétiteurs ?", type: "long", label_en: "Can you name 3 of your competitors?" },
+  { id: "acv", label: "Quel est votre argument clé de vente (ACV) ?", type: "long", label_en: "What is your key selling point (USP)?" },
+  { id: "vmc", label: "Quelle est votre valeur moyenne par commande (VMC) ?", type: "short", label_en: "What is your AOV (average order value)?" },
+  { id: "top_product", label: "Quel est le produit le plus acheté par vos clients ?", type: "short", label_en: "What is your best-selling product?" },
+  { id: "last_agency", label: "Comment s'est passée votre dernière expérience en agence ?", type: "long", label_en: "How did your last agency experience go?" },
+  { id: "client_acquisition", label: "Jusqu'à maintenant, comment avez-vous obtenu vos clients ?", type: "long", label_en: "So far, how have you acquired your customers?" },
+  { id: "monthly_revenue", label: "Votre chiffre d'affaires mensuel", type: "short", label_en: "Your monthly revenue" },
+  { id: "yearly_revenue", label: "Votre chiffre d'affaires annuel", type: "short", label_en: "Your yearly revenue" },
+  { id: "target_client", label: "Quel est votre client cible ? (le plus de détails possible)", type: "long", label_en: "Who is your target customer? (as much detail as possible)" },
+  { id: "target_country", label: "Quel est votre pays cible ?", type: "short", label_en: "What is your target country?" },
+  { id: "weekly_budget", label: "Quel est votre budget hebdomadaire ?", type: "short", label_en: "What is your weekly budget?" },
+  { id: "creatives_drive", label: "Le lien du Google Drive avec toutes vos anciennes créatives !", type: "url", placeholder: "https://drive.google.com/...", label_en: "The Google Drive link with all your past creatives!", placeholder_en: "https://drive.google.com/..." },
+  { id: "brand_colors", label: "Quelle est votre charte de couleurs ?", type: "short", label_en: "What is your brand color palette?" },
+  { id: "assets_drive", label: "Le lien de vos Drives avec les logos, les vidéos que vous avez déjà tournées, et vos anciennes publicités.", type: "url", placeholder: "https://drive.google.com/...", label_en: "The link to your Drives with logos, videos you've already shot, and past ads.", placeholder_en: "https://drive.google.com/..." },
+  { id: "marketing_goals", label: "Quels sont les principaux objectifs de votre stratégie marketing actuelle ?", type: "long", label_en: "What are the main goals of your current marketing strategy?" },
+  { id: "audience_profile", label: "Pouvez-vous décrire votre public cible en termes de démographie, d'intérêts et de comportements ?", type: "long", label_en: "Can you describe your target audience in terms of demographics, interests and behaviors?" },
+  { id: "channels_perf", label: "Quels sont les canaux de marketing que vous utilisez actuellement et quelle est la performance de chaque canal ?", type: "long", label_en: "Which marketing channels are you currently using and how is each channel performing?" },
+  { id: "main_message", label: "Quel est le message principal que vous souhaitez transmettre à votre audience ?", type: "long", label_en: "What is the core message you want to convey to your audience?" },
+  { id: "uvp", label: "Avez-vous une proposition de valeur unique que vous mettez en avant dans vos campagnes publicitaires ?", type: "long", label_en: "Do you have a unique value proposition that you highlight in your ad campaigns?" },
+  { id: "best_content", label: "Quels types de contenu performent le mieux sur vos réseaux sociaux (images, vidéos, carrousels, etc.) ?", type: "long", label_en: "Which content types perform best on your social channels (images, videos, carousels, etc.)?" },
+  { id: "monthly_ad_budget", label: "Quel est votre budget mensuel moyen pour les publicités sur Facebook et TikTok ?", type: "short", label_en: "What is your average monthly ad budget on Facebook and TikTok?" },
+  { id: "past_campaigns", label: "Quelles sont les campagnes publicitaires passées qui ont été particulièrement réussies ou non, et pourquoi ?", type: "long", label_en: "Which past ad campaigns worked especially well or poorly, and why?" },
+  { id: "content_strategy", label: "Avez-vous une stratégie de contenu planifiée pour vos réseaux sociaux, et si oui, comment est-elle structurée ?", type: "long", label_en: "Do you have a planned content strategy for your social channels, and if so, how is it structured?" },
+  { id: "competitor_diff", label: "Quels sont les principaux concurrents dans votre secteur, et comment vous différenciez-vous d'eux dans vos publicités ?", type: "long", label_en: "Who are the main competitors in your space, and how do you differentiate yourself in your ads?" },
+  { id: "seasonal_events", label: "Avez-vous des événements saisonniers ou des promotions spéciales qui nécessitent une attention particulière dans vos campagnes publicitaires ?", type: "long", label_en: "Do you have seasonal events or special promotions that need extra focus in your ad campaigns?" },
+  { id: "posting_frequency", label: "Quelle est la fréquence de vos publications sur Facebook et TikTok, et comment planifiez-vous votre calendrier de contenu ?", type: "long", label_en: "How often do you post on Facebook and TikTok, and how do you plan your content calendar?" },
+  { id: "market_research", label: "Avez-vous réalisé des études de marché ou des analyses de la concurrence récemment ?", type: "long", label_en: "Have you done any market research or competitor analysis recently?" },
+  { id: "engagement_mgmt", label: "Comment gérez-vous les commentaires et l'engagement des utilisateurs sur vos publicités et vos publications organiques ?", type: "long", label_en: "How do you handle comments and user engagement on your ads and organic posts?" },
+  { id: "testimonials", label: "Avez-vous des témoignages ou des études de cas que vous utilisez dans vos publicités pour renforcer la crédibilité ?", type: "long", label_en: "Do you have testimonials or case studies you use in your ads to boost credibility?" },
+  { id: "targeting_approach", label: "Quelle est votre approche pour le ciblage et la segmentation de votre audience dans vos campagnes publicitaires ?", type: "long", label_en: "What is your approach to audience targeting and segmentation in your ad campaigns?" },
+  { id: "partnerships", label: "Avez-vous des partenariats ou des collaborations avec d'autres marques ou influenceurs qui influencent votre stratégie marketing ?", type: "long", label_en: "Do you have partnerships or collaborations with other brands or influencers that shape your marketing strategy?" },
+  { id: "marketing_integration", label: "Comment intégrez-vous vos campagnes publicitaires sur Facebook et TikTok avec d'autres aspects de votre marketing digital (email marketing, SEO, etc.) ?", type: "long", label_en: "How do you integrate your Facebook and TikTok ad campaigns with other digital marketing efforts (email marketing, SEO, etc.)?" },
+  { id: "tools", label: "Avez-vous des outils ou des plateformes spécifiques que vous utilisez pour gérer et analyser vos campagnes publicitaires ?", type: "long", label_en: "Do you use any specific tools or platforms to manage and analyze your ad campaigns?" },
+  { id: "ad_objectives", label: "Quels sont vos objectifs à court et long terme pour vos campagnes publicitaires sur Facebook et TikTok ?", type: "long", label_en: "What are your short-term and long-term goals for your Facebook and TikTok ad campaigns?" },
+  { id: "brand_focus", label: "Y a-t-il des aspects spécifiques de votre marque ou de votre produit que vous souhaitez mettre en avant dans vos futures campagnes publicitaires ?", type: "long", label_en: "Are there specific aspects of your brand or product you want to highlight in future ad campaigns?" },
+  { id: "success_3m", label: "À quoi ressemble le succès pour vous dans 3 mois ?", type: "long", label_en: "What does success look like for you in 3 months?" },
+  { id: "objections", label: "Quelles sont les objections les plus fréquentes de vos clients avant d'acheter ?", type: "long", label_en: "What are the most common objections your customers have before buying?" },
+  { id: "tracking_tools", label: "Avez-vous mis en place des outils de suivi (Pixel, Analytics, etc.) ?", type: "long", label_en: "Have you set up tracking tools (Pixel, Analytics, etc.)?" },
+  { id: "crm", label: "Disposez-vous d'un CRM ou d'une base de données clients que nous pouvons exploiter ?", type: "long", label_en: "Do you have a CRM or customer database we can leverage?" },
+  { id: "biggest_challenge", label: "Quel a été jusqu'à présent votre plus grand défi marketing ?", type: "long", label_en: "What has been your biggest marketing challenge so far?" },
 ];
 
 // Founder Scan — Étape 4
@@ -87,6 +118,7 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
     id: "founder_self_description",
     label: "En une phrase, comment vous décririez-vous en tant que fondateur·rice ?",
     type: "short",
+    label_en: "In one sentence, how would you describe yourself as a founder?",
   },
   {
     id: "founder_strengths",
@@ -104,16 +136,30 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Planification financière",
       "Recrutement / Construction d'équipe",
     ],
+    label_en: "What are your top 3 strengths as a founder?",
+    options_en: [
+      "Storytelling",
+      "Branding",
+      "Operations",
+      "Sales / Closing",
+      "Leadership",
+      "Product development",
+      "Marketing strategy",
+      "Financial planning",
+      "Hiring / Team building",
+    ],
   },
   {
     id: "founder_weakness",
     label: "Quelle est votre plus grande faiblesse personnelle ou votre principal frein ?",
     type: "short",
+    label_en: "What is your biggest personal weakness or main blocker?",
   },
   {
     id: "success_definition",
     label: "Comment définissez-vous le succès dans votre entreprise en ce moment ?",
     type: "long",
+    label_en: "How do you define success in your business right now?",
   },
   {
     id: "update_preference",
@@ -127,6 +173,14 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Tableau de bord en temps réel uniquement",
       "Seulement lorsqu'il y a quelque chose d'important",
     ],
+    label_en: "How do you prefer to receive updates?",
+    options_en: [
+      "Weekly messages (email, Slack, text)",
+      "Bi-weekly summary reports",
+      "Loom video recaps",
+      "Real-time dashboard only",
+      "Only when something important comes up",
+    ],
   },
   {
     id: "communication_precision",
@@ -136,6 +190,9 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
     scaleMax: 5,
     scaleMinLabel: "Passez les détails",
     scaleMaxLabel: "J'aime avoir le contexte complet à chaque fois",
+    label_en: "How much detail do you want in communication?",
+    scaleMinLabel_en: "Skip the details",
+    scaleMaxLabel_en: "I like the full context every time",
   },
   {
     id: "decision_style",
@@ -147,6 +204,13 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Je prends le temps d'analyser avant d'agir",
       "J'aime faire du remue-méninges à voix haute",
       "Je préfère examiner en silence, puis répondre plus tard",
+    ],
+    label_en: "Which of these statements fits you best?",
+    options_en: [
+      "I move fast and like making quick decisions",
+      "I take time to analyze before acting",
+      "I like to brainstorm out loud",
+      "I prefer to review quietly, then respond later",
     ],
   },
   {
@@ -160,6 +224,13 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Je réponds lentement mais je fais confiance à votre jugement",
       "Je délègue la rétroaction à quelqu'un d'autre",
     ],
+    label_en: "How available are you for feedback?",
+    options_en: [
+      "I respond every day",
+      "I respond 2 to 3 times a week",
+      "I respond slowly but I trust your judgment",
+      "I delegate feedback to someone else",
+    ],
   },
   {
     id: "daily_role",
@@ -171,6 +242,13 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Je dirige la vision et l'image de marque",
       "Je gère le marketing et les ventes",
       "Je suis partiellement en retrait, je supervise une équipe",
+    ],
+    label_en: "What is your day-to-day role in the business?",
+    options_en: [
+      "I handle everything",
+      "I lead vision and branding",
+      "I run marketing and sales",
+      "I'm partly stepped back, overseeing a team",
     ],
   },
   {
@@ -184,6 +262,14 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Mon équipe marketing interne",
       "Mon équipe des opérations",
       "Des consultants / conseillers externes",
+    ],
+    label_en: "Who else is involved in the decision-making process?",
+    options_en: [
+      "No one, just me",
+      "My cofounder(s)",
+      "My in-house marketing team",
+      "My operations team",
+      "External consultants / advisors",
     ],
   },
   {
@@ -200,6 +286,16 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Courriels / SMS",
       "Aucun — il n'y a que moi",
     ],
+    label_en: "Do you currently have in-house team members handling any of the following areas?",
+    options_en: [
+      "Paid ads",
+      "Organic social media",
+      "Design",
+      "Copywriting",
+      "Video editing",
+      "Email / SMS",
+      "None — it's just me",
+    ],
   },
   {
     id: "top_priority",
@@ -215,21 +311,34 @@ export const FOUNDER_SCAN_QUESTIONS: Question[] = [
       "Lancer un nouveau produit",
       "Renforcer l'autorité de la marque",
     ],
+    label_en: "What is your #1 business priority right now?",
+    options_en: [
+      "Scale profitably",
+      "Lower CAC (customer acquisition cost)",
+      "Test new offers / sales funnels",
+      "Set up creative systems",
+      "Position for a fundraise",
+      "Launch a new product",
+      "Strengthen brand authority",
+    ],
   },
   {
     id: "time_sensitive_milestones",
     label: "Y a-t-il des jalons sensibles au temps dont nous devrions être informés ?",
     type: "short",
+    label_en: "Are there any time-sensitive milestones we should know about?",
   },
   {
     id: "great_creative",
     label: "Qu'est-ce que « une excellente créative » signifie pour vous ?",
     type: "short",
+    label_en: "What does \"great creative\" mean to you?",
   },
   {
     id: "team_should_know",
     label: "Y a-t-il quelque chose que vous aimeriez que notre équipe sache sur votre manière de travailler, de décider ou de communiquer ?",
     type: "long",
+    label_en: "Is there anything you'd like our team to know about how you work, decide or communicate?",
   },
 ];
 
@@ -376,6 +485,17 @@ export interface QuizBlock {
   title: string;
   description?: string;
   questionIds: string[];
+  title_en?: string;
+  description_en?: string;
+}
+
+export function localizeBlock(b: QuizBlock, lang: Lang): QuizBlock {
+  if (lang !== "en") return b;
+  return {
+    ...b,
+    title: b.title_en ?? b.title,
+    description: b.description_en ?? b.description,
+  };
 }
 
 export const WELCOME_BLOCKS: QuizBlock[] = [
@@ -384,6 +504,8 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
     title: "Vision & Mission",
     description: "Posons les bases : votre raison d'être et votre cap.",
     questionIds: ["mission", "vision", "best_solution", "competitors", "acv"],
+    title_en: "Vision & Mission",
+    description_en: "Let's set the foundation: your purpose and your direction.",
   },
   {
     id: "business_perf",
@@ -399,6 +521,8 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
       "weekly_budget",
       "monthly_ad_budget",
     ],
+    title_en: "Business & Performance",
+    description_en: "Your key numbers and commercial track record.",
   },
   {
     id: "audience_market",
@@ -411,6 +535,8 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
       "targeting_approach",
       "market_research",
     ],
+    title_en: "Target Customer & Market",
+    description_en: "Who are you speaking to, and where?",
   },
   {
     id: "brand_assets",
@@ -423,6 +549,8 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
       "main_message",
       "uvp",
     ],
+    title_en: "Brand & Assets",
+    description_en: "Your identity and the material you have on hand.",
   },
   {
     id: "marketing_ads",
@@ -442,6 +570,8 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
       "partnerships",
       "marketing_integration",
     ],
+    title_en: "Marketing & Ads",
+    description_en: "Your channels, content and campaigns.",
   },
   {
     id: "tools_goals",
@@ -457,20 +587,19 @@ export const WELCOME_BLOCKS: QuizBlock[] = [
       "objections",
       "biggest_challenge",
     ],
+    title_en: "Tools, Goals & Challenges",
+    description_en: "To wrap up: your stack and your ambitions.",
   },
 ];
 
 export const QUIZ_WEBHOOK_URL = "https://hook.us1.make.com/z5notv79fqjj9qg9e6r1nnfsefj8zasp";
 export const FOUNDER_SCAN_WEBHOOK_URL = "https://hook.us1.make.com/939rnmwmxldwbmse2j6k4qdqmgwi8s92";
-// TODO: remplacer par l'URL du webhook Make dédié au Business Deep Dive
-export const BUSINESS_DEEP_DIVE_WEBHOOK_URL = "REPLACE_ME_BUSINESS_DEEP_DIVE_WEBHOOK";
 
-export type FormKey = "welcome" | "founder_scan" | "business_deep_dive";
+export type FormKey = "welcome" | "founder_scan";
 
 export const WEBHOOK_URLS: Record<FormKey, string> = {
   welcome: QUIZ_WEBHOOK_URL,
   founder_scan: FOUNDER_SCAN_WEBHOOK_URL,
-  business_deep_dive: BUSINESS_DEEP_DIVE_WEBHOOK_URL,
 };
 
 // ---------------------------------------------------------------------------
@@ -480,10 +609,9 @@ import {
   WELCOME_QUESTIONS_LS,
   WELCOME_BLOCKS_LS,
   FOUNDER_SCAN_QUESTIONS_LS,
-  BUSINESS_DEEP_DIVE_QUESTIONS_LS,
 } from "./quizQuestionsLocalService";
 
-export type BusinessType = "ecommerce" | "local_service";
+export type BusinessType = "ecommerce" | "local_service" | "saas";
 
 export function getWelcomeQuestions(bt: BusinessType | null | undefined) {
   return bt === "local_service"
@@ -493,9 +621,5 @@ export function getWelcomeQuestions(bt: BusinessType | null | undefined) {
 
 export function getFounderScanQuestions(bt: BusinessType | null | undefined): Question[] {
   return bt === "local_service" ? FOUNDER_SCAN_QUESTIONS_LS : FOUNDER_SCAN_QUESTIONS;
-}
-
-export function getBusinessDeepDiveQuestions(bt: BusinessType | null | undefined): Question[] {
-  return bt === "local_service" ? BUSINESS_DEEP_DIVE_QUESTIONS_LS : BUSINESS_DEEP_DIVE_QUESTIONS;
 }
 

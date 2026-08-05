@@ -64,7 +64,7 @@ type Deal = {
   stripe_payment_url: string | null;
   stripe_payment_link_id: string | null;
   stripe_payment_type: string | null;
-  business_type: "ecommerce" | "local_service" | null;
+  business_type: "ecommerce" | "local_service" | "saas" | null;
   created_at: string;
 };
 
@@ -93,7 +93,8 @@ const emptyForm = {
   additional_monthly: "",
   closing_date: "",
   closer_name: "",
-  business_type: "ecommerce" as "ecommerce" | "local_service",
+  business_type: "ecommerce" as "ecommerce" | "local_service" | "saas",
+  client_language: "fr" as "fr" | "en",
   owner_same_as_contact: true,
   owner_name: "",
   owner_business: "",
@@ -200,6 +201,7 @@ const ClosedDeals = () => {
         already_runs_ads: form.has_run_ads === "" ? null : form.has_run_ads === "yes",
         internal_notes: form.account_manager_notes || null,
         business_type: form.business_type,
+        client_language: form.client_language,
       };
       const { data: cpRow, error: cpErr } = await (supabase as any)
         .from("client_progress")
@@ -360,6 +362,7 @@ const ClosedDeals = () => {
                 companyName: form.company_name.trim(),
                 contactName: form.contact_name || effOwnerName || null,
                 driveFolderUrl,
+                language: form.client_language,
               },
             });
           }
@@ -382,6 +385,7 @@ const ClosedDeals = () => {
               slack_invite_url: slackResult?.inviteUrl || null,
               slack_channel_name: slackResult?.channelName || null,
               payment_url: stripeResult?.url || null,
+              language: form.client_language,
             },
           });
           if (emailErr) {
@@ -566,7 +570,7 @@ const ClosedDeals = () => {
               <Field label="Type de business * (détermine les questions d'onboarding)">
                 <Select
                   value={form.business_type}
-                  onValueChange={(v: "ecommerce" | "local_service") =>
+                  onValueChange={(v: "ecommerce" | "local_service" | "saas") =>
                     setForm({ ...form, business_type: v })
                   }
                 >
@@ -574,6 +578,21 @@ const ClosedDeals = () => {
                   <SelectContent>
                     <SelectItem value="ecommerce">E-commerce</SelectItem>
                     <SelectItem value="local_service">Local Service</SelectItem>
+                    <SelectItem value="saas">SaaS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Langue du prospect * (courriels, Slack, onboarding)">
+                <Select
+                  value={form.client_language}
+                  onValueChange={(v: "fr" | "en") =>
+                    setForm({ ...form, client_language: v })
+                  }
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -777,10 +796,16 @@ const ClosedDeals = () => {
                           className={`font-mono text-[9px] uppercase tracking-[0.16em] px-1.5 py-0.5 rounded-[6px] border ${
                             d.business_type === "local_service"
                               ? "border-[rgba(255,184,77,0.25)] bg-[rgba(255,184,77,0.06)] text-[hsl(var(--watch))]"
+                              : d.business_type === "saas"
+                              ? "border-[rgba(168,113,255,0.25)] bg-[rgba(168,113,255,0.06)] text-[#c9a8ff]"
                               : "border-[rgba(77,159,255,0.25)] bg-[rgba(77,159,255,0.06)] text-[#9ec8ff]"
                           }`}
                         >
-                          {d.business_type === "local_service" ? "Local Service" : "E-commerce"}
+                          {d.business_type === "local_service"
+                            ? "Local Service"
+                            : d.business_type === "saas"
+                            ? "SaaS"
+                            : "E-commerce"}
                         </span>
                       </div>
                       <div className="text-xs text-muted-foreground">{d.contact_name || ""}</div>

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/hooks/useSound";
 import { markStepCompleted, startOnboardingTimer, useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
+import { useClientProgress } from "@/hooks/useClientProgress";
 import { YouTubeTracker } from "@/components/YouTubeTracker";
 import { useVideoWatchStatus } from "@/hooks/useVideoWatchStatus";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,8 +69,15 @@ const Step2 = () => {
   const { playSuccessSound } = useSound();
   const { info } = useClient();
   const clientCode = (info as any)?.client?.client_code ?? null;
+  const { progress } = useClientProgress(clientCode);
   const { isWatched, markWatched } = useVideoWatchStatus(clientCode);
   const platformsSyncedRef = useRef(false);
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   const allCompleted = Object.values(VIDEO_IDS).every((id) => isWatched(id));
 
@@ -118,7 +126,7 @@ const Step2 = () => {
       console.error("platforms completion sync error:", error);
     });
     playSuccessSound();
-    setTimeout(() => navigate("/voice"), 300);
+    setTimeout(() => navigate("/step3"), 300);
   };
 
   return (

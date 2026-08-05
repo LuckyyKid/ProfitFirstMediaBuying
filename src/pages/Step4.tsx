@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
@@ -10,8 +10,7 @@ import { markStepCompleted, useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
 import { useClientProgress } from "@/hooks/useClientProgress";
 import { QuizSlideshow } from "@/components/QuizSlideshow";
-import { getFounderScanQuestions } from "@/data/quizQuestions";
-import { stripVocalQuestions } from "@/data/voiceBlocks";
+import { getFounderScanQuestions, localizeQuestion } from "@/data/quizQuestions";
 
 const translations = {
   en: {
@@ -41,22 +40,22 @@ const Step4 = () => {
   const alreadyDone = !!progress?.founder_scan_submitted;
   const businessType =
     (progress as any)?.business_type ?? (info as any)?.client?.business_type ?? "ecommerce";
-  const founderQuestions = stripVocalQuestions(
-    getFounderScanQuestions(businessType),
-    "founder_scan",
-    businessType,
-  );
+  const founderQuestions = getFounderScanQuestions(businessType).map((q) => localizeQuestion(q, language));
 
-  // After Founder Scan, go to Payment (step6). Mark step 5 completed too so
-  // the /step6 guard passes even though Business Deep Dive comes later now.
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
+
   const handleComplete = () => {
-    markStepCompleted(5);
+    markStepCompleted(4);
     playSuccessSound();
     setTimeout(() => navigate("/step6"), 600);
   };
 
   const handleContinue = () => {
-    markStepCompleted(5);
+    markStepCompleted(4);
     navigate("/step6");
   };
 
@@ -107,6 +106,7 @@ const Step4 = () => {
                 email={progress?.email ?? (info as any)?.lead?.email ?? null}
                 brandName={progress?.brand_name ?? (info as any)?.client?.name ?? null}
                 clientInfo={info as any}
+                language={language}
                 onComplete={handleComplete}
               />
             )}

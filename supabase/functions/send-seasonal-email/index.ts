@@ -12,9 +12,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  renderYearlyCheckinEmail,
+  christmasSubject,
+  newYearSubject,
+  normalizeLang,
   renderChristmasEmail,
   renderNewYearEmail,
+  renderYearlyCheckinEmail,
+  yearlyCheckinSubject,
+  type Lang,
 } from "../_shared/email-design.ts";
 import { sendResendEmail } from "../_shared/resend.ts";
 
@@ -56,7 +61,7 @@ serve(async (req) => {
 
     let query = sb
       .from("client_progress")
-      .select("client_code, email, client_name, company_name, archived_at")
+      .select("client_code, email, client_name, company_name, archived_at, client_language")
       .is("archived_at", null);
     if (onlyClientCode) query = query.eq("client_code", onlyClientCode);
 
@@ -84,11 +89,13 @@ serve(async (req) => {
         continue;
       }
 
+      const lang = normalizeLang((c as any).client_language);
       const { subject, html } = buildEmail(type, {
         contactName: c.client_name,
         companyName: c.company_name,
         currentYear,
         nextYear,
+        language: lang,
       });
 
       if (dryRun) {
@@ -147,27 +154,22 @@ serve(async (req) => {
 
 function buildEmail(
   type: SeasonalType,
-  p: { contactName?: string | null; companyName?: string | null; currentYear: number; nextYear: number },
+  p: { contactName?: string | null; companyName?: string | null; currentYear: number; nextYear: number; language: Lang },
 ): { subject: string; html: string } {
   if (type === "yearly_checkin") {
     return {
-      subject: `${firstNameOf(p.contactName)}, on prend 30 min avant que ${p.currentYear} se termine ?`,
+      subject: yearlyCheckinSubject(p.contactName, p.currentYear, p.language),
       html: renderYearlyCheckinEmail({ ...p, calendlyUrl: CALENDLY_URL }),
     };
   }
   if (type === "christmas") {
     return {
-      subject: `Joyeux Noël de la part de toute l'équipe TDIA`,
+      subject: christmasSubject(p.language),
       html: renderChristmasEmail(p),
     };
   }
   return {
-    subject: `Que ${p.nextYear} soit à la hauteur de vos ambitions`,
+    subject: newYearSubject(p.nextYear, p.language),
     html: renderNewYearEmail(p),
   };
-}
-
-function firstNameOf(fullName?: string | null): string {
-  const n = (fullName ?? "").trim().split(/\s+/)[0];
-  return n || "bonjour";
 }

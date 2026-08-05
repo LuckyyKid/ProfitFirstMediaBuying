@@ -7,13 +7,13 @@ import Index from "./pages/Index";
 import ClientOnboarding from "./pages/ClientOnboarding";
 import Step2 from "./pages/Step2";
 import Step3 from "./pages/Step3";
-import VoiceOnboarding from "./pages/VoiceOnboarding";
 import PortalClient from "./pages/PortalClient";
 import PortalLogin from "./pages/portal/PortalLogin";
 import PortalSignup from "./pages/portal/PortalSignup";
+import PortalForgotPassword from "./pages/portal/PortalForgotPassword";
+import PortalResetPassword from "./pages/portal/PortalResetPassword";
 import PortalAuthGate from "./components/PortalAuthGate";
 import Step4 from "./pages/Step4";
-import Step5 from "./pages/Step5";
 import Step6 from "./pages/Step6";
 import Step7 from "./pages/Step7";
 import Step8 from "./pages/Step8";
@@ -112,10 +112,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/client" element={<ClientOnboarding />} />
           <Route path="/step2" element={<Step2 />} />
-          <Route path="/voice" element={<VoiceOnboarding />} />
+          <Route path="/voice" element={<Navigate to="/step3" replace />} />
           <Route path="/step3" element={<Step3 />} />
           <Route path="/step4" element={<Step4 />} />
-          <Route path="/step5" element={<Step5 />} />
+          <Route path="/step5" element={<Navigate to="/step6" replace />} />
           <Route path="/step6" element={<Step6 />} />
           <Route path="/step7" element={<Step7 />} />
           <Route path="/step8" element={<Step8 />} />
@@ -123,6 +123,8 @@ const App = () => (
 
           <Route path="/portail/login" element={<PortalLogin />} />
           <Route path="/portail/signup" element={<PortalSignup />} />
+          <Route path="/portail/forgot-password" element={<PortalForgotPassword />} />
+          <Route path="/portail/reset-password" element={<PortalResetPassword />} />
           <Route
             path="/portail"
             element={

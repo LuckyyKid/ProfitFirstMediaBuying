@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
@@ -8,6 +8,7 @@ import { FileCheck, ArrowLeft, ArrowRight } from "lucide-react";
 import { useSound } from "@/hooks/useSound";
 import { markStepCompleted, useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
+import { useClientProgress } from "@/hooks/useClientProgress";
 import { persistOnboardingStepCompletion } from "@/lib/persistOnboardingStep";
 
 const translations = {
@@ -35,7 +36,15 @@ const Step8 = () => {
   const t = translations[language];
   const { playSuccessSound } = useSound();
   const { info } = useClient();
+  const clientCode = info?.client?.client_code ?? null;
+  const { progress } = useClientProgress(clientCode);
   useStepGuard(8);
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   const handleNext = () => {
     markStepCompleted(8);
@@ -96,7 +105,7 @@ const Step8 = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate("/step5")}
+              onClick={() => navigate("/step7")}
               className="gap-2"
             >
               <ArrowLeft className="h-5 w-5" />

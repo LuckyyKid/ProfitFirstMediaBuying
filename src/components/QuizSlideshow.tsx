@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Check, SkipForward } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { WEBHOOK_URLS, type Question, type FormKey } from "@/data/quizQuestions";
+import { WEBHOOK_URLS, type Question, type FormKey, type Lang } from "@/data/quizQuestions";
 import { cn } from "@/lib/utils";
 
 interface QuizSlideshowProps {
@@ -17,10 +17,46 @@ interface QuizSlideshowProps {
   brandName?: string | null;
   clientInfo?: Record<string, any> | null;
   onComplete: () => void;
+  language?: Lang;
 }
 
 type CompositeValue = Record<string, string>;
 type AnswerValue = string | string[] | CompositeValue;
+
+const UI_TEXT = {
+  fr: {
+    answerFirst: "Veuillez répondre avant de continuer",
+    answerLast: "Veuillez répondre à la dernière question",
+    saved: "Réponses enregistrées !",
+    genericError: "Une erreur est survenue. Réessayez.",
+    yourAnswer: "Votre réponse...",
+    other: "Autre :",
+    otherPlaceholder: "Précisez...",
+    question: "Question",
+    optional: "(optionnel)",
+    prev: "Précédent",
+    skip: "Passer",
+    next: "Suivant",
+    sending: "Envoi...",
+    submit: "Envoyer mes réponses",
+  },
+  en: {
+    answerFirst: "Please answer before continuing",
+    answerLast: "Please answer the last question",
+    saved: "Answers saved!",
+    genericError: "Something went wrong. Please try again.",
+    yourAnswer: "Your answer...",
+    other: "Other:",
+    otherPlaceholder: "Please specify...",
+    question: "Question",
+    optional: "(optional)",
+    prev: "Previous",
+    skip: "Skip",
+    next: "Next",
+    sending: "Sending...",
+    submit: "Send my answers",
+  },
+} as const;
 
 export const QuizSlideshow = ({
   questions,
@@ -30,7 +66,9 @@ export const QuizSlideshow = ({
   brandName,
   clientInfo,
   onComplete,
+  language = "fr",
 }: QuizSlideshowProps) => {
+  const t = UI_TEXT[language];
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
@@ -81,7 +119,7 @@ export const QuizSlideshow = ({
 
   const next = () => {
     if (!canProceed) {
-      toast.error("Veuillez répondre avant de continuer");
+      toast.error(t.answerFirst);
       return;
     }
     setDirection(1);
@@ -124,7 +162,7 @@ export const QuizSlideshow = ({
 
   const handleSubmit = async () => {
     if (!canProceed) {
-      toast.error("Veuillez répondre à la dernière question");
+      toast.error(t.answerLast);
       return;
     }
     setSubmitting(true);
@@ -172,11 +210,11 @@ export const QuizSlideshow = ({
         if (error) console.error("mark-form-submitted error:", error);
       }
 
-      toast.success("Réponses enregistrées !");
+      toast.success(t.saved);
       onComplete();
     } catch (e) {
       console.error(e);
-      toast.error("Une erreur est survenue. Réessayez.");
+      toast.error(t.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +236,7 @@ export const QuizSlideshow = ({
           <Textarea
             value={(value as string) ?? ""}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder={current.placeholder ?? "Votre réponse..."}
+            placeholder={current.placeholder ?? t.yourAnswer}
             rows={5}
             className="text-base md:text-lg leading-relaxed rounded-[12px] px-5 py-4 resize-none"
             autoFocus
@@ -243,6 +281,8 @@ export const QuizSlideshow = ({
                 onChange={(v) =>
                   setOtherValues((o) => ({ ...o, [current.id]: v }))
                 }
+                otherLabel={t.other}
+                placeholder={t.otherPlaceholder}
               />
             )}
           </div>
@@ -294,14 +334,14 @@ export const QuizSlideshow = ({
                       <Check className="h-3.5 w-3.5 text-[#9ec8ff]" strokeWidth={3} />
                     )}
                   </span>
-                  Autre :
+                  {t.other}
                 </label>
                 <Input
                   value={otherValues[current.id] ?? ""}
                   onChange={(e) =>
                     setOtherValues((o) => ({ ...o, [current.id]: e.target.value }))
                   }
-                  placeholder="Précisez..."
+                  placeholder={t.otherPlaceholder}
                 />
               </div>
             )}
@@ -382,7 +422,7 @@ export const QuizSlideshow = ({
             type={current.type === "url" ? "url" : "text"}
             value={(value as string) ?? ""}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder={current.placeholder ?? "Votre réponse..."}
+            placeholder={current.placeholder ?? t.yourAnswer}
             className={inputClass}
             autoFocus
             onKeyDown={(e) => {
@@ -400,7 +440,7 @@ export const QuizSlideshow = ({
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-foreground/70">
-          <span>Question {index + 1} / {questions.length}</span>
+          <span>{t.question} {index + 1} / {questions.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-[3px] w-full rounded-full bg-[rgba(148,170,215,0.12)] overflow-hidden">
@@ -429,7 +469,7 @@ export const QuizSlideshow = ({
               {current.label}
               {current.optional && (
                 <span className="ml-2 text-xs font-normal uppercase tracking-wider text-muted-foreground align-middle">
-                  (optionnel)
+                  {t.optional}
                 </span>
               )}
             </h3>
@@ -451,7 +491,7 @@ export const QuizSlideshow = ({
           className="w-full sm:w-auto"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Précédent
+          {t.prev}
         </Button>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -464,7 +504,7 @@ export const QuizSlideshow = ({
               className="w-full sm:w-auto text-muted-foreground"
             >
               <SkipForward className="mr-2 h-4 w-4" />
-              Passer
+              {t.skip}
             </Button>
           )}
           {isLast ? (
@@ -478,12 +518,12 @@ export const QuizSlideshow = ({
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Envoi...
+                  {t.sending}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Envoyer mes réponses
+                  {t.submit}
                 </>
               )}
             </Button>
@@ -495,7 +535,7 @@ export const QuizSlideshow = ({
               disabled={!canProceed}
               className="w-full sm:w-auto"
             >
-              Suivant
+              {t.next}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
@@ -511,11 +551,15 @@ const OtherRow = ({
   onSelect,
   value,
   onChange,
+  otherLabel,
+  placeholder,
 }: {
   active: boolean;
   onSelect: () => void;
   value: string;
   onChange: (v: string) => void;
+  otherLabel: string;
+  placeholder: string;
 }) => (
   <div
     className={cn(
@@ -538,7 +582,7 @@ const OtherRow = ({
       >
         {active && <span className="h-2 w-2 rounded-full bg-white" />}
       </span>
-      Autre :
+      {otherLabel}
     </button>
     <Input
       value={value}
@@ -546,7 +590,7 @@ const OtherRow = ({
         onChange(e.target.value);
         if (!active) onSelect();
       }}
-      placeholder="Précisez..."
+      placeholder={placeholder}
       className="bg-background/60"
     />
   </div>

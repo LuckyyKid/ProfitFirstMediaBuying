@@ -4,7 +4,7 @@
 //  3. Si le client a avancé d'étape → reset des compteurs de suivi.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { renderFollowUpEmail } from "../_shared/email-design.ts";
+import { followUpEmailSubject, normalizeLang, renderFollowUpEmail, STEP_NAMES_EN } from "../_shared/email-design.ts";
 import { sendResendEmail } from "../_shared/resend.ts";
 
 const corsHeaders = {
@@ -12,7 +12,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ONBOARDING_BASE = "https://tdiaonboarding.lovable.app";
+const ONBOARDING_BASE = "https://profit-first-media-buying.vercel.app";
 const FROM = Deno.env.get("EMAIL_FROM") || "TDIA <onboarding@resend.dev>";
 
 
@@ -52,7 +52,7 @@ serve(async (req) => {
 
     let query = supabase
       .from("client_progress")
-      .select("client_code, email, client_name, company_name, phone, current_step, updated_at, completed_at, archived_at, followup_sent_at, followup_count, followup_step, callback_due_at, callback_notified_at, slack_invite_url, slack_channel_name");
+      .select("client_code, email, client_name, company_name, phone, current_step, updated_at, completed_at, archived_at, followup_sent_at, followup_count, followup_step, callback_due_at, callback_notified_at, slack_invite_url, slack_channel_name, client_language");
     if (forceClientCode) {
       query = query.eq("client_code", forceClientCode);
     } else {
@@ -101,7 +101,9 @@ serve(async (req) => {
         ? !!c.email
         : (!c.followup_sent_at && c.email && c.updated_at && c.updated_at < cutoff);
       if (shouldSend) {
-        const link = `${ONBOARDING_BASE}/?client=${encodeURIComponent(c.client_code)}`;
+        // Follow-up email → client existant qui doit reprendre son parcours ; on l'envoie
+        // sur /portail/login (il a probablement déjà un compte).
+        const link = `${ONBOARDING_BASE}/portail/login`;
         // Look up payment URL (only show "Payer maintenant" if not yet paid)
         let paymentUrl: string | null = null;
         try {
@@ -115,19 +117,22 @@ serve(async (req) => {
           }
         } catch { /* ignore */ }
 
+        const lang = normalizeLang((c as any).client_language);
+        const stepNames = lang === "en" ? STEP_NAMES_EN : STEP_NAMES;
         const html = renderFollowUpEmail({
           contactName: c.client_name,
           companyName: c.company_name,
           currentStep,
-          stepNames: STEP_NAMES,
+          stepNames,
           resumeUrl: link,
           slackInviteUrl: c.slack_invite_url,
           slackChannelName: c.slack_channel_name,
           paymentUrl,
+          language: lang,
         });
 
         try {
-          await sendResendEmail({ apiKey: RESEND_API_KEY, from: FROM, to: c.email, subject: "On peut vous aider à finaliser votre onboarding TDIA ?", html });
+          await sendResendEmail({ apiKey: RESEND_API_KEY, from: FROM, to: c.email, subject: followUpEmailSubject(lang), html });
           await supabase
             .from("client_progress")
             .update({

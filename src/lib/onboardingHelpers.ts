@@ -5,7 +5,6 @@ export const ONBOARDING_STEPS = [
   { key: "platforms", label: "Accès plateformes", flag: "platforms_completed_at", legacy: null },
   { key: "form", label: "Formulaire", flag: "form_completed_at", legacy: "welcome_form_submitted" },
   { key: "founder_scan", label: "Founder Scan", flag: "founder_scan_completed_at", legacy: "founder_scan_submitted" },
-  { key: "business_deep_dive", label: "Business Deep Dive", flag: "business_deep_dive_completed_at", legacy: "business_deep_dive_submitted" },
   { key: "payment", label: "Paiement", flag: "payment_completed_at", legacy: "paid" },
   { key: "contract", label: "Contrat", flag: "contract_completed_at", legacy: "contract_signed" },
   { key: "kickoff", label: "Appel démarrage", flag: "kickoff_completed_at", legacy: "kickoff_scheduled" },
@@ -109,11 +108,11 @@ export type GlobalStatus =
   | "Onboarding Completed";
 
 export function globalStatus(client: ClientRow): GlobalStatus {
-  if (isStepDone(client, 8)) return "Onboarding Completed";
-  if (isStepDone(client, 7)) return "Kick-off Booked";
-  if (isStepDone(client, 6)) return "Kick-off Not Booked";
-  if (isStepDone(client, 5)) return "Contract Pending";
-  if (isStepDone(client, 4)) return "Payment Pending";
+  if (isStepDone(client, 7)) return "Onboarding Completed";
+  if (isStepDone(client, 6)) return "Kick-off Booked";
+  if (isStepDone(client, 5)) return "Kick-off Not Booked";
+  if (isStepDone(client, 4)) return "Contract Pending";
+  if (isStepDone(client, 3)) return "Payment Pending";
   const completed = completedStepsCount(client);
   if (completed === 0) {
     const sent = client.onboarding_sent_at ? new Date(client.onboarding_sent_at).getTime() : null;
@@ -129,7 +128,7 @@ export function globalStatus(client: ClientRow): GlobalStatus {
 export type Risk = "Low" | "Normal" | "Medium" | "High";
 
 export function riskLevel(client: ClientRow): Risk {
-  if (isStepDone(client, 8)) return "Low";
+  if (isStepDone(client, 7)) return "Low";
   const sent = client.onboarding_sent_at ? new Date(client.onboarding_sent_at).getTime() : null;
   const last = client.last_activity_at ? new Date(client.last_activity_at).getTime() : sent;
   const now = Date.now();

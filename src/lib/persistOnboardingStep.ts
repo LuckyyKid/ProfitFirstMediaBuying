@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 type StepFlag =
   | "welcome_completed_at"
   | "platforms_completed_at"
-  | "business_deep_dive_completed_at"
   | "payment_completed_at"
   | "contract_completed_at"
   | "kickoff_completed_at";
@@ -25,11 +24,6 @@ const STEP_CONFIG: Record<
     currentStep: 3,
     eventType: "platforms_completed",
     extraUpdates: { video_watched: true },
-  },
-  business_deep_dive_completed_at: {
-    currentStep: 6,
-    eventType: "business_deep_dive_completed",
-    extraUpdates: { business_deep_dive_submitted: true },
   },
   payment_completed_at: {
     currentStep: 7,

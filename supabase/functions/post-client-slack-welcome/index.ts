@@ -22,24 +22,40 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     if (!TOKEN) throw new Error("SLACK_BOT_TOKEN missing");
-    const { channelId, contactName, driveFolderUrl } = await req.json();
+    const { channelId, contactName, driveFolderUrl, language } = await req.json();
     if (!channelId) throw new Error("channelId required");
 
-    const hello = contactName ? `Bonjour ${contactName}` : "Bonjour";
+    const lang: "fr" | "en" = language === "en" ? "en" : "fr";
 
-    const text =
-      `:wave: ${hello}, bienvenue chez *TDIA* !\n\n` +
-      `Voici votre espace dédié. Toute la collaboration avec l'équipe se passe ici.\n\n` +
-      `:tada: *TDIA Hub — votre plateforme centrale*\n` +
-      `${HUB_URL}\n` +
-      `C'est ici que vous retrouverez *tous les livrables créatifs* (visuels, vidéos, ads) ` +
-      `et que vous pourrez *valider ou demander des ajustements* directement depuis une seule interface. ` +
-      `Une vidéo de démonstration est disponible sur la plateforme pour vous guider.\n\n` +
-      (driveFolderUrl
-        ? `:file_folder: *Google Drive du projet*\n${driveFolderUrl}\n` +
-          `Espace de partage pour vos fichiers bruts (logos, assets, briefs, etc.).\n\n`
-        : "") +
-      `_Ce message est épinglé pour que vous y ayez toujours accès._ :pushpin:`;
+    const text = lang === "en"
+      ? (
+        `:wave: ${contactName ? `Hi ${contactName}` : "Hi"}, welcome to *TDIA*!\n\n` +
+        `Here's your dedicated space. All collaboration with the team happens here.\n\n` +
+        `:tada: *TDIA Hub — your central platform*\n` +
+        `${HUB_URL}\n` +
+        `This is where you'll find *all creative deliverables* (visuals, videos, ads) ` +
+        `and where you can *approve or request adjustments* directly from a single interface. ` +
+        `A demo video is available on the platform to guide you.\n\n` +
+        (driveFolderUrl
+          ? `:file_folder: *Project Google Drive*\n${driveFolderUrl}\n` +
+            `Shared space for your raw files (logos, assets, briefs, etc.).\n\n`
+          : "") +
+        `_This message is pinned so you always have access._ :pushpin:`
+      )
+      : (
+        `:wave: ${contactName ? `Bonjour ${contactName}` : "Bonjour"}, bienvenue chez *TDIA* !\n\n` +
+        `Voici votre espace dédié. Toute la collaboration avec l'équipe se passe ici.\n\n` +
+        `:tada: *TDIA Hub — votre plateforme centrale*\n` +
+        `${HUB_URL}\n` +
+        `C'est ici que vous retrouverez *tous les livrables créatifs* (visuels, vidéos, ads) ` +
+        `et que vous pourrez *valider ou demander des ajustements* directement depuis une seule interface. ` +
+        `Une vidéo de démonstration est disponible sur la plateforme pour vous guider.\n\n` +
+        (driveFolderUrl
+          ? `:file_folder: *Google Drive du projet*\n${driveFolderUrl}\n` +
+            `Espace de partage pour vos fichiers bruts (logos, assets, briefs, etc.).\n\n`
+          : "") +
+        `_Ce message est épinglé pour que vous y ayez toujours accès._ :pushpin:`
+      );
 
     // Ensure bot is in the channel (private channels need explicit invite; ignore errors)
     try {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
@@ -58,6 +58,12 @@ const Step7 = () => {
 
   useStepGuard(7);
 
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
+
   const handleGenerate = async () => {
     setGenError(null);
     setIsGenerating(true);
@@ -91,7 +97,7 @@ const Step7 = () => {
         const now = new Date().toISOString();
         await supabase
           .from("client_progress")
-          .update({ current_step: 5, last_activity_at: now, updated_at: now })
+          .update({ current_step: 8, last_activity_at: now, updated_at: now })
           .eq("client_code", info.client.client_code);
       }
     } catch (err) {
@@ -111,8 +117,7 @@ const Step7 = () => {
     } finally {
       setIsSending(false);
       playSuccessSound();
-      // After contract, send client to Business Deep Dive (/step5) before kickoff.
-      setTimeout(() => navigate("/step5"), 300);
+      setTimeout(() => navigate("/step8"), 300);
     }
   };
 

@@ -16,7 +16,6 @@ const flow = [
   { file: 4, en: "Founder Scan", fr: "Founder Scan" },
   { file: 6, en: "Payment", fr: "Paiement" },
   { file: 7, en: "Contract", fr: "Contrat" },
-  { file: 5, en: "Business Deep Dive", fr: "Business Deep Dive" },
   { file: 8, en: "Kickoff Call", fr: "Appel Démarrage" },
   { file: 9, en: "Complete", fr: "Terminé" },
 ];

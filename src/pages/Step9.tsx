@@ -8,6 +8,7 @@ import { CheckCircle2, ArrowLeft, ArrowRight, Rocket } from "lucide-react";
 import { useSound } from "@/hooks/useSound";
 import { useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
+import { useClientProgress } from "@/hooks/useClientProgress";
 import { supabase } from "@/integrations/supabase/client";
 
 const translations = {
@@ -47,8 +48,16 @@ const Step9 = () => {
   const { playCelebrationSound } = useSound();
   const navigate = useNavigate();
   const { info } = useClient();
+  const clientCode = info?.client?.client_code ?? null;
+  const { progress } = useClientProgress(clientCode);
 
   useStepGuard(9);
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   useEffect(() => {
     // Play celebration sound when component mounts

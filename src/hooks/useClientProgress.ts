@@ -6,6 +6,7 @@ export interface ClientProgress {
   email: string | null;
   brand_name: string | null;
   client_id: string | null;
+  client_language: "fr" | "en" | null;
   welcome_form_submitted: boolean;
   founder_scan_submitted: boolean;
   business_deep_dive_submitted: boolean;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ArrowRight, Lock, UserRound, LayoutDashboard } from "lucide-react";
+import { ArrowRight, Lock, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const translations = {
@@ -11,9 +11,6 @@ const translations = {
     onboardingTitle: "Client onboarding",
     onboardingDescription: "First visit? Open your onboarding to identify yourself with your client information.",
     onboardingAction: "Start onboarding",
-    portalTitle: "Client portal",
-    portalDescription: "Access your personalised dashboard: performance, reports and documents.",
-    portalAction: "Open my portal",
     adminTitle: "Administrator access",
     adminDescription: "Go to the TDIA admin portal to access the dashboard.",
     adminAction: "Continue as admin",
@@ -24,9 +21,6 @@ const translations = {
     onboardingTitle: "Onboarding client",
     onboardingDescription: "Première visite ? Ouvrez votre onboarding et identifiez-vous avec vos informations client.",
     onboardingAction: "Démarrer l'onboarding",
-    portalTitle: "Portail client",
-    portalDescription: "Accédez à votre tableau de bord personnalisé : performance, rapports et documents.",
-    portalAction: "Ouvrir mon portail",
     adminTitle: "Accès administrateur",
     adminDescription: "Accédez au portail admin TDIA pour ouvrir le dashboard.",
     adminAction: "Continuer comme administrateur",
@@ -89,20 +83,13 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 max-w-3xl mx-auto">
             <AccessCard
               icon={<UserRound className="h-6 w-6" />}
               title={t.onboardingTitle}
               description={t.onboardingDescription}
               action={t.onboardingAction}
               onClick={() => navigate("/client")}
-            />
-            <AccessCard
-              icon={<LayoutDashboard className="h-6 w-6" />}
-              title={t.portalTitle}
-              description={t.portalDescription}
-              action={t.portalAction}
-              onClick={() => navigate("/portail/login")}
             />
             <AccessCard
               icon={<Lock className="h-6 w-6" />}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import { useSound } from "@/hooks/useSound";
 import { useClient, fetchClient } from "@/hooks/useClient";
+import { useClientProgress } from "@/hooks/useClientProgress";
 import { toast } from "sonner";
 import { markStepCompleted, useStepGuard } from "@/hooks/useStepProgress";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,14 @@ const Step6 = () => {
   const isPaid = Boolean(info?.client?.paid);
   const [checking, setChecking] = useState(false);
   const [creating, setCreating] = useState(false);
+  const { progress } = useClientProgress(clientCode ?? null);
   useStepGuard(6);
+
+  useEffect(() => {
+    if (progress?.client_language && progress.client_language !== language) {
+      setLanguage(progress.client_language);
+    }
+  }, [progress?.client_language]);
 
   const setLocalPaidState = (amount?: number) => {
     setClient({
