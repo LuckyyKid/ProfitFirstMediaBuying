@@ -15,6 +15,7 @@ from app.collectors.industry_data import (
 )
 from app.agents import runners
 from app.report.excel import render_excel
+from app.export import export_reviews_excel
 
 
 def _safe(ws: ClientWorkspace, step: str, fn, *args, **kwargs):
@@ -157,6 +158,12 @@ def run_audit(client_name: str, onboarding: dict, audit_id: str | None = None,
 
     if extra_reviews:
         ws.write_json(ws.raw("trustpilot.json"), tp_data + extra_reviews)
+
+    # ===== 2d. Export consolide (reviews.xlsx) — apres TOUTE la collecte =====
+    # Un seul fichier normalise (id | source | entreprise | role | date | note
+    # | titre | texte | url | extra), pret a etre uploade dans une conversation
+    # IA. Robuste aux sources manquantes.
+    _safe(ws, "export_excel", export_reviews_excel, ws)
 
     # ===== 2c. Gate de suffisance des donnees =====
     reviews_n = len(ws.read_json(ws.raw("trustpilot.json")) or [])

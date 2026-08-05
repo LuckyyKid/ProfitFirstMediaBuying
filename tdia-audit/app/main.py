@@ -2,6 +2,7 @@
 POST /audits          -> lance un audit (webhook du formulaire d'onboarding)
 GET  /audits/{c}/{id} -> statut du pipeline etape par etape
 GET  /audits/{c}/{id}/audit_data.xlsx -> Excel des donnees collectees (pour l'AM)
+GET  /audits/{c}/{id}/reviews.xlsx   -> Excel consolide des verbatims (upload IA)
 GET  /audits/{c}/{id}/analysis/business-context -> contexte business (markdown)
 """
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks
@@ -62,6 +63,28 @@ def audit_excel(client: str, audit_id: str, authorization: str | None = Header(N
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ),
         filename=f"audit-{client}-{audit_id}.xlsx",
+    )
+
+
+@app.get("/audits/{client}/{audit_id}/reviews.xlsx")
+def reviews_excel(client: str, audit_id: str, authorization: str | None = Header(None)):
+    """Verbatims consolides (Trustpilot + Reddit + Meta Ads + GMaps + YouTube)
+    dans un unique Excel normalise, pret a etre uploade dans une conversation IA."""
+    _auth(authorization)
+    p = DATA_DIR / "clients" / client / audit_id / "report" / "reviews.xlsx"
+    if not p.exists():
+        # Fallback CSV si openpyxl n'est pas installe cote worker
+        csv_p = p.with_suffix(".csv")
+        if csv_p.exists():
+            return FileResponse(csv_p, media_type="text/csv",
+                                filename=f"reviews-{client}-{audit_id}.csv")
+        raise HTTPException(404, "pas encore genere")
+    return FileResponse(
+        p,
+        media_type=(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ),
+        filename=f"reviews-{client}-{audit_id}.xlsx",
     )
 
 
