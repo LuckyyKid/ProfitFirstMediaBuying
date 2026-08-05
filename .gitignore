@@ -28,3 +28,8 @@ dist-ssr
 twenty-main
 fichierdebase.zip
 fichierdebase/
+Design UI système propriétaire*/
+portail-client-tdia.html
+
+# Claude Code runtime
+.claude/scheduled_tasks.lock

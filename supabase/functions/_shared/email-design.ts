@@ -98,10 +98,9 @@ function shell(title: string, inner: string, lang: Lang = "fr"): string {
             </tr></table>
           </td></tr>
 
-          <!-- Star rating -->
+          <!-- Platforms -->
           <tr><td align="center" style="padding:22px 24px 0;font-family:${SANS};font-size:10px;color:${MUTED};letter-spacing:0.18em;font-weight:700;text-transform:uppercase;">
-            <span style="color:${GOLD};font-size:13px;letter-spacing:0.1em;">★★★★★</span>
-            &nbsp;&nbsp;4.9/5&nbsp;·&nbsp;Meta · Google · TikTok
+            Meta · Google · TikTok
           </td></tr>
 
           <!-- Inner content -->
