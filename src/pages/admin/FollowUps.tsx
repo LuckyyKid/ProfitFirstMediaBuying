@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, ExternalLink, Mail, MailCheck, RefreshCcw, Search, Send } from "lucide-react";
+import { ArrowLeft, ExternalLink, Mail, MailCheck, MessageSquare, RefreshCcw, Search, Send } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminClients } from "@/hooks/useAdminClients";
 import {
@@ -113,12 +113,24 @@ const FollowUps = () => {
     if (!c.email) { toast.error("Aucun email"); return; }
     const t = toast.loading("Envoi de l'email de suivi…");
     const { data, error } = await supabase.functions.invoke("follow-up-stuck-clients", {
-      body: { client_code: c.client_code },
+      body: { client_code: c.client_code, channel: "email" },
     });
     toast.dismiss(t);
     if (error) toast.error(error.message || "Échec");
     else if ((data as any)?.sent > 0) toast.success(`Suivi envoyé à ${c.email}`);
     else toast.message("Aucun email envoyé");
+  };
+
+  const sendSmsNow = async (c: any) => {
+    if (!c.phone) { toast.error("Aucun téléphone"); return; }
+    const t = toast.loading("Envoi du SMS de suivi…");
+    const { data, error } = await supabase.functions.invoke("follow-up-stuck-clients", {
+      body: { client_code: c.client_code, channel: "sms" },
+    });
+    toast.dismiss(t);
+    if (error) toast.error(error.message || "Échec");
+    else if ((data as any)?.smsSent > 0) toast.success(`SMS envoyé à ${c.phone}`);
+    else toast.message("Aucun SMS envoyé");
   };
 
   return (
@@ -256,6 +268,15 @@ const FollowUps = () => {
                             title={c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
                           >
                             <Send className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => sendSmsNow(c)}
+                            disabled={!c.phone}
+                            title={c.followup_sent_at ? "Renvoyer SMS de suivi" : "Envoyer SMS de suivi"}
+                          >
+                            <MessageSquare className="h-4 w-4" />
                           </Button>
                           <Button asChild size="sm" variant="outline">
                             <Link to={`/admin/clients/${encodeURIComponent(detailRef)}`}>

@@ -50,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -161,12 +161,24 @@ const AdminDashboard = () => {
     if (!c.email) { toast.error("Aucun email pour ce client"); return; }
     const t = toast.loading("Envoi de l'email de suivi…");
     const { data, error } = await supabase.functions.invoke("follow-up-stuck-clients", {
-      body: { client_code: c.client_code },
+      body: { client_code: c.client_code, channel: "email" },
     });
     toast.dismiss(t);
     if (error) toast.error(error.message || "Échec de l'envoi");
     else if ((data as any)?.sent > 0) toast.success(`Email de suivi envoyé à ${c.email}`);
     else toast.message("Aucun email envoyé (vérifie l'email du client)");
+  };
+
+  const onSendSmsFollowUp = async (c: any) => {
+    if (!c.phone) { toast.error("Aucun téléphone pour ce client"); return; }
+    const t = toast.loading("Envoi du SMS de suivi…");
+    const { data, error } = await supabase.functions.invoke("follow-up-stuck-clients", {
+      body: { client_code: c.client_code, channel: "sms" },
+    });
+    toast.dismiss(t);
+    if (error) toast.error(error.message || "Échec de l'envoi");
+    else if ((data as any)?.smsSent > 0) toast.success(`SMS de suivi envoyé à ${c.phone}`);
+    else toast.message("Aucun SMS envoyé (vérifie le téléphone du client ou les credentials Twilio)");
   };
 
   const onResendSlackInvite = async (c: any) => {
@@ -406,6 +418,10 @@ const AdminDashboard = () => {
                               <DropdownMenuItem onClick={() => onSendFollowUp(c)} disabled={!c.email}>
                                 <Send className="h-4 w-4 mr-2" />
                                 {c.followup_sent_at ? "Renvoyer email de suivi" : "Envoyer email de suivi"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => onSendSmsFollowUp(c)} disabled={!c.phone}>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                {c.followup_sent_at ? "Renvoyer SMS de suivi" : "Envoyer SMS de suivi"}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => onResendSlackInvite(c)} disabled={!c.email || (!c.company_name && !c.brand_name)}>
                                 <Hash className="h-4 w-4 mr-2" />
