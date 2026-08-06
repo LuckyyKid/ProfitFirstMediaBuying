@@ -101,9 +101,9 @@ serve(async (req) => {
         ? !!c.email
         : (!c.followup_sent_at && c.email && c.updated_at && c.updated_at < cutoff);
       if (shouldSend) {
-        // Follow-up email → client existant qui doit reprendre son parcours ; on l'envoie
-        // sur /portail/login (il a probablement déjà un compte).
-        const link = `${ONBOARDING_BASE}/portail/login`;
+        // Follow-up email → client existant qui doit reprendre son parcours, on l'envoie
+        // sur /client (entrée unique de l'onboarding).
+        const link = `${ONBOARDING_BASE}/client`;
         // Look up payment URL (only show "Payer maintenant" if not yet paid)
         let paymentUrl: string | null = null;
         try {

@@ -59,9 +59,8 @@ serve(async (req) => {
     }
 
     const lang = normalizeLang(finalLanguage);
-    // Welcome email → client hasn't signed up yet, send them to signup with their
-    // client_code pre-filled so they only need to enter email + password.
-    const onboardingUrl = `${ONBOARDING_BASE}/portail/signup?code=${encodeURIComponent(client_code)}`;
+    // Welcome email → send the client straight into the onboarding flow at /client.
+    const onboardingUrl = `${ONBOARDING_BASE}/client`;
     const subject = welcomeEmailSubject(lang);
 
     const html = renderWelcomeEmail({
