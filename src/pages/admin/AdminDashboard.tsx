@@ -51,6 +51,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Trash2 } from "lucide-react";
+import { NotificationBell } from "@/components/admin/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -244,6 +245,7 @@ const AdminDashboard = () => {
             <p className="text-sm text-muted-foreground">TDIA — vue centrale équipe interne</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <NotificationBell />
             <Button asChild size="sm" variant="hero">
               <Link to="/admin/followups">
                 <BellRing className="h-4 w-4 mr-2" />
