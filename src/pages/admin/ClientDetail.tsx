@@ -24,7 +24,7 @@ import {
   timeAgo,
 } from "@/lib/onboardingHelpers";
 import {
-  ArrowLeft, Check, Copy, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw,
+  ArrowLeft, Check, Copy, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Mail, Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -58,6 +58,9 @@ const ClientDetail = () => {
   const [savingEmail, setSavingEmail] = useState(false);
   const [togglingComplete, setTogglingComplete] = useState(false);
   const [savingLanguage, setSavingLanguage] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [infoDraft, setInfoDraft] = useState<Record<string, any>>({});
+  const [savingInfo, setSavingInfo] = useState(false);
 
   const saveLanguage = async (next: "fr" | "en") => {
     if (!client?.client_code) return;
@@ -144,6 +147,99 @@ const ClientDetail = () => {
       toast.error(err?.message || "Échec de la mise à jour");
     } finally {
       setSavingEmail(false);
+    }
+  };
+
+  const INFO_FIELDS: Array<{
+    key: string;
+    label: string;
+    type?: "text" | "number" | "date" | "textarea" | "select";
+    options?: Array<{ value: string; label: string }>;
+  }> = [
+    { key: "client_name", label: "Nom du contact" },
+    { key: "company_name", label: "Entreprise" },
+    { key: "brand_name", label: "Marque / brand" },
+    { key: "phone", label: "Téléphone" },
+    {
+      key: "client_language",
+      label: "Langue (emails + Slack + onboarding)",
+      type: "select",
+      options: [{ value: "fr", label: "Français" }, { value: "en", label: "English" }],
+    },
+    {
+      key: "business_type",
+      label: "Type de business",
+      type: "select",
+      options: [
+        { value: "ecommerce", label: "E-commerce" },
+        { value: "local_service", label: "Local Service" },
+        { value: "saas", label: "SaaS" },
+      ],
+    },
+    { key: "lead_source", label: "Source du lead" },
+    { key: "closer_name", label: "Closer" },
+    { key: "sales_supervisor", label: "Superviseur sales" },
+    { key: "deal_value", label: "Deal value", type: "number" },
+    { key: "ad_budget", label: "Budget publicitaire mensuel", type: "number" },
+    { key: "closing_date", label: "Closing date", type: "date" },
+    {
+      key: "already_runs_ads",
+      label: "Fait déjà des ads ?",
+      type: "select",
+      options: [{ value: "true", label: "Oui" }, { value: "false", label: "Non" }, { value: "", label: "Inconnu" }],
+    },
+    { key: "contract_start_date", label: "Contrat — début", type: "date" },
+    { key: "contract_end_date", label: "Contrat — fin", type: "date" },
+    { key: "churned_at", label: "Churné le", type: "date" },
+    { key: "churn_reason", label: "Raison churn", type: "textarea" },
+    { key: "owner_pain_point", label: "Pain point", type: "textarea" },
+  ];
+
+  const startInfoEdit = () => {
+    const draft: Record<string, any> = {};
+    for (const f of INFO_FIELDS) {
+      const raw = client?.[f.key];
+      if (f.type === "date" && raw) {
+        draft[f.key] = String(raw).slice(0, 10);
+      } else if (f.key === "already_runs_ads") {
+        draft[f.key] = raw === true ? "true" : raw === false ? "false" : "";
+      } else {
+        draft[f.key] = raw ?? "";
+      }
+    }
+    setInfoDraft(draft);
+    setEditingInfo(true);
+  };
+
+  const cancelInfoEdit = () => {
+    setEditingInfo(false);
+    setInfoDraft({});
+  };
+
+  const saveInfoDraft = async () => {
+    if (!client?.client_code) return;
+    setSavingInfo(true);
+    try {
+      const patch: Record<string, any> = {};
+      for (const f of INFO_FIELDS) {
+        let v = infoDraft[f.key];
+        if (f.type === "number") v = v === "" || v == null ? null : Number(v);
+        else if (f.key === "already_runs_ads") v = v === "true" ? true : v === "false" ? false : null;
+        else if (v === "") v = null;
+        patch[f.key] = v;
+      }
+      const { error } = await (supabase as any)
+        .from("client_progress")
+        .update(patch)
+        .eq("client_code", client.client_code);
+      if (error) throw error;
+      toast.success("Infos client mises à jour");
+      setEditingInfo(false);
+      refetch?.();
+    } catch (err: any) {
+      toast.error(err?.message || "Échec de la mise à jour");
+    } finally {
+      setSavingInfo(false);
     }
   };
 
@@ -294,6 +390,49 @@ const ClientDetail = () => {
           </div>
         </Card>
 
+        <Card className="p-4 glass-card">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary shrink-0">
+              <Mail className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                Email de contact — utilisé pour tous les envois (emails, Slack invite)
+              </div>
+              {editingEmail ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="email"
+                    value={emailDraft}
+                    onChange={(e) => setEmailDraft(e.target.value)}
+                    className="flex-1 min-w-[240px] rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+                    autoFocus
+                  />
+                  <Button size="sm" onClick={saveEmail} disabled={savingEmail}>Enregistrer</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingEmail(false)} disabled={savingEmail}>Annuler</Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-base font-medium break-all">
+                    {emailBlockedByConflict ? `${crmEmail} (bloqué par doublon local)` : (client.email || "—")}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => { setEmailDraft(client.email || ""); setEditingEmail(true); }}
+                  >
+                    <Pencil className="h-3.5 w-3.5 mr-1" />
+                    Modifier
+                  </Button>
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground mt-1.5">
+                Modifier ici met à jour <code className="font-mono">client_progress.email</code> + <code className="font-mono">closed_deals.owner_email</code>. Les prochains emails (bienvenue, relance) partiront à cette adresse.
+              </div>
+            </div>
+          </div>
+        </Card>
+
         <Tabs defaultValue="info" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="info" className="text-xs sm:text-sm">Infos</TabsTrigger>
@@ -318,35 +457,10 @@ const ClientDetail = () => {
                   <Field label="Dernière synchro CRM" value={client.external_synced_at} />
                   <Field label="Dernière mise à jour côté CRM" value={externalClient?.updated_at} />
                   <Field label="Email CRM brut" value={crmEmail} />
-                  <div>
-                    <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Email enregistré localement</div>
-                    {editingEmail ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="email"
-                          value={emailDraft}
-                          onChange={(e) => setEmailDraft(e.target.value)}
-                          className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
-                          autoFocus
-                        />
-                        <Button size="sm" onClick={saveEmail} disabled={savingEmail}>Enregistrer</Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditingEmail(false)} disabled={savingEmail}>Annuler</Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-sm">
-                          {emailBlockedByConflict ? `${crmEmail} (bloqué par doublon local)` : (client.email || "—")}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => { setEmailDraft(client.email || ""); setEditingEmail(true); }}
-                        >
-                          Modifier
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  <Field
+                    label="Email enregistré localement"
+                    value={emailBlockedByConflict ? `${crmEmail} (bloqué par doublon local)` : (client.email || "—")}
+                  />
                   <Field label="Téléphone CRM brut" value={crmPhone} />
                   <Field label="Téléphone enregistré localement" value={client.phone} />
                   <Field
@@ -376,39 +490,76 @@ const ClientDetail = () => {
 
               <div className="h-px bg-border/60" />
 
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Client ID" value={client.client_id} />
-                <Field label="Client Code" value={client.client_code} />
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Langue du client (courriels + Slack + onboarding)</div>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={client.client_language ?? "fr"}
-                      onChange={(e) => saveLanguage(e.target.value as "fr" | "en")}
-                      disabled={savingLanguage}
-                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm"
-                    >
-                      <option value="fr">Français</option>
-                      <option value="en">English</option>
-                    </select>
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Fiche client</div>
+                    <div className="text-sm text-muted-foreground">Toutes les infos utilisées pour les envois (emails, Slack, contrats).</div>
                   </div>
+                  {editingInfo ? (
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveInfoDraft} disabled={savingInfo}>Enregistrer</Button>
+                      <Button size="sm" variant="ghost" onClick={cancelInfoEdit} disabled={savingInfo}>Annuler</Button>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={startInfoEdit}>
+                      <Pencil className="h-3.5 w-3.5 mr-1" />
+                      Modifier
+                    </Button>
+                  )}
                 </div>
-                <Field label="Nom client" value={client.client_name} />
-                <Field label="Entreprise" value={client.company_name || client.brand_name} />
-                <Field label="Source du lead" value={client.lead_source} />
-                <Field label="Deal value" value={client.deal_value} />
-                <Field label="Closing date" value={client.closing_date} />
-                <Field label="Budget publicitaire" value={client.ad_budget} />
-                <Field label="Closer" value={client.closer_name} />
-                <Field label="Superviseur sales" value={client.sales_supervisor} />
-                <Field label="Onboarding envoyé" value={client.onboarding_sent_at} />
-                <Field label="Statut CRM" value={client.external_status} />
-                <Field label="Contrat — début" value={client.contract_start_date} />
-                <Field label="Contrat — fin" value={client.contract_end_date} />
-                <Field label="Churné le" value={client.churned_at} />
-                <Field label="Raison churn" value={client.churn_reason} />
-                <Field label="Pain point" value={client.owner_pain_point} />
-                <Field label="Lead ID" value={client.lead_id} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field label="Client ID" value={client.client_id} />
+                  <Field label="Client Code" value={client.client_code} />
+                  {INFO_FIELDS.map((f) => {
+                    if (!editingInfo) {
+                      const raw = client[f.key];
+                      let display: any = raw;
+                      if (f.key === "already_runs_ads") {
+                        display = raw === true ? "Oui" : raw === false ? "Non" : "Inconnu";
+                      } else if (f.type === "date" && raw) {
+                        display = String(raw).slice(0, 10);
+                      }
+                      return <Field key={f.key} label={f.label} value={display} />;
+                    }
+                    const val = infoDraft[f.key] ?? "";
+                    const setVal = (v: any) => setInfoDraft((p) => ({ ...p, [f.key]: v }));
+                    return (
+                      <div key={f.key} className={f.type === "textarea" ? "md:col-span-2" : ""}>
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">{f.label}</div>
+                        {f.type === "textarea" ? (
+                          <Textarea
+                            rows={2}
+                            value={val}
+                            onChange={(e) => setVal(e.target.value)}
+                            className="text-sm"
+                          />
+                        ) : f.type === "select" ? (
+                          <select
+                            value={val}
+                            onChange={(e) => setVal(e.target.value)}
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+                          >
+                            {f.options?.map((o) => (
+                              <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={f.type || "text"}
+                            value={val}
+                            onChange={(e) => setVal(e.target.value)}
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                  <Field label="Onboarding envoyé" value={client.onboarding_sent_at} />
+                  <Field label="Statut CRM" value={client.external_status} />
+                  <Field label="Lead ID" value={client.lead_id} />
+                </div>
               </section>
 
               <div className="h-px bg-border/60" />

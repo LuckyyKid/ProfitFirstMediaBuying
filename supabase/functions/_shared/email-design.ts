@@ -230,9 +230,9 @@ export function renderWelcomeEmail(p0: WelcomeEmailParams): string {
         featPayTitle: "Service activation",
         featPayBody: (url: string) => `Settle the deposit to kick things off: <a href="${url}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">pay now</a>.`,
         featContractTitle: "DocuSign contract",
-        featContractBody: "Sent separately — or available from your onboarding portal.",
+        featContractBody: "Sent separately by email — signature link straight in your inbox.",
         helpCopy: (href: string) => `Need help logging in? <a href="${href}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">Watch this short tutorial</a>.`,
-        ctaPortal: "Access my portal",
+        ctaPortal: "Access my onboarding",
       }
     : {
         title: "Bienvenue chez TDIA",
@@ -253,9 +253,9 @@ export function renderWelcomeEmail(p0: WelcomeEmailParams): string {
         featPayTitle: "Activation du service",
         featPayBody: (url: string) => `Réglez l'acompte pour lancer l'accompagnement : <a href="${url}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">payer maintenant</a>.`,
         featContractTitle: "Contrat DocuSign",
-        featContractBody: "Envoyé séparément — ou disponible depuis votre portail d'onboarding.",
+        featContractBody: "Envoyé séparément par email — le lien de signature arrive directement dans votre boîte.",
         helpCopy: (href: string) => `Besoin d'aide pour vous connecter ? <a href="${href}" style="color:${ACCENT_HOVER};text-decoration:none;font-weight:600;">Regardez ce court tutoriel</a>.`,
-        ctaPortal: "Accéder à mon portail",
+        ctaPortal: "Accéder à mon onboarding",
       };
 
   const slackCardBody = slackHref ? t.slackWithLink(channelLabel, esc(slackHref)) : t.slackNoLink(channelLabel);

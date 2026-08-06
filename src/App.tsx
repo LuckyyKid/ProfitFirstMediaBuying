@@ -7,12 +7,6 @@ import Index from "./pages/Index";
 import ClientOnboarding from "./pages/ClientOnboarding";
 import Step2 from "./pages/Step2";
 import Step3 from "./pages/Step3";
-import PortalClient from "./pages/PortalClient";
-import PortalLogin from "./pages/portal/PortalLogin";
-import PortalSignup from "./pages/portal/PortalSignup";
-import PortalForgotPassword from "./pages/portal/PortalForgotPassword";
-import PortalResetPassword from "./pages/portal/PortalResetPassword";
-import PortalAuthGate from "./components/PortalAuthGate";
 import Step4 from "./pages/Step4";
 import Step6 from "./pages/Step6";
 import Step7 from "./pages/Step7";
@@ -121,26 +115,10 @@ const App = () => (
           <Route path="/step8" element={<Step8 />} />
           <Route path="/step9" element={<Step9 />} />
 
-          <Route path="/portail/login" element={<PortalLogin />} />
-          <Route path="/portail/signup" element={<PortalSignup />} />
-          <Route path="/portail/forgot-password" element={<PortalForgotPassword />} />
-          <Route path="/portail/reset-password" element={<PortalResetPassword />} />
-          <Route
-            path="/portail"
-            element={
-              <PortalAuthGate>
-                {({ clientCode, logout }) => <PortalClient clientCode={clientCode} onLogout={logout} />}
-              </PortalAuthGate>
-            }
-          />
-          <Route
-            path="/portal"
-            element={
-              <PortalAuthGate>
-                {({ clientCode, logout }) => <PortalClient clientCode={clientCode} onLogout={logout} />}
-              </PortalAuthGate>
-            }
-          />
+          <Route path="/portail" element={<Navigate to="/client" replace />} />
+          <Route path="/portail/*" element={<Navigate to="/client" replace />} />
+          <Route path="/portal" element={<Navigate to="/client" replace />} />
+          <Route path="/portal/*" element={<Navigate to="/client" replace />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
