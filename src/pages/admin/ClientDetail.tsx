@@ -61,6 +61,7 @@ const ClientDetail = () => {
   const [editingInfo, setEditingInfo] = useState(false);
   const [infoDraft, setInfoDraft] = useState<Record<string, any>>({});
   const [savingInfo, setSavingInfo] = useState(false);
+  const [regeneratingStripe, setRegeneratingStripe] = useState(false);
 
   const saveLanguage = async (next: "fr" | "en") => {
     if (!client?.client_code) return;
@@ -286,6 +287,50 @@ const ClientDetail = () => {
       toast.error("Impossible d'enregistrer les modifications. Réessayez dans un instant.");
     } finally {
       setSavingInfo(false);
+    }
+  };
+
+  const regenerateStripeLink = async () => {
+    if (!client?.client_code) return;
+    if (client.paid) {
+      toast.info("Le client a déjà payé — aucun nouveau lien n'est nécessaire.");
+      return;
+    }
+    const amount = Number(client.deal_value ?? 0);
+    if (!amount || amount <= 0) {
+      toast.error("Renseignez d'abord un deal_value valide avant de générer un lien Stripe.");
+      return;
+    }
+    setRegeneratingStripe(true);
+    try {
+      await (supabase as any)
+        .from("client_progress")
+        .update({ stripe_link: null, stripe_amount_expected: amount })
+        .eq("client_code", client.client_code);
+
+      const { data: linkData, error: linkErr } = await supabase.functions.invoke(
+        "create-stripe-payment-link",
+        {
+          body: {
+            deal_value: amount,
+            client_name: client.client_name || client.company_name || client.name,
+            client_code: client.client_code,
+            client_id: client.client_id ?? undefined,
+            currency: "cad",
+          },
+        }
+      );
+      if (linkErr) throw linkErr;
+      if (!linkData?.url) throw new Error("stripe_link_regeneration_no_url");
+      toast.success("Nouveau lien Stripe généré (l'ancien est désactivé).");
+      refetch?.();
+    } catch (err: any) {
+      console.error("Manual Stripe regen failed:", err);
+      toast.error(
+        "Impossible de régénérer le lien Stripe. Réessayez dans un instant."
+      );
+    } finally {
+      setRegeneratingStripe(false);
     }
   };
 
@@ -702,12 +747,22 @@ const ClientDetail = () => {
               <Field label="Date paiement" value={client.payment_completed_at} />
               <Field label="Statut" value={client.paid ? "Payé" : "En attente"} />
               <Field label="Lien Stripe" value={client.stripe_link} />
-              <div className="md:col-span-2 flex gap-2">
+              <div className="md:col-span-2 flex flex-wrap gap-2">
                 {client.stripe_link && (
                   <Button asChild size="sm" variant="outline">
                     <a href={client.stripe_link} target="_blank" rel="noreferrer">Ouvrir Stripe <ExternalLink className="h-3 w-3 ml-1" /></a>
                   </Button>
                 )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={regenerateStripeLink}
+                  disabled={regeneratingStripe || client.paid}
+                  title={client.paid ? "Le client a déjà payé" : "Désactive l'ancien lien et en génère un nouveau au montant actuel"}
+                >
+                  <RefreshCw className={`h-3 w-3 mr-1 ${regeneratingStripe ? "animate-spin" : ""}`} />
+                  {regeneratingStripe ? "Régénération…" : (client.stripe_link ? "Régénérer le lien" : "Générer un lien")}
+                </Button>
               </div>
             </Card>
           </TabsContent>
