@@ -23,6 +23,9 @@ const translations = {
     nextStep: "Continue to Kickoff Call",
     alreadySignedTitle: "Contract already signed",
     alreadySignedDesc: "We've received your signed contract. You can move on to the next step.",
+    missingContact: "Your contact info seems incomplete. Please contact your onboarding manager so we can prepare your contract.",
+    generateFailed: "We couldn't prepare your contract right now. Please try again in a moment — if the problem persists, contact your onboarding manager.",
+    missingSignUrl: "Your contract is being prepared. Please refresh the page in a few seconds and try again.",
   },
   fr: {
     title: "Votre Contrat",
@@ -34,6 +37,9 @@ const translations = {
     nextStep: "Continuer vers l'appel de démarrage",
     alreadySignedTitle: "Contrat déjà signé",
     alreadySignedDesc: "Nous avons bien reçu votre contrat signé. Vous pouvez passer à l'étape suivante.",
+    missingContact: "Vos informations de contact semblent incomplètes. Contactez votre chargé d'onboarding pour qu'on prépare votre contrat.",
+    generateFailed: "Nous n'avons pas pu préparer votre contrat. Réessayez dans un instant — si le problème persiste, contactez votre chargé d'onboarding.",
+    missingSignUrl: "Votre contrat est en cours de préparation. Rafraîchissez la page dans quelques secondes puis réessayez.",
   }
 };
 
@@ -64,13 +70,30 @@ const Step7 = () => {
     }
   }, [progress?.client_language]);
 
+  const openSigningUrl = (url: string, popup: Window | null) => {
+    if (popup && !popup.closed) {
+      popup.location.href = url;
+    } else {
+      // Popup was blocked — fall back to same-tab redirect so signing still works.
+      window.location.href = url;
+    }
+  };
+
   const handleGenerate = async () => {
     setGenError(null);
+    // Open the signing tab synchronously (still inside the click gesture) so
+    // popup blockers don't strip it after the awaits below. We'll set the
+    // real URL as soon as DocuSign returns it.
+    const popup = window.open("", "_blank");
     setIsGenerating(true);
     try {
       const email = info?.client?.contact_email || info?.client?.email || info?.lead?.email;
       const name = info?.client?.owner_name || info?.client?.name || info?.caller_name || info?.lead?.name || info?.client?.company_name;
-      if (!email || !name) throw new Error("Email/nom client introuvable");
+      if (!email || !name) {
+        popup?.close();
+        setGenError(t.missingContact);
+        return;
+      }
       const { data, error } = await supabase.functions.invoke("create-docusign-envelope", {
         body: {
           email,
@@ -80,10 +103,17 @@ const Step7 = () => {
         },
       });
       if (error) throw error;
-      if (!data?.signingUrl) throw new Error(data?.error || "URL de signature manquante");
+      if (!data?.signingUrl) {
+        popup?.close();
+        setGenError(t.missingSignUrl);
+        return;
+      }
       setSigningUrl(data.signingUrl);
+      openSigningUrl(data.signingUrl, popup);
     } catch (e: any) {
-      setGenError(e?.message || "Erreur génération contrat");
+      console.error("DocuSign envelope error:", e);
+      popup?.close();
+      setGenError(t.generateFailed);
     } finally {
       setIsGenerating(false);
     }

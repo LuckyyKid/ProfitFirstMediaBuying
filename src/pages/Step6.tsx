@@ -24,7 +24,11 @@ const translations = {
     next: "Continue",
     checking: "Checking payment...",
     notPaid: "Payment not detected yet. Please complete the Stripe checkout, then try again.",
-    alreadyPaid: "Payment already completed for this client."
+    alreadyPaid: "Payment already completed for this client.",
+    dealValueMissing: "The contract amount is not yet available for your account. Please contact your onboarding manager so we can prepare your payment link.",
+    createLinkFailed: "We couldn't open the secure payment page. Please try again in a few seconds — if the problem persists, contact your onboarding manager.",
+    verifyFailed: "We couldn't confirm your payment right now. Please try again in a moment — if you've already paid, your access will unlock automatically.",
+    missingClient: "Your session seems to have expired. Please refresh the page and log back in with your client code."
   },
   fr: {
     title: "Paiement",
@@ -36,7 +40,11 @@ const translations = {
     next: "Continuer",
     checking: "Vérification du paiement...",
     notPaid: "Paiement non détecté. Veuillez compléter le paiement Stripe, puis réessayer.",
-    alreadyPaid: "Le paiement a déjà été effectué pour ce client."
+    alreadyPaid: "Le paiement a déjà été effectué pour ce client.",
+    dealValueMissing: "Le montant de votre contrat n'est pas encore disponible. Contactez votre chargé d'onboarding pour qu'on prépare votre lien de paiement.",
+    createLinkFailed: "Impossible d'ouvrir la page de paiement sécurisée. Réessayez dans quelques secondes — si le problème persiste, contactez votre chargé d'onboarding.",
+    verifyFailed: "Nous n'avons pas pu confirmer votre paiement. Réessayez dans un instant — si le paiement a bien été effectué, votre accès sera débloqué automatiquement.",
+    missingClient: "Votre session semble avoir expiré. Rafraîchissez la page et reconnectez-vous avec votre code client."
   }
 };
 
@@ -120,6 +128,19 @@ const Step6 = () => {
       toast.info(t.alreadyPaid);
       return;
     }
+    // Popup blockers strip user-activation across awaits, so window.open()
+    // called after an `await` gets silently blocked. Open the tab NOW,
+    // synchronously in the click handler, then swap its URL once we have it.
+    const popup = window.open("", "_blank");
+    const navigateToPayment = (url: string) => {
+      if (popup && !popup.closed) {
+        popup.location.href = url;
+      } else {
+        // Popup was blocked — fall back to same-tab redirect so the client
+        // can still complete the payment.
+        window.location.href = url;
+      }
+    };
     setCreating(true);
     try {
       // Double-check with Stripe before opening any link to prevent double payment
@@ -129,6 +150,7 @@ const Step6 = () => {
           body: { client_code: clientCode, client_id: info?.client?.id },
         });
         if (chk?.paid) {
+          popup?.close();
           try {
             const identifier = info?.client?.id || info?.client?.client_code;
             if (identifier) {
@@ -154,11 +176,12 @@ const Step6 = () => {
       } catch (_) { /* ignore — fall through to opening link */ }
 
       if (existingLink) {
-        window.open(existingLink, "_blank");
+        navigateToPayment(existingLink);
         return;
       }
       if (!dealValue || dealValue <= 0) {
-        toast.error(language === "fr" ? "Valeur du contrat introuvable" : "Contract value not found");
+        popup?.close();
+        toast.error(t.dealValueMissing);
         return;
       }
       const { data, error } = await supabase.functions.invoke("create-stripe-payment-link", {
@@ -171,7 +194,7 @@ const Step6 = () => {
         },
       });
       if (error) throw error;
-      if (!data?.url) throw new Error("Lien non généré");
+      if (!data?.url) throw new Error("stripe_payment_link_missing_url");
       setClient({
         ...info,
         client: {
@@ -179,9 +202,11 @@ const Step6 = () => {
           stripe_link: data.url,
         },
       } as typeof info);
-      window.open(data.url, "_blank");
+      navigateToPayment(data.url);
     } catch (e: any) {
-      toast.error(e?.message || (language === "fr" ? "Erreur création paiement" : "Payment creation error"));
+      console.error("Stripe payment link error:", e);
+      popup?.close();
+      toast.error(t.createLinkFailed);
     } finally {
       setCreating(false);
     }
@@ -191,7 +216,7 @@ const Step6 = () => {
   const handleNext = async () => {
     const identifier = info?.client?.id || info?.client?.client_code;
     if (!identifier) {
-      toast.error(language === "fr" ? "Client introuvable" : "Client not found");
+      toast.error(t.missingClient);
       return;
     }
     setChecking(true);
@@ -246,7 +271,8 @@ const Step6 = () => {
       playSuccessSound();
       setTimeout(() => navigate("/step7"), 300);
     } catch (e: any) {
-      toast.error(e?.message || (language === "fr" ? "Erreur de vérification" : "Verification error"));
+      console.error("Payment verification error:", e);
+      toast.error(t.verifyFailed);
     } finally {
       setChecking(false);
     }
