@@ -210,18 +210,28 @@ const ContractCreator = () => {
       let docusignError: string | null = null;
       if (signerEmail && fullName) {
         try {
-          const { data: dsData, error: dsErr } = await supabase.functions.invoke(
-            "create-docusign-envelope",
-            {
-              body: {
+          // Two distinct edge functions so the Step 7 embedded flow and the
+          // admin email flow never step on each other's toes.
+          const fnName = deliveryMode === "email"
+            ? "send-docusign-contract-email"
+            : "create-docusign-envelope";
+          const invokeBody = deliveryMode === "email"
+            ? {
+                email: signerEmail,
+                name: fullName,
+                client_code: code,
+                contract_pdf_base64: pdfBase64,
+              }
+            : {
                 email: signerEmail,
                 name: fullName,
                 client_code: code,
                 return_url: `${window.location.origin}/step8`,
                 contract_pdf_base64: pdfBase64,
-                delivery_mode: deliveryMode,
-              },
-            },
+              };
+          const { data: dsData, error: dsErr } = await supabase.functions.invoke(
+            fnName,
+            { body: invokeBody },
           );
           if (dsErr) throw dsErr;
           envelopeId = (dsData as any)?.envelopeId ?? null;

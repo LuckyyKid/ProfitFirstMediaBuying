@@ -174,7 +174,6 @@ Deno.serve(async (req) => {
       return_url,
       envelope_id: existingEnvelopeId,
       contract_pdf_base64: directBase64,
-      delivery_mode: deliveryModeRaw,
     } = body as {
       email?: string;
       name?: string;
@@ -182,11 +181,7 @@ Deno.serve(async (req) => {
       return_url?: string;
       envelope_id?: string;
       contract_pdf_base64?: string;
-      delivery_mode?: string;
     };
-
-    const deliveryMode: "embedded" | "email" =
-      deliveryModeRaw === "email" ? "email" : "embedded";
 
     if (!email || !name) {
       return new Response(JSON.stringify({ error: "email and name are required" }), {
@@ -197,9 +192,10 @@ Deno.serve(async (req) => {
     const accessToken = await getAccessToken();
     const apiBase = normalizeApiBaseUrl(BASE_URL, ACCOUNT_ID);
 
-    // Fast path only applies to embedded signing — email mode always sends a
-    // fresh envelope so DocuSign emits a new notification email.
-    if (existingEnvelopeId && deliveryMode === "embedded") {
+    // Fast path: an envelope already exists for this client. DocuSign embedded
+    // signing URLs expire after a few minutes, so we always mint a fresh one
+    // instead of creating a brand-new envelope on every retry.
+    if (existingEnvelopeId) {
       const viewRes = await fetch(`${apiBase}/envelopes/${existingEnvelopeId}/views/recipient`, {
         method: "POST",
         headers: {
@@ -410,31 +406,6 @@ Deno.serve(async (req) => {
       console.log(`[docusign] contract source = ${contractSource}`);
     }
 
-    // In embedded mode, clientUserId identifies the recipient for in-app signing
-    // and suppresses the automatic DocuSign email. In email mode, we omit it so
-    // DocuSign sends its own signing invitation to the recipient.
-    const buildSigner = () => {
-      const base: Record<string, unknown> = {
-        email,
-        name,
-        recipientId: "1",
-        routingOrder: "1",
-        tabs: {
-          signHereTabs: [
-            { anchorString: "/sig/", anchorUnits: "pixels", anchorXOffset: "0", anchorYOffset: "0" },
-          ],
-        },
-      };
-      if (deliveryMode === "embedded") base.clientUserId = client_code || email;
-      return base;
-    };
-
-    const buildTemplateRole = () => {
-      const base: Record<string, unknown> = { email, name, roleName: "Client" };
-      if (deliveryMode === "embedded") base.clientUserId = client_code || email;
-      return base;
-    };
-
     // Build envelope: prefer fetched PDF, else template, else placeholder
     const envelopePayload: Record<string, unknown> = contractBase64
       ? {
@@ -448,12 +419,34 @@ Deno.serve(async (req) => {
               documentId: "1",
             },
           ],
-          recipients: { signers: [buildSigner()] },
+          recipients: {
+            signers: [
+              {
+                email,
+                name,
+                recipientId: "1",
+                routingOrder: "1",
+                clientUserId: client_code || email,
+                tabs: {
+                  signHereTabs: [
+                    { anchorString: "/sig/", anchorUnits: "pixels", anchorXOffset: "0", anchorYOffset: "0" },
+                  ],
+                },
+              },
+            ],
+          },
         }
       : TEMPLATE_ID
       ? {
           templateId: TEMPLATE_ID,
-          templateRoles: [buildTemplateRole()],
+          templateRoles: [
+            {
+              email,
+              name,
+              roleName: "Client",
+              clientUserId: client_code || email,
+            },
+          ],
           status: "sent",
           emailSubject: `Contrat TDIA — ${name}`,
         }
@@ -468,7 +461,19 @@ Deno.serve(async (req) => {
               documentId: "1",
             },
           ],
-          recipients: { signers: [buildSigner()] },
+          recipients: {
+            signers: [
+              {
+                email, name, recipientId: "1", routingOrder: "1",
+                clientUserId: client_code || email,
+                tabs: {
+                  signHereTabs: [
+                    { anchorString: "/sig/", anchorUnits: "pixels", anchorXOffset: "0", anchorYOffset: "0" },
+                  ],
+                },
+              },
+            ],
+          },
         };
 
     let envRes = await fetch(`${apiBase}/envelopes`, {
@@ -500,7 +505,19 @@ Deno.serve(async (req) => {
             documentId: "1",
           },
         ],
-        recipients: { signers: [buildSigner()] },
+        recipients: {
+          signers: [
+            {
+              email, name, recipientId: "1", routingOrder: "1",
+              clientUserId: client_code || email,
+              tabs: {
+                signHereTabs: [
+                  { anchorString: "/sig/", anchorUnits: "pixels", anchorXOffset: "0", anchorYOffset: "0" },
+                ],
+              },
+            },
+          ],
+        },
       };
       envRes = await fetch(`${apiBase}/envelopes`, {
         method: "POST",
@@ -522,19 +539,7 @@ Deno.serve(async (req) => {
 
     const envelopeId = envData.envelopeId as string;
 
-    // Email mode: DocuSign already dispatched the signing invitation email to
-    // the recipient (no clientUserId on the signer), so we're done — no
-    // embedded signing URL is needed or valid here.
-    if (deliveryMode === "email") {
-      return new Response(JSON.stringify({
-        success: true,
-        envelopeId,
-        deliveryMode: "email",
-        emailSentTo: email,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    // Embedded mode: create embedded recipient view (short-lived signing URL)
+    // Create embedded recipient view (signing URL)
     const viewRes = await fetch(`${apiBase}/envelopes/${envelopeId}/views/recipient`, {
       method: "POST",
       headers: {
@@ -560,7 +565,6 @@ Deno.serve(async (req) => {
       success: true,
       envelopeId,
       signingUrl: viewData.url,
-      deliveryMode: "embedded",
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), {
