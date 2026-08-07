@@ -4,7 +4,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, FileCheck, Loader2, ExternalLink, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileCheck, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSound } from "@/hooks/useSound";
 import { useClient } from "@/hooks/useClient";
@@ -55,12 +55,12 @@ const Step7 = () => {
   const { info } = useClient();
   const clientCode = info?.client?.client_code || info?.client?.id || null;
   const { progress } = useClientProgress(clientCode);
-  const docusignLink = signingUrl || info?.client?.docusign_link;
   const alreadySigned = Boolean(
     (progress as any)?.contract_signed ||
     (progress as any)?.docusign_signed_at ||
     (progress as any)?.docusign_pdf_url
   );
+  const envelopeId = (progress as any)?.docusign_envelope_id ?? null;
 
   useStepGuard(7);
 
@@ -100,6 +100,7 @@ const Step7 = () => {
           name,
           client_code: info?.client?.client_code || info?.client?.id,
           return_url: `${window.location.origin}/step8`,
+          envelope_id: envelopeId,
         },
       });
       if (error) throw error;
@@ -211,16 +212,6 @@ const Step7 = () => {
                     <p className="text-lg font-semibold text-foreground">{t.alreadySignedTitle}</p>
                     <p className="text-sm text-muted-foreground text-center">{t.alreadySignedDesc}</p>
                   </div>
-                ) : docusignLink ? (
-                  <Button
-                    variant="hero"
-                    size="lg"
-                    onClick={() => window.open(docusignLink, "_blank")}
-                    className="gap-2 text-lg px-8 py-6 rounded-2xl"
-                  >
-                    {language === "fr" ? "Signer le contrat (DocuSign)" : "Sign contract (DocuSign)"}
-                    <ExternalLink className="h-5 w-5" />
-                  </Button>
                 ) : (
                   <Button
                     variant="hero"
@@ -230,7 +221,9 @@ const Step7 = () => {
                     className="gap-2 text-lg px-8 py-6 rounded-2xl"
                   >
                     {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileCheck className="h-5 w-5" />}
-                    {language === "fr" ? "Générer mon contrat" : "Generate my contract"}
+                    {envelopeId
+                      ? (language === "fr" ? "Signer mon contrat" : "Sign my contract")
+                      : (language === "fr" ? "Générer mon contrat" : "Generate my contract")}
                   </Button>
                 )}
                 {genError && !alreadySigned && (

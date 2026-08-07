@@ -323,13 +323,14 @@ const ClosedDeals = () => {
           toast.warning("Enveloppe DocuSign non créée");
         }
 
-        // Persist signing URL on client_progress so Step6 (onboarding) embeds it
-        if (docusignResult?.signingUrl) {
+        // Persist only the envelope id — embedded signing URLs expire after ~5 min,
+        // so Step7 mints a fresh one on click via the edge function.
+        if (docusignResult?.envelopeId) {
           await (supabase as any)
             .from("client_progress")
             .update({
-              docusign_link: docusignResult.signingUrl,
-              docusign_envelope_id: docusignResult.envelopeId ?? null,
+              docusign_link: null,
+              docusign_envelope_id: docusignResult.envelopeId,
               docusign_sent_at: new Date().toISOString(),
             })
             .eq("client_code", finalCode);

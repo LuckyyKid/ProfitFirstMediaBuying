@@ -167,8 +167,8 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, name, client_code, return_url } = body as {
-      email?: string; name?: string; client_code?: string; return_url?: string;
+    const { email, name, client_code, return_url, envelope_id: existingEnvelopeId } = body as {
+      email?: string; name?: string; client_code?: string; return_url?: string; envelope_id?: string;
     };
 
     if (!email || !name) {
@@ -179,6 +179,41 @@ Deno.serve(async (req) => {
 
     const accessToken = await getAccessToken();
     const apiBase = normalizeApiBaseUrl(BASE_URL, ACCOUNT_ID);
+
+    // Fast path: an envelope already exists for this client. DocuSign embedded
+    // signing URLs expire after a few minutes, so we always mint a fresh one
+    // instead of creating a brand-new envelope on every retry.
+    if (existingEnvelopeId) {
+      const viewRes = await fetch(`${apiBase}/envelopes/${existingEnvelopeId}/views/recipient`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          returnUrl: return_url || "https://testtdia.lovable.app/step7",
+          authenticationMethod: "none",
+          email,
+          userName: name,
+          clientUserId: client_code || email,
+        }),
+      });
+      const viewData = await readJsonResponse(viewRes);
+      if (viewRes.ok && viewData?.url) {
+        return new Response(JSON.stringify({
+          success: true,
+          envelopeId: existingEnvelopeId,
+          signingUrl: viewData.url,
+          reused: true,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      // Envelope was voided/deleted or the recipient no longer matches — fall
+      // through and create a new envelope so the client is never blocked.
+      console.warn(
+        `[docusign] Could not reuse envelope ${existingEnvelopeId} (status ${viewRes.status}); creating a new one. Details:`,
+        viewData,
+      );
+    }
 
     // Fetch contract PDF: priority to the contract generated via admin Contract Creator
     // (stored in closed-deals-contracts bucket and linked via client_progress.manual_contract_pdf_url).
