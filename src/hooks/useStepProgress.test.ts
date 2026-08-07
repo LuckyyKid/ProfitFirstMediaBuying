@@ -85,17 +85,80 @@ describe("markStepCompleted", () => {
   });
 });
 
+// The same computation the runtime hook performs. Returning `null` means the
+// user is allowed to stay on `step`; a string means the hook would call
+// navigate(target, { replace: true }) — which is what mints history entries.
+function computeGuardTarget(step: number, currentPath: string): string | null {
+  const stepIdx = STEP_FLOW.indexOf(step);
+  if (stepIdx < 0) return null;
+  const maxIdx = STEP_FLOW.indexOf(getMaxCompleted());
+  const allowedIdx = Math.min(maxIdx + 1, STEP_FLOW.length - 1);
+  if (stepIdx <= allowedIdx) return null;
+  const targetStep = STEP_FLOW[allowedIdx];
+  const target = targetStep <= 1 ? "/" : `/step${targetStep}`;
+  if (target === currentPath) return null;
+  return target;
+}
+
 // Regression: with maxCompleted=4 (Founder Scan just done), Step6 must be
 // accessible without any guard redirect — otherwise Step6 → /step5 →
 // <Navigate to="/step6" replace /> creates an infinite replaceState loop.
-describe("Step6 access after Step4 completion", () => {
-  it("treats step 6 as the next allowed step", () => {
+describe("Step6 access after Step4 completion (payment loop regression)", () => {
+  it("does not redirect the user away from /step6", () => {
     markStepCompleted(4);
-    const max = getMaxCompleted();
-    const maxIdx = STEP_FLOW.indexOf(max);
-    const allowed = STEP_FLOW[Math.min(maxIdx + 1, STEP_FLOW.length - 1)];
-    expect(allowed).toBe(6);
-    // Step 6 is at index 4 which is <= allowedIdx (4) → no redirect.
-    expect(STEP_FLOW.indexOf(6)).toBeLessThanOrEqual(maxIdx + 1);
+    expect(computeGuardTarget(6, "/step6")).toBeNull();
+  });
+
+  it("does not redirect even if session storage still holds the removed step 5", () => {
+    sessionStorage.setItem(PROGRESS_KEY, "5");
+    expect(computeGuardTarget(6, "/step6")).toBeNull();
+  });
+
+  it("never re-navigates to the current path (self-redirect loop protection)", () => {
+    // Simulate a stale sessionStorage that would otherwise want to send us
+    // back to the same URL we're already on.
+    sessionStorage.setItem(PROGRESS_KEY, "0");
+    expect(computeGuardTarget(1, "/")).toBeNull();
+  });
+});
+
+describe("Full onboarding progression does not stall or loop", () => {
+  it("walks Step2 → Step3 → Step4 → Step6 → Step7 → Step8 → Step9 cleanly", () => {
+    // Start of onboarding: nothing completed, user on landing.
+    expect(computeGuardTarget(2, "/step2")).toBe("/"); // must complete step 1 first
+    markStepCompleted(1);
+    expect(computeGuardTarget(2, "/step2")).toBeNull();
+
+    markStepCompleted(2);
+    expect(computeGuardTarget(3, "/step3")).toBeNull();
+
+    markStepCompleted(3);
+    expect(computeGuardTarget(4, "/step4")).toBeNull();
+
+    markStepCompleted(4);
+    // The bug that motivated the fix — Step6 must be reachable directly.
+    expect(computeGuardTarget(6, "/step6")).toBeNull();
+    // Skipping ahead to Step7/Step8/Step9 must NOT be allowed yet.
+    expect(computeGuardTarget(7, "/step7")).toBe("/step6");
+    expect(computeGuardTarget(8, "/step8")).toBe("/step6");
+
+    markStepCompleted(6);
+    expect(computeGuardTarget(7, "/step7")).toBeNull();
+    expect(computeGuardTarget(8, "/step8")).toBe("/step7");
+
+    markStepCompleted(7);
+    expect(computeGuardTarget(8, "/step8")).toBeNull();
+
+    markStepCompleted(8);
+    expect(computeGuardTarget(9, "/step9")).toBeNull();
+  });
+
+  it("guard target is stable when re-evaluated at the redirect target (no ping-pong)", () => {
+    // If Step7 kicks us to Step6, remounting Step6 must NOT kick us anywhere.
+    markStepCompleted(3);
+    const target = computeGuardTarget(7, "/step7");
+    expect(target).toBe("/step4");
+    // Re-run the guard as if we've now landed at /step4:
+    expect(computeGuardTarget(4, "/step4")).toBeNull();
   });
 });
