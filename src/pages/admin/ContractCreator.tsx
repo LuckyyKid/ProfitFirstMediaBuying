@@ -23,9 +23,11 @@ import logoTDIA from "@/assets/contract/logo-tdia.png";
 type GenerationResult = {
   clientCode: string;
   clientName: string;
+  deliveryMode: "embedded" | "email";
   pdfSaved: boolean;
   storageUploaded: boolean;
   envelopeId: string | null;
+  emailSentTo: string | null;
   docusignError: string | null;
 };
 
@@ -108,7 +110,7 @@ const ContractCreator = () => {
   if (!isAuthed) return <Navigate to="/admin/login" replace />;
 
 
-  const generatePDF = useCallback(async () => {
+  const generatePDF = useCallback(async (deliveryMode: "embedded" | "email" = "embedded") => {
     if (!previewRef.current) return;
     const code = (data.clientCode || "").trim().toUpperCase();
     if (!code) {
@@ -120,7 +122,7 @@ const ContractCreator = () => {
       // Verify client exists
       const { data: client } = await supabase
         .from("client_progress")
-        .select("client_code, client_name, company_name")
+        .select("client_code, client_name, company_name, email")
         .eq("client_code", code)
         .maybeSingle();
       if (!client) {
@@ -204,6 +206,7 @@ const ContractCreator = () => {
       const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim()
         || client.client_name || code;
       let envelopeId: string | null = null;
+      let emailSentTo: string | null = null;
       let docusignError: string | null = null;
       if (signerEmail && fullName) {
         try {
@@ -216,11 +219,13 @@ const ContractCreator = () => {
                 client_code: code,
                 return_url: `${window.location.origin}/step8`,
                 contract_pdf_base64: pdfBase64,
+                delivery_mode: deliveryMode,
               },
             },
           );
           if (dsErr) throw dsErr;
           envelopeId = (dsData as any)?.envelopeId ?? null;
+          emailSentTo = (dsData as any)?.emailSentTo ?? null;
           if (!envelopeId) {
             docusignError = "DocuSign a répondu sans envelope ID";
           }
@@ -233,25 +238,32 @@ const ContractCreator = () => {
       }
 
       // 3) Persist: link the manual URL and the fresh envelope id (or null if it
-      // failed, so Step7 falls back to on-demand generation).
+      // failed). In email mode we don't overwrite the embedded envelope id —
+      // Step7 keeps working with its own envelope; the email envelope is a
+      // separate DocuSign envelope that the client signs from their inbox.
+      const progressUpdate: Record<string, unknown> = {
+        manual_contract_pdf_url: manualUrl,
+        updated_at: new Date().toISOString(),
+      };
+      if (deliveryMode === "embedded") {
+        progressUpdate.docusign_envelope_id = envelopeId;
+        progressUpdate.docusign_link = null;
+        progressUpdate.docusign_sent_at = envelopeId ? new Date().toISOString() : null;
+      }
       await (supabase as any)
         .from("client_progress")
-        .update({
-          manual_contract_pdf_url: manualUrl,
-          docusign_envelope_id: envelopeId,
-          docusign_link: null,
-          docusign_sent_at: envelopeId ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(progressUpdate)
         .eq("client_code", code);
 
       pdf.save(filename);
       setResult({
         clientCode: code,
         clientName: client.client_name || client.company_name || code,
+        deliveryMode,
         pdfSaved: true,
         storageUploaded,
         envelopeId,
+        emailSentTo,
         docusignError,
       });
     } catch (err) {
@@ -288,21 +300,19 @@ const ContractCreator = () => {
                 <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />Aperçu
               </button>
             </div>
-            <Button onClick={generatePDF} disabled={generating} className="gap-2">
+            <Button onClick={() => generatePDF("embedded")} disabled={generating} className="gap-2">
               <FileDown className="w-4 h-4" />
               {generating ? "Génération..." : "Télécharger PDF"}
             </Button>
             <Button
               variant="outline"
-              disabled={!data.email}
-              onClick={() => {
-                const subject = encodeURIComponent("Votre contrat TDIA");
-                const body = encodeURIComponent(`Bonjour ${data.firstName},\n\nVeuillez trouver ci-joint votre contrat de service TDIA.\n\nCordialement,\nTDIA`);
-                window.open(`mailto:${data.email}?subject=${subject}&body=${body}`);
-              }}
+              disabled={generating || !data.email}
+              onClick={() => generatePDF("email")}
               className="gap-2 hidden md:inline-flex"
+              title="Envoie le contrat par email via DocuSign (séparé du flow Step 7)"
             >
-              <Mail className="w-4 h-4" />Email
+              <Mail className="w-4 h-4" />
+              {generating ? "Envoi..." : "Envoyer par email"}
             </Button>
           </div>
         </div>
@@ -354,7 +364,9 @@ const ContractCreator = () => {
                   )}
                   <DialogTitle className="text-center text-xl">
                     {result.envelopeId
-                      ? "Contrat prêt pour signature"
+                      ? result.deliveryMode === "email"
+                        ? "Contrat envoyé par email"
+                        : "Contrat prêt pour signature"
                       : "Contrat généré, envoi partiel"}
                   </DialogTitle>
                   <DialogDescription className="text-center">
@@ -398,14 +410,29 @@ const ContractCreator = () => {
                     <XCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
                   )}
                   <div className="text-sm">
-                    <p className="font-medium">Enveloppe DocuSign</p>
+                    <p className="font-medium">
+                      {result.deliveryMode === "email"
+                        ? "Envoi email DocuSign"
+                        : "Enveloppe DocuSign (Step 7)"}
+                    </p>
                     <p className="text-muted-foreground">
                       {result.envelopeId ? (
-                        <>
-                          Créée avec succès —{" "}
-                          <span className="font-mono text-xs">{result.envelopeId}</span>. Le client peut
-                          maintenant signer depuis l'étape 7.
-                        </>
+                        result.deliveryMode === "email" ? (
+                          <>
+                            Email envoyé à{" "}
+                            <span className="font-medium text-foreground">
+                              {result.emailSentTo || "l'adresse du client"}
+                            </span>{" "}
+                            avec le lien de signature DocuSign. Enveloppe :{" "}
+                            <span className="font-mono text-xs">{result.envelopeId}</span>.
+                          </>
+                        ) : (
+                          <>
+                            Créée avec succès —{" "}
+                            <span className="font-mono text-xs">{result.envelopeId}</span>. Le client peut
+                            maintenant signer depuis l'étape 7.
+                          </>
+                        )
                       ) : (
                         result.docusignError || "Enveloppe non créée."
                       )}
