@@ -4,7 +4,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { PlatformAccessButton } from "@/components/PlatformAccessButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ArrowLeft, ArrowRight, Rocket } from "lucide-react";
+import { CheckCircle2, ArrowLeft, ArrowRight, Rocket, Sparkles } from "lucide-react";
 import { useSound } from "@/hooks/useSound";
 import { useStepGuard } from "@/hooks/useStepProgress";
 import { useClient } from "@/hooks/useClient";
