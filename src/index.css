@@ -133,6 +133,16 @@ All colors MUST be HSL.
     letter-spacing: -0.02em;
     font-weight: 500;
   }
+
+  /* Contract pages render on white paper — force headings back to near-black
+     so the global dark-theme heading color doesn't leak in. */
+  .contract-page,
+  .contract-page h1,
+  .contract-page h2,
+  .contract-page h3,
+  .contract-page h4 {
+    color: #0a0a0a;
+  }
 }
 
 @layer utilities {
