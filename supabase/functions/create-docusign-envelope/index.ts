@@ -236,6 +236,7 @@ Deno.serve(async (req) => {
             const rows = await lookupRes.json();
             const manualUrl: string | null = rows?.[0]?.manual_contract_pdf_url ?? null;
             if (manualUrl) {
+              // Try the stored (public) URL first.
               const pdfRes = await fetch(manualUrl);
               if (pdfRes.ok) {
                 const buf = new Uint8Array(await pdfRes.arrayBuffer());
@@ -243,8 +244,48 @@ Deno.serve(async (req) => {
                 contractSource = "manual_contract_creator";
                 console.log(`[docusign] Using manual contract from ${manualUrl}`);
               } else {
-                contractFetchError = `manual contract download failed (status ${pdfRes.status})`;
-                console.warn(contractFetchError);
+                // Public URL failed (bucket likely private). Extract the object
+                // path from the URL and mint a signed URL with the service key.
+                const pathMatch = manualUrl.match(
+                  /\/storage\/v1\/object\/(?:public|sign|authenticated)\/closed-deals-contracts\/([^?]+)/i,
+                );
+                const objectPath = pathMatch?.[1] ? decodeURIComponent(pathMatch[1]) : null;
+                if (objectPath) {
+                  const signRes = await fetch(
+                    `${SUPABASE_URL}/storage/v1/object/sign/closed-deals-contracts/${encodeURI(objectPath)}`,
+                    {
+                      method: "POST",
+                      headers: {
+                        apikey: SERVICE_KEY,
+                        Authorization: `Bearer ${SERVICE_KEY}`,
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ expiresIn: 600 }),
+                    },
+                  );
+                  if (signRes.ok) {
+                    const { signedURL } = await signRes.json();
+                    const fullUrl = signedURL?.startsWith("http")
+                      ? signedURL
+                      : `${SUPABASE_URL}/storage/v1${signedURL}`;
+                    const signedPdfRes = await fetch(fullUrl);
+                    if (signedPdfRes.ok) {
+                      const buf = new Uint8Array(await signedPdfRes.arrayBuffer());
+                      contractBase64 = encodeBase64(buf);
+                      contractSource = "manual_contract_creator_signed";
+                      console.log(`[docusign] Using manual contract via signed URL for ${objectPath}`);
+                    } else {
+                      contractFetchError = `manual contract signed download failed (status ${signedPdfRes.status})`;
+                      console.warn(contractFetchError);
+                    }
+                  } else {
+                    contractFetchError = `manual contract sign request failed (status ${signRes.status})`;
+                    console.warn(contractFetchError);
+                  }
+                } else {
+                  contractFetchError = `manual contract download failed (status ${pdfRes.status}) and could not parse object path`;
+                  console.warn(contractFetchError);
+                }
               }
             }
           }

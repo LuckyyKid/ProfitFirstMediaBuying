@@ -162,9 +162,18 @@ const ContractCreator = () => {
         const { data: pub } = supabase.storage
           .from("closed-deals-contracts")
           .getPublicUrl(path);
+        // Also invalidate any envelope that was auto-created at deal-close time
+        // with a placeholder/fallback PDF — the next Step7 click will mint a
+        // fresh envelope that picks up this new manual_contract_pdf_url.
         await (supabase as any)
           .from("client_progress")
-          .update({ manual_contract_pdf_url: pub.publicUrl, updated_at: new Date().toISOString() })
+          .update({
+            manual_contract_pdf_url: pub.publicUrl,
+            docusign_envelope_id: null,
+            docusign_link: null,
+            docusign_sent_at: null,
+            updated_at: new Date().toISOString(),
+          })
           .eq("client_code", code);
       }
 
