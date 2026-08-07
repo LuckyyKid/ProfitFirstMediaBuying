@@ -21,7 +21,7 @@ const translations = {
     step1: "Our team will review your information",
     step2: "You'll receive a welcome email within 24 hours",
     step3: "We'll schedule your onboarding call",
-    platformsInfo: "Important: Your Slack and ClickUp access links will be sent in your onboarding email.",
+    platformsInfo: "Important: Your Slack access link will be sent in your onboarding email.",
     thankYou: "Thank you for choosing TDIA!",
     back: "Back to Previous Step",
     returnHome: "Return to Home"
@@ -35,7 +35,7 @@ const translations = {
     step1: "Notre équipe va examiner vos informations",
     step2: "Vous recevrez un email de bienvenue sous 24h",
     step3: "Nous planifierons votre appel d'intégration",
-    platformsInfo: "Important : Les liens d'accès Slack et ClickUp seront envoyés dans votre email d'onboarding.",
+    platformsInfo: "Important : Le lien d'accès Slack sera envoyé dans votre email d'onboarding.",
     thankYou: "Merci d'avoir choisi TDIA !",
     back: "Retour à l'étape précédente",
     returnHome: "Retour à l'accueil"
@@ -187,32 +187,6 @@ const Step9 = () => {
                 {t.thankYou}
               </p>
             </div>
-          </div>
-
-          {/* Test webhook button */}
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const code = info?.client?.client_code;
-                if (!code) {
-                  alert("Aucun client_code trouvé");
-                  return;
-                }
-                const { data, error } = await supabase.functions.invoke(
-                  "notify-onboarding-complete",
-                  { body: { client_code: code, force: true } }
-                );
-                if (error) {
-                  alert("Erreur: " + error.message);
-                } else {
-                  alert("Webhook envoyé ✓\n" + JSON.stringify(data, null, 2));
-                }
-              }}
-            >
-              🧪 Tester le webhook Slack
-            </Button>
           </div>
 
           {/* Navigation Buttons */}
