@@ -182,6 +182,46 @@ const AdminDashboard = () => {
     else toast.message("Aucun SMS envoyé (vérifie le téléphone du client ou les credentials Twilio)");
   };
 
+  const onSendContractEmail = async (c: any) => {
+    if (!c.email) { toast.error("Aucun email pour ce client"); return; }
+    if (!c.manual_contract_pdf_url) {
+      toast.error("Aucun contrat trouvé. Génère-le d'abord dans admin/contract-creator.");
+      return;
+    }
+    const signerName = c.client_name || c.company_name || c.brand_name || c.client_code;
+    const t = toast.loading("Préparation du contrat DocuSign…");
+    try {
+      const pdfRes = await fetch(c.manual_contract_pdf_url);
+      if (!pdfRes.ok) throw new Error(`Impossible de récupérer le PDF (${pdfRes.status})`);
+      const blob = await pdfRes.blob();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(((reader.result as string) || "").split(",")[1] ?? "");
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+      const { data, error } = await supabase.functions.invoke("send-docusign-contract-email", {
+        body: {
+          email: c.email,
+          name: signerName,
+          client_code: c.client_code,
+          contract_pdf_base64: pdfBase64,
+        },
+      });
+      toast.dismiss(t);
+      if (error) throw error;
+      if ((data as any)?.envelopeId) {
+        toast.success(`Contrat DocuSign envoyé à ${c.email}`);
+      } else {
+        toast.error("Envoi DocuSign : réponse sans envelope ID");
+      }
+    } catch (e: any) {
+      toast.dismiss(t);
+      console.error("[send-docusign-contract-email]", e);
+      toast.error(e?.message || "Échec de l'envoi du contrat par email");
+    }
+  };
+
   const onResendSlackInvite = async (c: any) => {
     if (!c.email) { toast.error("Aucun email pour ce client"); return; }
     if (!c.company_name && !c.brand_name) { toast.error("Aucun nom de compagnie"); return; }
@@ -428,6 +468,14 @@ const AdminDashboard = () => {
                               <DropdownMenuItem onClick={() => onResendSlackInvite(c)} disabled={!c.email || (!c.company_name && !c.brand_name)}>
                                 <Hash className="h-4 w-4 mr-2" />
                                 Renvoyer invitation Slack
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => onSendContractEmail(c)}
+                                disabled={!c.email || !c.manual_contract_pdf_url}
+                                title={!c.manual_contract_pdf_url ? "Génère d'abord le contrat dans admin/contract-creator" : undefined}
+                              >
+                                <FileSignature className="h-4 w-4 mr-2" />
+                                Envoyer contrat par email
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onArchive(c)}>
