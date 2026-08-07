@@ -152,8 +152,21 @@ const ContractCreator = () => {
       const filename = `contrat-${code}-${Date.now()}.pdf`;
       const blob = pdf.output("blob");
 
-      // Upload to storage linked to the client
+      // Convert blob to base64 for direct DocuSign upload — bypasses any
+      // storage URL / RLS flakiness that would otherwise fall back to placeholder.
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1] ?? "");
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+
+      // 1) Upload to storage (best-effort — no longer critical to DocuSign flow)
       const path = `${code}/${filename}`;
+      let manualUrl: string | null = null;
       const { error: upErr } = await supabase.storage
         .from("closed-deals-contracts")
         .upload(path, blob, { contentType: "application/pdf", upsert: true });
@@ -162,23 +175,64 @@ const ContractCreator = () => {
         const { data: pub } = supabase.storage
           .from("closed-deals-contracts")
           .getPublicUrl(path);
-        // Also invalidate any envelope that was auto-created at deal-close time
-        // with a placeholder/fallback PDF — the next Step7 click will mint a
-        // fresh envelope that picks up this new manual_contract_pdf_url.
-        await (supabase as any)
-          .from("client_progress")
-          .update({
-            manual_contract_pdf_url: pub.publicUrl,
-            docusign_envelope_id: null,
-            docusign_link: null,
-            docusign_sent_at: null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("client_code", code);
+        manualUrl = pub.publicUrl;
       }
 
+      // 2) Build the DocuSign envelope RIGHT NOW with the fresh base64. We don't
+      // rely on the edge function re-fetching the URL — we pass the bytes.
+      const signerEmail = data.email?.trim() || client.email || null;
+      const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim()
+        || client.client_name || code;
+      let envelopeId: string | null = null;
+      let docusignError: string | null = null;
+      if (signerEmail && fullName) {
+        try {
+          const { data: dsData, error: dsErr } = await supabase.functions.invoke(
+            "create-docusign-envelope",
+            {
+              body: {
+                email: signerEmail,
+                name: fullName,
+                client_code: code,
+                return_url: `${window.location.origin}/step8`,
+                contract_pdf_base64: pdfBase64,
+              },
+            },
+          );
+          if (dsErr) throw dsErr;
+          envelopeId = (dsData as any)?.envelopeId ?? null;
+          if (!envelopeId) {
+            docusignError = "DocuSign a répondu sans envelope ID";
+          }
+        } catch (e: any) {
+          console.error("[contract → docusign]", e);
+          docusignError = e?.message || "Envoi DocuSign échoué";
+        }
+      } else {
+        docusignError = "Email ou nom du signataire manquant";
+      }
+
+      // 3) Persist: link the manual URL and the fresh envelope id (or null if it
+      // failed, so Step7 falls back to on-demand generation).
+      await (supabase as any)
+        .from("client_progress")
+        .update({
+          manual_contract_pdf_url: manualUrl,
+          docusign_envelope_id: envelopeId,
+          docusign_link: null,
+          docusign_sent_at: envelopeId ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("client_code", code);
+
       pdf.save(filename);
-      toast.success(`PDF généré et lié à ${client.client_name || code}`);
+      if (envelopeId) {
+        toast.success(`Contrat prêt et envoyé à DocuSign pour ${client.client_name || code}`);
+      } else {
+        toast.warning(
+          `PDF généré, mais l'enveloppe DocuSign n'a pas été créée${docusignError ? ` : ${docusignError}` : ""}`,
+        );
+      }
     } catch (err) {
       console.error(err);
       toast.error("Erreur lors de la génération du PDF");

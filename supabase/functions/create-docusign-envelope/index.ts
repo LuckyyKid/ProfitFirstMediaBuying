@@ -167,8 +167,20 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, name, client_code, return_url, envelope_id: existingEnvelopeId } = body as {
-      email?: string; name?: string; client_code?: string; return_url?: string; envelope_id?: string;
+    const {
+      email,
+      name,
+      client_code,
+      return_url,
+      envelope_id: existingEnvelopeId,
+      contract_pdf_base64: directBase64,
+    } = body as {
+      email?: string;
+      name?: string;
+      client_code?: string;
+      return_url?: string;
+      envelope_id?: string;
+      contract_pdf_base64?: string;
     };
 
     if (!email || !name) {
@@ -222,7 +234,15 @@ Deno.serve(async (req) => {
     let contractFetchError: string | null = null;
     let contractSource: string | null = null;
 
-    if (client_code) {
+    // Priority 0: caller (e.g. admin Contract Creator) passed the PDF bytes
+    // directly. Skip every DB/URL lookup — bypasses RLS/bucket ACL issues.
+    if (directBase64 && directBase64.length > 0) {
+      contractBase64 = directBase64;
+      contractSource = "direct_base64_upload";
+      console.log(`[docusign] Using directly-provided base64 (${directBase64.length} chars)`);
+    }
+
+    if (!contractBase64 && client_code) {
       // 1) Try manual contract uploaded from admin Contract Creator
       try {
         const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
