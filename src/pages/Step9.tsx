@@ -19,8 +19,11 @@ const translations = {
     welcomeMessage: "Welcome aboard! We're thrilled to have you join the TDIA family.",
     nextSteps: "What happens next?",
     step1: "Our team will review your information",
-    step2: "You'll receive a welcome email within 24 hours",
-    step3: "We'll schedule your onboarding call",
+    step2: "Join your Slack channel",
+    step3Prefix: "Get familiar with ",
+    step3LinkLabel: "TDIA Hub",
+    step3Suffix: "",
+    step4: "Be ready for the kick-off call",
     platformsInfo: "Important: Your Slack access link will be sent in your onboarding email.",
     thankYou: "Thank you for choosing TDIA!",
     back: "Back to Previous Step",
@@ -33,8 +36,11 @@ const translations = {
     welcomeMessage: "Bienvenue à bord ! Nous sommes ravis de vous accueillir dans la famille TDIA.",
     nextSteps: "Et maintenant ?",
     step1: "Notre équipe va examiner vos informations",
-    step2: "Vous recevrez un email de bienvenue sous 24h",
-    step3: "Nous planifierons votre appel d'intégration",
+    step2: "Rejoins ton canal Slack",
+    step3Prefix: "Familiarise-toi avec ",
+    step3LinkLabel: "TDIA Hub",
+    step3Suffix: "",
+    step4: "Sois prêt pour le kick-off call",
     platformsInfo: "Important : Le lien d'accès Slack sera envoyé dans votre email d'onboarding.",
     thankYou: "Merci d'avoir choisi TDIA !",
     back: "Retour à l'étape précédente",
@@ -171,7 +177,22 @@ const Step9 = () => {
                 </div>
                 <div className="flex items-start gap-3 p-4 bg-background/50 rounded-xl hover-scale transition-all">
                   <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                  <p className="text-foreground/90">{t.step3}</p>
+                  <p className="text-foreground/90">
+                    {t.step3Prefix}
+                    <a
+                      href="https://tdiaconnect.ca/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-2 hover:text-primary/80"
+                    >
+                      {t.step3LinkLabel}
+                    </a>
+                    {t.step3Suffix}
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-background/50 rounded-xl hover-scale transition-all">
+                  <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-foreground/90">{t.step4}</p>
                 </div>
               </div>
 
