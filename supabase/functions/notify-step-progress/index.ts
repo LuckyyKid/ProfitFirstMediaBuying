@@ -192,57 +192,78 @@ Deno.serve(async (req) => {
     let slackOk = false;
     let slackError: string | null = null;
 
-    if (isDone) {
-      // Final completion uses the dedicated notify-onboarding-complete function elsewhere.
-      slackOk = true;
+    const token = Deno.env.get('SLACK_BOT_TOKEN');
+    if (!token) {
+      slackError = 'SLACK_BOT_TOKEN missing';
     } else {
-      const token = Deno.env.get('SLACK_BOT_TOKEN');
-      if (!token) {
-        slackError = 'SLACK_BOT_TOKEN missing';
-      } else {
-        const p = payload as any;
-        const text = [
-          `🚀 *Progression onboarding client*`,
-          ``,
-          `*Client ID :* ${p.client_id ?? '—'}`,
-          ``,
-          `*Entreprise :* ${p.company_name ?? '—'}`,
-          ``,
-          `*Client :* ${p.client_name ?? '—'}`,
-          ``,
-          `*Deal value :* ${p.deal_value ?? '—'}$ / mois`,
-          ``,
-          `*Progression :* ${p.progress_percent}%`,
-          ``,
-          `*Étape actuelle :* ${p.current_step}/${p.total_steps} — ${p.current_step_name}`,
-          ``,
-          `*Dernière activité :* ${p.last_activity_at}`,
-          ``,
-          `*Paiement :* ${p.payment_status}`,
-          ``,
-          `*Contrat :* ${p.contract_status}`,
-          ``,
-          `*Appel démarrage :* ${p.kickoff_status}`,
-          ``,
-          `*Statut risque :* ${p.risk_level}`,
-          ``,
-          `*Action recommandée :* ${p.next_action}`,
-          ``,
-          `🔗 ${p.admin_dashboard_url}`,
-        ].join('\n');
+      const text = isDone
+        ? [
+            `🎉 *Onboarding TERMINÉ*`,
+            ``,
+            `*Client ID :* ${c.client_id ?? c.client_code ?? '—'}`,
+            ``,
+            `*Entreprise :* ${company_name ?? '—'}`,
+            ``,
+            `*Client :* ${c.client_name ?? '—'}`,
+            ``,
+            `*Deal value :* ${c.deal_value ?? '—'}$ / mois`,
+            ``,
+            `*Progression :* 100%`,
+            ``,
+            `*Paiement :* ${paid ? 'paid' : 'pending'}`,
+            ``,
+            `*Contrat :* ${signed ? 'signed' : 'pending'}`,
+            ``,
+            `*Appel démarrage :* ${kickoff ? 'booked' : 'not_booked'}`,
+            ``,
+            `*Complété le :* ${normalized.completed_at ?? new Date().toISOString()}`,
+            ``,
+            `🔗 https://testtdia.lovable.app/admin/clients/${c.client_code}`,
+          ].join('\n')
+        : (() => {
+            const p = payload as any;
+            return [
+              `🚀 *Progression onboarding client*`,
+              ``,
+              `*Client ID :* ${p.client_id ?? '—'}`,
+              ``,
+              `*Entreprise :* ${p.company_name ?? '—'}`,
+              ``,
+              `*Client :* ${p.client_name ?? '—'}`,
+              ``,
+              `*Deal value :* ${p.deal_value ?? '—'}$ / mois`,
+              ``,
+              `*Progression :* ${p.progress_percent}%`,
+              ``,
+              `*Étape actuelle :* ${p.current_step}/${p.total_steps} — ${p.current_step_name}`,
+              ``,
+              `*Dernière activité :* ${p.last_activity_at}`,
+              ``,
+              `*Paiement :* ${p.payment_status}`,
+              ``,
+              `*Contrat :* ${p.contract_status}`,
+              ``,
+              `*Appel démarrage :* ${p.kickoff_status}`,
+              ``,
+              `*Statut risque :* ${p.risk_level}`,
+              ``,
+              `*Action recommandée :* ${p.next_action}`,
+              ``,
+              `🔗 ${p.admin_dashboard_url}`,
+            ].join('\n');
+          })();
 
-        const res = await fetch('https://slack.com/api/chat.postMessage', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-          body: JSON.stringify({ channel: SLACK_CHANNEL, text, mrkdwn: true }),
-        });
-        const data = await res.json().catch(() => ({}));
-        slackOk = res.ok && data?.ok === true;
-        if (!slackOk) slackError = data?.error || `HTTP ${res.status}`;
-      }
+      const res = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify({ channel: SLACK_CHANNEL, text, mrkdwn: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      slackOk = res.ok && data?.ok === true;
+      if (!slackOk) slackError = data?.error || `HTTP ${res.status}`;
     }
 
     await supabase.from('client_activity_log').insert({
