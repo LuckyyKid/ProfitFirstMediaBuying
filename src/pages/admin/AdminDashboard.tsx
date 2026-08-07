@@ -191,9 +191,23 @@ const AdminDashboard = () => {
     const signerName = c.client_name || c.company_name || c.brand_name || c.client_code;
     const t = toast.loading("Préparation du contrat DocuSign…");
     try {
-      const pdfRes = await fetch(c.manual_contract_pdf_url);
-      if (!pdfRes.ok) throw new Error(`Impossible de récupérer le PDF (${pdfRes.status})`);
-      const blob = await pdfRes.blob();
+      // The bucket is private, so the stored public URL returns 400 in the
+      // browser. Extract the object path and download it via the storage SDK,
+      // which uses the admin's authenticated session.
+      const url = String(c.manual_contract_pdf_url);
+      const pathMatch = url.match(
+        /\/storage\/v1\/object\/(?:public|sign|authenticated)\/closed-deals-contracts\/([^?]+)/i,
+      );
+      const objectPath = pathMatch?.[1] ? decodeURIComponent(pathMatch[1]) : null;
+      if (!objectPath) {
+        throw new Error("URL du contrat non reconnue (chemin storage introuvable)");
+      }
+      const { data: blob, error: dlErr } = await supabase.storage
+        .from("closed-deals-contracts")
+        .download(objectPath);
+      if (dlErr || !blob) {
+        throw new Error(dlErr?.message || "Téléchargement du PDF échoué");
+      }
       const pdfBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(((reader.result as string) || "").split(",")[1] ?? "");
