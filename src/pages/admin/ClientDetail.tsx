@@ -228,16 +228,62 @@ const ClientDetail = () => {
         else if (v === "") v = null;
         patch[f.key] = v;
       }
+
+      const previousDealValue = Number(client.deal_value ?? 0);
+      const nextDealValue = Number(patch.deal_value ?? previousDealValue);
+      const dealValueChanged =
+        Number.isFinite(nextDealValue) &&
+        nextDealValue > 0 &&
+        nextDealValue !== previousDealValue;
+
+      // If the deal amount changes and we already handed the client a Stripe
+      // link, that link is now stale and locked on the old amount. Clear it
+      // in the same patch so the client can never see or reuse it.
+      const shouldRegenerateStripe =
+        dealValueChanged && !client.paid && Boolean(client.stripe_link);
+      if (shouldRegenerateStripe) {
+        patch.stripe_link = null;
+        patch.stripe_amount_expected = nextDealValue;
+      }
+
       const { error } = await (supabase as any)
         .from("client_progress")
         .update(patch)
         .eq("client_code", client.client_code);
       if (error) throw error;
-      toast.success("Infos client mises à jour");
+
+      if (shouldRegenerateStripe) {
+        try {
+          const { data: linkData, error: linkErr } = await supabase.functions.invoke(
+            "create-stripe-payment-link",
+            {
+              body: {
+                deal_value: nextDealValue,
+                client_name: client.client_name || client.company_name || client.name,
+                client_code: client.client_code,
+                client_id: client.client_id ?? undefined,
+                currency: "cad",
+              },
+            }
+          );
+          if (linkErr) throw linkErr;
+          if (!linkData?.url) throw new Error("stripe_link_regeneration_no_url");
+          toast.success("Nouveau lien Stripe généré (l'ancien est désactivé).");
+        } catch (regenErr: any) {
+          console.error("Stripe link regeneration failed:", regenErr);
+          toast.error(
+            "Infos enregistrées, mais impossible de régénérer le lien Stripe. Réessayez depuis l'onglet Paiement ou contactez le support."
+          );
+        }
+      } else {
+        toast.success("Infos client mises à jour");
+      }
+
       setEditingInfo(false);
       refetch?.();
     } catch (err: any) {
-      toast.error(err?.message || "Échec de la mise à jour");
+      console.error("saveInfoDraft error:", err);
+      toast.error("Impossible d'enregistrer les modifications. Réessayez dans un instant.");
     } finally {
       setSavingInfo(false);
     }

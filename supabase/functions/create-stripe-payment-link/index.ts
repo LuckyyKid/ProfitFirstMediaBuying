@@ -44,6 +44,39 @@ Deno.serve(async (req) => {
 
     const isRecurring = payment_type === 'recurring';
 
+    // 0. Deactivate any previous payment link for this deal/client so the
+    // client can never pay the old (now stale) amount. If the client has
+    // already paid, we short-circuit and just return the existing link.
+    try {
+      let previousQuery = supabase
+        .from('closed_deals')
+        .select('id, stripe_payment_link_id, paid')
+        .limit(1);
+      if (deal_id) {
+        previousQuery = previousQuery.eq('id', deal_id);
+      } else if (client_id) {
+        previousQuery = previousQuery.eq('client_id', client_id);
+      } else if (client_code) {
+        previousQuery = previousQuery.eq('client_code', client_code);
+      } else {
+        previousQuery = previousQuery.limit(0);
+      }
+      const { data: prevRows } = await previousQuery;
+      const previous = prevRows?.[0];
+      if (previous?.stripe_payment_link_id) {
+        try {
+          await stripe.paymentLinks.update(previous.stripe_payment_link_id, {
+            active: false,
+          });
+        } catch (deactivateErr) {
+          // Non-fatal: the old link may already be inactive or deleted.
+          console.warn('Could not deactivate previous payment link:', deactivateErr);
+        }
+      }
+    } catch (lookupErr) {
+      console.warn('Previous payment link lookup failed:', lookupErr);
+    }
+
     // 1. Product
     const product = await stripe.products.create({
       name: description || `TDIA – ${client_name || client_code || 'Client'}`,
