@@ -4,7 +4,15 @@ import { ContractData, defaultContractData } from "@/types/contract";
 import ContractForm from "@/components/contract/ContractForm";
 import ContractPreview from "@/components/contract/ContractPreview";
 import { Button } from "@/components/ui/button";
-import { FileDown, Eye, PenLine, Mail, ArrowLeft } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { FileDown, Eye, PenLine, Mail, ArrowLeft, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
@@ -12,11 +20,21 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import logoTDIA from "@/assets/contract/logo-tdia.png";
 
+type GenerationResult = {
+  clientCode: string;
+  clientName: string;
+  pdfSaved: boolean;
+  storageUploaded: boolean;
+  envelopeId: string | null;
+  docusignError: string | null;
+};
+
 const ContractCreator = () => {
   const { isAuthed } = useAdminAuth();
   const [data, setData] = useState<ContractData>(defaultContractData);
   const [view, setView] = useState<"form" | "preview">("form");
   const [generating, setGenerating] = useState(false);
+  const [result, setResult] = useState<GenerationResult | null>(null);
   const [params] = useSearchParams();
   const dealId = params.get("deal");
   const clientCode = params.get("client");
@@ -167,11 +185,13 @@ const ContractCreator = () => {
       // 1) Upload to storage (best-effort — no longer critical to DocuSign flow)
       const path = `${code}/${filename}`;
       let manualUrl: string | null = null;
+      let storageUploaded = false;
       const { error: upErr } = await supabase.storage
         .from("closed-deals-contracts")
         .upload(path, blob, { contentType: "application/pdf", upsert: true });
       if (upErr) console.warn("[contract upload]", upErr);
       else {
+        storageUploaded = true;
         const { data: pub } = supabase.storage
           .from("closed-deals-contracts")
           .getPublicUrl(path);
@@ -226,13 +246,14 @@ const ContractCreator = () => {
         .eq("client_code", code);
 
       pdf.save(filename);
-      if (envelopeId) {
-        toast.success(`Contrat prêt et envoyé à DocuSign pour ${client.client_name || code}`);
-      } else {
-        toast.warning(
-          `PDF généré, mais l'enveloppe DocuSign n'a pas été créée${docusignError ? ` : ${docusignError}` : ""}`,
-        );
-      }
+      setResult({
+        clientCode: code,
+        clientName: client.client_name || client.company_name || code,
+        pdfSaved: true,
+        storageUploaded,
+        envelopeId,
+        docusignError,
+      });
     } catch (err) {
       console.error(err);
       toast.error("Erreur lors de la génération du PDF");
@@ -317,6 +338,91 @@ const ContractCreator = () => {
           )}
         </div>
       </main>
+
+      <Dialog open={!!result} onOpenChange={(open) => { if (!open) setResult(null); }}>
+        <DialogContent className="sm:max-w-md">
+          {result && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  {result.envelopeId ? (
+                    <CheckCircle2 className="h-14 w-14 text-[hsl(var(--good,142_71%_45%))]" />
+                  ) : result.pdfSaved ? (
+                    <AlertTriangle className="h-14 w-14 text-yellow-500" />
+                  ) : (
+                    <XCircle className="h-14 w-14 text-destructive" />
+                  )}
+                  <DialogTitle className="text-center text-xl">
+                    {result.envelopeId
+                      ? "Contrat prêt pour signature"
+                      : "Contrat généré, envoi partiel"}
+                  </DialogTitle>
+                  <DialogDescription className="text-center">
+                    Client : <span className="font-medium text-foreground">{result.clientName}</span>{" "}
+                    <span className="text-muted-foreground">({result.clientCode})</span>
+                  </DialogDescription>
+                </div>
+              </DialogHeader>
+
+              <ul className="space-y-3 py-2">
+                <li className="flex items-start gap-3">
+                  {result.pdfSaved ? (
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[hsl(var(--good,142_71%_45%))] mt-0.5" />
+                  ) : (
+                    <XCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
+                  )}
+                  <div className="text-sm">
+                    <p className="font-medium">Téléchargement du PDF</p>
+                    <p className="text-muted-foreground">Le fichier a été enregistré sur ton appareil.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  {result.storageUploaded ? (
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[hsl(var(--good,142_71%_45%))] mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-500 mt-0.5" />
+                  )}
+                  <div className="text-sm">
+                    <p className="font-medium">Archivage dans Supabase Storage</p>
+                    <p className="text-muted-foreground">
+                      {result.storageUploaded
+                        ? "PDF stocké et associé au client."
+                        : "Upload échoué (non bloquant, DocuSign reçoit quand même le contrat)."}
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  {result.envelopeId ? (
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[hsl(var(--good,142_71%_45%))] mt-0.5" />
+                  ) : (
+                    <XCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
+                  )}
+                  <div className="text-sm">
+                    <p className="font-medium">Enveloppe DocuSign</p>
+                    <p className="text-muted-foreground">
+                      {result.envelopeId ? (
+                        <>
+                          Créée avec succès —{" "}
+                          <span className="font-mono text-xs">{result.envelopeId}</span>. Le client peut
+                          maintenant signer depuis l'étape 7.
+                        </>
+                      ) : (
+                        result.docusignError || "Enveloppe non créée."
+                      )}
+                    </p>
+                  </div>
+                </li>
+              </ul>
+
+              <DialogFooter>
+                <Button onClick={() => setResult(null)} className="w-full sm:w-auto">
+                  Fermer
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
