@@ -9,6 +9,7 @@ interface Props {
 const ContractImportantClauses = ({ data, onChange }: Props) => {
   const clauses = data.importantClauses ?? [];
   if (!data.importantClausesActive || clauses.length === 0) return null;
+  const isEN = data.language === "en";
 
   return (
     <div className={pageClassName} style={pageStyle}>
@@ -16,11 +17,14 @@ const ContractImportantClauses = ({ data, onChange }: Props) => {
         className="font-bold uppercase mb-8 pb-2 border-b-4 border-black"
         style={{ fontFamily: "'Times New Roman', serif", fontSize: "22px", letterSpacing: "0.05em" }}
       >
-        Clauses importantes
+        {isEN ? "Important clauses" : "Clauses importantes"}
       </h1>
 
       {clauses.map((clause, index) => (
-        <Section key={index} title={`${index + 1}. ${clause.title || "Titre de la clause"}`}>
+        <Section
+          key={index}
+          title={`${index + 1}. ${clause.title || (isEN ? "Clause title" : "Titre de la clause")}`}
+        >
           <p
             style={{ whiteSpace: "pre-wrap", outline: "none", minHeight: "1.5em" }}
             contentEditable={!!onChange}
@@ -32,7 +36,7 @@ const ContractImportantClauses = ({ data, onChange }: Props) => {
               onChange({ ...data, importantClauses: next });
             }}
           >
-            {clause.content || "{{contenu de la clause}}"}
+            {clause.content || (isEN ? "{{clause content}}" : "{{contenu de la clause}}")}
           </p>
         </Section>
       ))}

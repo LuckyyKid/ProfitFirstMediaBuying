@@ -20,6 +20,9 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 );
 
 const ContractForm = ({ data, onChange }: ContractFormProps) => {
+  const isEN = data.language === "en";
+  const t = (fr: string, en: string) => (isEN ? en : fr);
+
   const update = (field: keyof ContractData, value: any) => {
     onChange({ ...data, [field]: value });
   };
@@ -65,8 +68,10 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
-        <h2 className="font-display text-base font-semibold text-foreground">Lien avec le client</h2>
-        <Field label="Client ID (obligatoire — ex: CLI-XXXXXXXX)">
+        <h2 className="font-display text-base font-semibold text-foreground">
+          {t("Lien avec le client", "Link to the client")}
+        </h2>
+        <Field label={t("Client ID (obligatoire — ex: CLI-XXXXXXXX)", "Client ID (required — e.g. CLI-XXXXXXXX)")}>
           <Input
             value={data.clientCode}
             onChange={(e) => update("clientCode", e.target.value.trim().toUpperCase())}
@@ -75,49 +80,79 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
           />
         </Field>
         <p className="text-xs text-muted-foreground">
-          Le contrat sera relié à ce client dans le dashboard admin et stocké dans son dossier.
+          {t(
+            "Le contrat sera relié à ce client dans le dashboard admin et stocké dans son dossier.",
+            "The contract will be linked to this client in the admin dashboard and stored in their folder.",
+          )}
         </p>
       </div>
 
       <div>
-        <h2 className="font-display text-xl font-semibold text-foreground mb-4">Informations du client</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+          {t("Informations du client", "Client information")}
+        </h2>
         <div className="grid gap-4">
-          <Field label="Nom de la marque / entreprise">
-            <Input value={data.nomDuBrand} onChange={(e) => update("nomDuBrand", e.target.value)} placeholder="Ex: Boutique XYZ" />
+          <Field label={t("Nom de la marque / entreprise", "Brand / company name")}>
+            <Input
+              value={data.nomDuBrand}
+              onChange={(e) => update("nomDuBrand", e.target.value)}
+              placeholder={t("Ex: Boutique XYZ", "e.g. XYZ Boutique")}
+            />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Prénom du signataire">
-              <Input value={data.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder="Ex: Jean" />
+            <Field label={t("Prénom du signataire", "Signer's first name")}>
+              <Input
+                value={data.firstName}
+                onChange={(e) => update("firstName", e.target.value)}
+                placeholder={t("Ex: Jean", "e.g. John")}
+              />
             </Field>
-            <Field label="Nom du signataire">
-              <Input value={data.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder="Ex: Dupont" />
+            <Field label={t("Nom du signataire", "Signer's last name")}>
+              <Input
+                value={data.lastName}
+                onChange={(e) => update("lastName", e.target.value)}
+                placeholder={t("Ex: Dupont", "e.g. Smith")}
+              />
             </Field>
           </div>
-          <Field label="Email du client">
-            <Input type="email" value={data.email} onChange={(e) => update("email", e.target.value)} placeholder="Ex: client@example.com" />
+          <Field label={t("Email du client", "Client email")}>
+            <Input
+              type="email"
+              value={data.email}
+              onChange={(e) => update("email", e.target.value)}
+              placeholder={t("Ex: client@example.com", "e.g. client@example.com")}
+            />
           </Field>
-          <Field label="Coût (article 2 — texte libre)">
+          <Field label={t("Coût (article 2 — texte libre)", "Cost (article 2 — free text)")}>
             <Textarea
               rows={3}
               value={data.cost}
               onChange={(e) => update("cost", e.target.value)}
-              placeholder="Ex: Le Client paiera 2 597 $ CAD par mois pendant les 3 premiers mois, puis 3 500 $ CAD par mois."
+              placeholder={t(
+                "Ex: Le Client paiera 2 597 $ CAD par mois pendant les 3 premiers mois, puis 3 500 $ CAD par mois.",
+                "e.g. The Client will pay CAD $2,597 per month for the first 3 months, then CAD $3,500 per month.",
+              )}
             />
           </Field>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <Label className="text-sm font-medium text-muted-foreground">Introduction (début du contrat)</Label>
+            <Label className="text-sm font-medium text-muted-foreground">
+              {t("Introduction (début du contrat)", "Introduction (start of contract)")}
+            </Label>
             <Switch
               checked={data.introductionActive}
               onCheckedChange={(checked) => update("introductionActive", checked as any)}
             />
           </div>
           {data.introductionActive && (
-            <Field label="Texte de l'introduction">
+            <Field label={t("Texte de l'introduction", "Introduction text")}>
               <Textarea
                 rows={4}
                 value={data.introduction}
                 onChange={(e) => update("introduction", e.target.value)}
-                placeholder="Texte d'introduction qui apparaîtra au tout début du contrat..."
+                placeholder={t(
+                  "Texte d'introduction qui apparaîtra au tout début du contrat...",
+                  "Introduction text that will appear at the very beginning of the contract...",
+                )}
               />
             </Field>
           )}
@@ -125,42 +160,58 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </div>
 
       <div>
-        <h2 className="font-display text-xl font-semibold text-foreground mb-4">Détails du contrat</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+          {t("Détails du contrat", "Contract details")}
+        </h2>
         <div className="grid gap-4">
-          <Field label="Date de début des services">
+          <Field label={t("Date de début des services", "Services start date")}>
             <Input type="date" value={data.dateDeServices} onChange={(e) => update("dateDeServices", e.target.value)} />
           </Field>
-          <Field label="Prix mensuel (CAD)">
-            <Input value={data.prix} onChange={(e) => update("prix", e.target.value)} placeholder="Ex: 1 500" />
+          <Field label={t("Prix mensuel (CAD)", "Monthly price (CAD)")}>
+            <Input
+              value={data.prix}
+              onChange={(e) => update("prix", e.target.value)}
+              placeholder={t("Ex: 1 500", "e.g. 1,500")}
+            />
           </Field>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <Label className="text-sm font-medium text-muted-foreground">Période de test</Label>
+            <Label className="text-sm font-medium text-muted-foreground">
+              {t("Période de test", "Trial period")}
+            </Label>
             <Switch
               checked={data.periodeTestActive}
               onCheckedChange={(checked) => update("periodeTestActive", checked as any)}
             />
           </div>
           {data.periodeTestActive && (
-            <Field label="Durée de la période de test (mois)">
-              <Input value={data.periodeTestMois} onChange={(e) => update("periodeTestMois", e.target.value)} placeholder="Ex: 3" />
+            <Field label={t("Durée de la période de test (mois)", "Trial period length (months)")}>
+              <Input
+                value={data.periodeTestMois}
+                onChange={(e) => update("periodeTestMois", e.target.value)}
+                placeholder={t("Ex: 3", "e.g. 3")}
+              />
             </Field>
           )}
-          <Field label="Clause de garantie (article 6)">
+          <Field label={t("Clause de garantie (article 6)", "Warranty clause (article 6)")}>
             <Textarea
               rows={4}
               value={data.warranty}
               onChange={(e) => update("warranty", e.target.value)}
-              placeholder="Texte de la clause de garantie..."
+              placeholder={t("Texte de la clause de garantie...", "Warranty clause text...")}
             />
           </Field>
         </div>
       </div>
 
       <div>
-        <h2 className="font-display text-xl font-semibold text-foreground mb-4">Clauses importantes</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+          {t("Clauses importantes", "Important clauses")}
+        </h2>
         <div className="grid gap-4">
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <Label className="text-sm font-medium text-muted-foreground">Activer les clauses importantes</Label>
+            <Label className="text-sm font-medium text-muted-foreground">
+              {t("Activer les clauses importantes", "Enable important clauses")}
+            </Label>
             <Switch
               checked={data.importantClausesActive}
               onCheckedChange={(checked) => update("importantClausesActive", checked)}
@@ -172,7 +223,10 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               {clauses.map((clause, index) => (
                 <div key={index} className="space-y-2 rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Clause #{index + 1}</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      {t("Clause #", "Clause #")}
+                      {index + 1}
+                    </Label>
                     <Button variant="ghost" size="icon" onClick={() => removeClause(index)} className="h-7 w-7">
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -180,19 +234,19 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
                   <Input
                     value={clause.title}
                     onChange={(e) => updateClause(index, { title: e.target.value })}
-                    placeholder="Titre de la clause"
+                    placeholder={t("Titre de la clause", "Clause title")}
                   />
                   <Textarea
                     rows={3}
                     value={clause.content}
                     onChange={(e) => updateClause(index, { content: e.target.value })}
-                    placeholder="Contenu de la clause..."
+                    placeholder={t("Contenu de la clause...", "Clause content...")}
                   />
                 </div>
               ))}
               <Button variant="outline" onClick={addClause} className="gap-2">
                 <Plus className="w-4 h-4" />
-                Ajouter une clause
+                {t("Ajouter une clause", "Add a clause")}
               </Button>
             </>
           )}
@@ -200,10 +254,12 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
       </div>
 
       <div>
-        <h2 className="font-display text-xl font-semibold text-foreground mb-4">Signature du client</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+          {t("Signature du client", "Client signature")}
+        </h2>
         {data.signatureClient ? (
           <div className="relative border border-border rounded-lg p-4 bg-muted/30">
-            <img src={data.signatureClient} alt="Signature client" className="max-h-20 mx-auto" />
+            <img src={data.signatureClient} alt={t("Signature client", "Client signature")} className="max-h-20 mx-auto" />
             <Button
               variant="ghost"
               size="icon"
@@ -222,7 +278,17 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
           >
             <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              Glissez-déposez la signature ici ou <span className="text-primary underline">cliquez pour parcourir</span>
+              {isEN ? (
+                <>
+                  Drop the signature here or{" "}
+                  <span className="text-primary underline">click to browse</span>
+                </>
+              ) : (
+                <>
+                  Glissez-déposez la signature ici ou{" "}
+                  <span className="text-primary underline">cliquez pour parcourir</span>
+                </>
+              )}
             </p>
             <input
               ref={fileInputRef}

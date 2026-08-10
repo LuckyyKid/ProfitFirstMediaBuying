@@ -1,9 +1,12 @@
+export type ContractLanguage = "fr" | "en";
+
 export interface ImportantClause {
   title: string;
   content: string;
 }
 
 export interface ContractData {
+  language: ContractLanguage;
   clientCode: string;
   dateDeServices: string;
   nomDuBrand: string;
@@ -22,7 +25,13 @@ export interface ContractData {
   importantClauses: ImportantClause[];
 }
 
+export const defaultWarrantyByLang: Record<ContractLanguage, string> = {
+  fr: "La Société déclare et garantit qu'elle fournira des services avec un soin et une compétence raisonnables.",
+  en: "The Company represents and warrants that it will provide the services with reasonable care and skill.",
+};
+
 export const defaultContractData: ContractData = {
+  language: "fr",
   clientCode: "",
   dateDeServices: "",
   nomDuBrand: "",
@@ -33,8 +42,7 @@ export const defaultContractData: ContractData = {
   signatureClient: "",
   periodeTestActive: true,
   periodeTestMois: "3",
-  warranty:
-    "La Société déclare et garantit qu'elle fournira des services avec un soin et une compétence raisonnables.",
+  warranty: defaultWarrantyByLang.fr,
   cost: "",
   introduction: "",
   introductionActive: false,

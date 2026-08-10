@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
-import { ContractData, defaultContractData } from "@/types/contract";
+import { ContractData, ContractLanguage, defaultContractData, defaultWarrantyByLang } from "@/types/contract";
 import ContractForm from "@/components/contract/ContractForm";
 import ContractPreview from "@/components/contract/ContractPreview";
 import { Button } from "@/components/ui/button";
@@ -109,12 +109,31 @@ const ContractCreator = () => {
 
   if (!isAuthed) return <Navigate to="/admin/login" replace />;
 
+  const isEN = data.language === "en";
+  const t = (fr: string, en: string) => (isEN ? en : fr);
+
+  const setLanguage = (lang: ContractLanguage) => {
+    setData((prev) => {
+      if (prev.language === lang) return prev;
+      // Only auto-swap the warranty if the user hasn't customised it —
+      // detect this by comparing to the previous language's default text.
+      const nextWarranty =
+        prev.warranty === defaultWarrantyByLang[prev.language]
+          ? defaultWarrantyByLang[lang]
+          : prev.warranty;
+      return { ...prev, language: lang, warranty: nextWarranty };
+    });
+  };
 
   const generatePDF = useCallback(async (deliveryMode: "embedded" | "email" = "embedded") => {
     if (!previewRef.current) return;
     const code = (data.clientCode || "").trim().toUpperCase();
     if (!code) {
-      toast.error("Veuillez renseigner le Client ID pour relier le contrat");
+      toast.error(
+        data.language === "en"
+          ? "Please enter the Client ID to link the contract"
+          : "Veuillez renseigner le Client ID pour relier le contrat",
+      );
       return;
     }
     setGenerating(true);
@@ -126,7 +145,11 @@ const ContractCreator = () => {
         .eq("client_code", code)
         .maybeSingle();
       if (!client) {
-        toast.error(`Aucun client trouvé avec le code ${code}`);
+        toast.error(
+          data.language === "en"
+            ? `No client found with code ${code}`
+            : `Aucun client trouvé avec le code ${code}`,
+        );
         setGenerating(false);
         return;
       }
@@ -237,14 +260,20 @@ const ContractCreator = () => {
           envelopeId = (dsData as any)?.envelopeId ?? null;
           emailSentTo = (dsData as any)?.emailSentTo ?? null;
           if (!envelopeId) {
-            docusignError = "DocuSign a répondu sans envelope ID";
+            docusignError = data.language === "en"
+              ? "DocuSign returned no envelope ID"
+              : "DocuSign a répondu sans envelope ID";
           }
         } catch (e: any) {
           console.error("[contract → docusign]", e);
-          docusignError = e?.message || "Envoi DocuSign échoué";
+          docusignError = e?.message || (data.language === "en"
+            ? "DocuSign send failed"
+            : "Envoi DocuSign échoué");
         }
       } else {
-        docusignError = "Email ou nom du signataire manquant";
+        docusignError = data.language === "en"
+          ? "Signer email or name is missing"
+          : "Email ou nom du signataire manquant";
       }
 
       // 3) Persist: link the manual URL and the fresh envelope id (or null if it
@@ -278,7 +307,11 @@ const ContractCreator = () => {
       });
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la génération du PDF");
+      toast.error(
+        data.language === "en"
+          ? "Error while generating the PDF"
+          : "Erreur lors de la génération du PDF",
+      );
     } finally {
       setGenerating(false);
     }
@@ -293,36 +326,61 @@ const ContractCreator = () => {
               <Link to="/admin"><ArrowLeft className="w-4 h-4 mr-1" />Admin</Link>
             </Button>
             <img src={logoTDIA} alt="TDIA" className="h-8" />
-            <p className="text-sm text-muted-foreground hidden md:block">Générateur de contrats</p>
+            <p className="text-sm text-muted-foreground hidden md:block">
+              {t("Générateur de contrats", "Contract generator")}
+            </p>
           </div>
           <div className="flex items-center gap-2">
+            <div
+              className="flex items-center bg-secondary rounded-lg p-1"
+              role="group"
+              aria-label={t("Langue du contrat", "Contract language")}
+            >
+              <button
+                onClick={() => setLanguage("fr")}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${!isEN ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={!isEN}
+              >
+                FR
+              </button>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${isEN ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                aria-pressed={isEN}
+              >
+                EN
+              </button>
+            </div>
             <div className="hidden sm:flex items-center bg-secondary rounded-lg p-1">
               <button
                 onClick={() => setView("form")}
                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "form" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <PenLine className="w-4 h-4 inline mr-1.5 -mt-0.5" />Éditer
+                <PenLine className="w-4 h-4 inline mr-1.5 -mt-0.5" />{t("Éditer", "Edit")}
               </button>
               <button
                 onClick={() => setView("preview")}
                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />Aperçu
+                <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />{t("Aperçu", "Preview")}
               </button>
             </div>
             <Button onClick={() => generatePDF("embedded")} disabled={generating} className="gap-2">
               <FileDown className="w-4 h-4" />
-              {generating ? "Génération..." : "Télécharger PDF"}
+              {generating ? t("Génération...", "Generating...") : t("Télécharger PDF", "Download PDF")}
             </Button>
             <Button
               variant="outline"
               disabled={generating || !data.email}
               onClick={() => generatePDF("email")}
               className="gap-2 hidden md:inline-flex"
-              title="Envoie le contrat par email via DocuSign (séparé du flow Step 7)"
+              title={t(
+                "Envoie le contrat par email via DocuSign (séparé du flow Step 7)",
+                "Sends the contract by email via DocuSign (separate from the Step 7 flow)",
+              )}
             >
               <Mail className="w-4 h-4" />
-              {generating ? "Envoi..." : "Envoyer par email"}
+              {generating ? t("Envoi...", "Sending...") : t("Envoyer par email", "Send by email")}
             </Button>
           </div>
         </div>
@@ -330,10 +388,10 @@ const ContractCreator = () => {
 
       <div className="sm:hidden flex items-center bg-secondary rounded-lg p-1 mx-4 mt-4">
         <button onClick={() => setView("form")} className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${view === "form" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
-          <PenLine className="w-4 h-4 inline mr-1.5 -mt-0.5" />Éditer
+          <PenLine className="w-4 h-4 inline mr-1.5 -mt-0.5" />{t("Éditer", "Edit")}
         </button>
         <button onClick={() => setView("preview")} className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${view === "preview" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
-          <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />Aperçu
+          <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />{t("Aperçu", "Preview")}
         </button>
       </div>
 
@@ -375,12 +433,13 @@ const ContractCreator = () => {
                   <DialogTitle className="text-center text-xl">
                     {result.envelopeId
                       ? result.deliveryMode === "email"
-                        ? "Contrat envoyé par email"
-                        : "Contrat prêt pour signature"
-                      : "Contrat généré, envoi partiel"}
+                        ? t("Contrat envoyé par email", "Contract sent by email")
+                        : t("Contrat prêt pour signature", "Contract ready for signature")
+                      : t("Contrat généré, envoi partiel", "Contract generated, partial send")}
                   </DialogTitle>
                   <DialogDescription className="text-center">
-                    Client : <span className="font-medium text-foreground">{result.clientName}</span>{" "}
+                    {t("Client :", "Client:")}{" "}
+                    <span className="font-medium text-foreground">{result.clientName}</span>{" "}
                     <span className="text-muted-foreground">({result.clientCode})</span>
                   </DialogDescription>
                 </div>
@@ -394,8 +453,10 @@ const ContractCreator = () => {
                     <XCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
                   )}
                   <div className="text-sm">
-                    <p className="font-medium">Téléchargement du PDF</p>
-                    <p className="text-muted-foreground">Le fichier a été enregistré sur ton appareil.</p>
+                    <p className="font-medium">{t("Téléchargement du PDF", "PDF download")}</p>
+                    <p className="text-muted-foreground">
+                      {t("Le fichier a été enregistré sur ton appareil.", "The file has been saved to your device.")}
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
@@ -405,11 +466,14 @@ const ContractCreator = () => {
                     <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-500 mt-0.5" />
                   )}
                   <div className="text-sm">
-                    <p className="font-medium">Archivage dans Supabase Storage</p>
+                    <p className="font-medium">{t("Archivage dans Supabase Storage", "Archived in Supabase Storage")}</p>
                     <p className="text-muted-foreground">
                       {result.storageUploaded
-                        ? "PDF stocké et associé au client."
-                        : "Upload échoué (non bloquant, DocuSign reçoit quand même le contrat)."}
+                        ? t("PDF stocké et associé au client.", "PDF stored and linked to the client.")
+                        : t(
+                            "Upload échoué (non bloquant, DocuSign reçoit quand même le contrat).",
+                            "Upload failed (non-blocking — DocuSign still receives the contract).",
+                          )}
                     </p>
                   </div>
                 </li>
@@ -422,29 +486,35 @@ const ContractCreator = () => {
                   <div className="text-sm">
                     <p className="font-medium">
                       {result.deliveryMode === "email"
-                        ? "Envoi email DocuSign"
-                        : "Enveloppe DocuSign (Step 7)"}
+                        ? t("Envoi email DocuSign", "DocuSign email send")
+                        : t("Enveloppe DocuSign (Step 7)", "DocuSign envelope (Step 7)")}
                     </p>
                     <p className="text-muted-foreground">
                       {result.envelopeId ? (
                         result.deliveryMode === "email" ? (
                           <>
-                            Email envoyé à{" "}
+                            {t("Email envoyé à", "Email sent to")}{" "}
                             <span className="font-medium text-foreground">
-                              {result.emailSentTo || "l'adresse du client"}
+                              {result.emailSentTo || t("l'adresse du client", "the client's address")}
                             </span>{" "}
-                            avec le lien de signature DocuSign. Enveloppe :{" "}
+                            {t(
+                              "avec le lien de signature DocuSign. Enveloppe :",
+                              "with the DocuSign signing link. Envelope:",
+                            )}{" "}
                             <span className="font-mono text-xs">{result.envelopeId}</span>.
                           </>
                         ) : (
                           <>
-                            Créée avec succès —{" "}
-                            <span className="font-mono text-xs">{result.envelopeId}</span>. Le client peut
-                            maintenant signer depuis l'étape 7.
+                            {t("Créée avec succès —", "Successfully created —")}{" "}
+                            <span className="font-mono text-xs">{result.envelopeId}</span>.{" "}
+                            {t(
+                              "Le client peut maintenant signer depuis l'étape 7.",
+                              "The client can now sign from step 7.",
+                            )}
                           </>
                         )
                       ) : (
-                        result.docusignError || "Enveloppe non créée."
+                        result.docusignError || t("Enveloppe non créée.", "Envelope not created.")
                       )}
                     </p>
                   </div>
@@ -453,7 +523,7 @@ const ContractCreator = () => {
 
               <DialogFooter>
                 <Button onClick={() => setResult(null)} className="w-full sm:w-auto">
-                  Fermer
+                  {t("Fermer", "Close")}
                 </Button>
               </DialogFooter>
             </>
