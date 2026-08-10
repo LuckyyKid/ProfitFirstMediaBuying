@@ -24,10 +24,11 @@ import {
   timeAgo,
 } from "@/lib/onboardingHelpers";
 import {
-  ArrowLeft, Check, Copy, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Mail, Pencil,
+  ArrowLeft, Check, Copy, Download, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Mail, Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,6 +63,65 @@ const ClientDetail = () => {
   const [infoDraft, setInfoDraft] = useState<Record<string, any>>({});
   const [savingInfo, setSavingInfo] = useState(false);
   const [regeneratingStripe, setRegeneratingStripe] = useState(false);
+  const [exportingXlsx, setExportingXlsx] = useState(false);
+
+  const exportAnswers = async () => {
+    const code = client?.client_code;
+    if (!code) { toast.error("Client sans client_code — export impossible"); return; }
+    setExportingXlsx(true);
+    try {
+      const { data: voice, error: voiceErr } = await supabase
+        .from("voice_answers")
+        .select("form_key, question_id, transcript, written_fallback, duration_ms, status, ambient_noise_warning, created_at")
+        .eq("client_code", code)
+        .order("form_key", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (voiceErr) throw voiceErr;
+
+      const mapForm = (rows: any[]) => rows.map((r) => ({
+        Section: r.section ?? "",
+        "Clé question": r.question_key,
+        Question: r.question_label ?? "",
+        Réponse: r.answer ?? "",
+        Date: r.created_at ? new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") : "",
+      }));
+
+      const voiceRows = (voice ?? []).map((r: any) => ({
+        Formulaire: r.form_key,
+        "ID question": r.question_id,
+        Transcription: r.transcript ?? "",
+        "Texte écrit (fallback)": r.written_fallback ?? "",
+        "Durée (s)": r.duration_ms ? Math.round(r.duration_ms / 1000) : 0,
+        Statut: r.status,
+        "Bruit ambiant": r.ambient_noise_warning ? "oui" : "non",
+        Date: r.created_at ? new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") : "",
+      }));
+
+      if (welcome.length === 0 && founder.length === 0 && voiceRows.length === 0) {
+        toast.info("Aucune réponse à exporter pour ce client");
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+      const addSheet = (name: string, rows: any[], cols: any[]) => {
+        const ws = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{ Info: "Aucune réponse" }]);
+        ws["!cols"] = cols;
+        XLSX.utils.book_append_sheet(wb, ws, name);
+      };
+      const formCols = [{ wch: 20 }, { wch: 24 }, { wch: 40 }, { wch: 60 }, { wch: 20 }];
+      addSheet("Quiz intégration", mapForm(welcome), formCols);
+      addSheet("Founder Scan", mapForm(founder), formCols);
+      addSheet("Voix", voiceRows, [{ wch: 22 }, { wch: 28 }, { wch: 80 }, { wch: 60 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 20 }]);
+
+      const date = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `reponses_${code}_${date}.xlsx`);
+      toast.success(`Export généré (${welcome.length} quiz · ${founder.length} founder · ${voiceRows.length} voix)`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erreur lors de l'export");
+    } finally {
+      setExportingXlsx(false);
+    }
+  };
 
   const saveLanguage = async (next: "fr" | "en") => {
     if (!client?.client_code) return;
@@ -449,6 +509,16 @@ const ClientDetail = () => {
             >
               <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
               {syncing ? "Synchro…" : "Resynchroniser"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportAnswers}
+              disabled={exportingXlsx}
+              title="Télécharger un XLSX avec les réponses du Quiz d'intégration, du Founder Scan et de l'onboarding vocal"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              {exportingXlsx ? "Export…" : "Télécharger XLSX"}
             </Button>
             <Button
               variant={client.completed_at ? "outline" : "default"}
