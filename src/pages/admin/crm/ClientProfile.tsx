@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Calculator, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Calculator, CheckCircle2, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { SectionHeader, StatusBadge, RiskBadge, ClickUpPlaceholder } from "@/crm/ui";
 import { AutoForm, FieldDef } from "@/crm/FormKit";
 import { useCrmSingle, useCrmList, upsertCrmSingle } from "@/crm/hooks";
@@ -871,10 +872,75 @@ const TABS = [
   { v: "clickup", l: "ClickUp" },
 ];
 
+async function exportOnboardingAnswers(client: any) {
+  const code = client?.client_code;
+  if (!code) {
+    toast.error("Ce client n'a pas de client_code — export impossible");
+    return;
+  }
+
+  const [formRes, voiceRes] = await Promise.all([
+    supabase
+      .from("client_form_answers")
+      .select("form_type, section, question_key, question_label, answer, created_at")
+      .eq("client_code", code)
+      .order("form_type", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("voice_answers")
+      .select("form_key, question_id, transcript, written_fallback, duration_ms, status, ambient_noise_warning, created_at")
+      .eq("client_code", code)
+      .order("form_key", { ascending: true })
+      .order("created_at", { ascending: true }),
+  ]);
+
+  if (formRes.error) { toast.error(`Formulaires: ${formRes.error.message}`); return; }
+  if (voiceRes.error) { toast.error(`Voix: ${voiceRes.error.message}`); return; }
+
+  const formRows = (formRes.data ?? []).map(r => ({
+    Formulaire: r.form_type,
+    Section: r.section ?? "",
+    "Clé question": r.question_key,
+    Question: r.question_label ?? "",
+    Réponse: r.answer ?? "",
+    Date: r.created_at ? new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") : "",
+  }));
+
+  const voiceRows = (voiceRes.data ?? []).map(r => ({
+    Formulaire: r.form_key,
+    "ID question": r.question_id,
+    Transcription: r.transcript ?? "",
+    "Texte écrit (fallback)": r.written_fallback ?? "",
+    "Durée (s)": r.duration_ms ? Math.round(r.duration_ms / 1000) : 0,
+    Statut: r.status,
+    "Bruit ambiant": r.ambient_noise_warning ? "oui" : "non",
+    Date: r.created_at ? new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ") : "",
+  }));
+
+  if (formRows.length === 0 && voiceRows.length === 0) {
+    toast.info("Aucune réponse à exporter pour ce client");
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const wsForm = XLSX.utils.json_to_sheet(formRows.length > 0 ? formRows : [{ Info: "Aucune réponse de formulaire" }]);
+  wsForm["!cols"] = [{ wch: 18 }, { wch: 20 }, { wch: 24 }, { wch: 40 }, { wch: 60 }, { wch: 20 }];
+  XLSX.utils.book_append_sheet(wb, wsForm, "Formulaires");
+
+  const wsVoice = XLSX.utils.json_to_sheet(voiceRows.length > 0 ? voiceRows : [{ Info: "Aucune réponse vocale" }]);
+  wsVoice["!cols"] = [{ wch: 22 }, { wch: 28 }, { wch: 80 }, { wch: 60 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 20 }];
+  XLSX.utils.book_append_sheet(wb, wsVoice, "Voix");
+
+  const date = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `reponses_${code}_${date}.xlsx`);
+  toast.success(`Export généré (${formRows.length} formulaire · ${voiceRows.length} voix)`);
+}
+
 export default function ClientProfile() {
   const { id } = useParams();
   const [client, setClient] = useState<any | null>(null);
   const [tab, setTab] = useState("overview");
+  const [exporting, setExporting] = useState(false);
 
   const load = async () => {
     if (!id) return;
@@ -886,6 +952,13 @@ export default function ClientProfile() {
   if (!id) return null;
   if (!client) return <div className="p-6 text-muted-foreground">Chargement…</div>;
 
+  const handleExport = async () => {
+    setExporting(true);
+    try { await exportOnboardingAnswers(client); }
+    catch (e: any) { toast.error(e?.message ?? "Erreur lors de l'export"); }
+    finally { setExporting(false); }
+  };
+
   return (
     <div>
       <div className="mb-4">
@@ -894,7 +967,16 @@ export default function ClientProfile() {
       <SectionHeader
         title={client.company_name}
         description={`${client.client_code ?? ""} · ${client.industry ?? "—"} · AM: ${client.am_owner_name ?? "—"}`}
-        actions={<><StatusBadge status={client.current_phase} /><RiskBadge level={client.risk_level} /></>}
+        actions={
+          <>
+            <StatusBadge status={client.current_phase} />
+            <RiskBadge level={client.risk_level} />
+            <Button size="sm" variant="outline" onClick={handleExport} disabled={exporting}>
+              <Download className="h-4 w-4 mr-1" />
+              {exporting ? "Export…" : "Exporter réponses (XLSX)"}
+            </Button>
+          </>
+        }
       />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex flex-wrap h-auto justify-start">
