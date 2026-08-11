@@ -50,10 +50,10 @@ const ContractPageSignature = ({ data, date, p }: Props) => {
             )}
           </div>
           <p className="font-bold uppercase tracking-wide text-[13px] mt-3">
-            {p(data.nomDuBrand, "{{Nomdubrand}}")} Inc.
+            {p(data.nomDuBrand, "{{Company_name}}")} Inc.
           </p>
           <p className="text-[12px]">
-            {p(data.firstName, "{{FirstName}}")} {p(data.lastName, "{{LastName}}")}
+            {p(data.firstName, "{{Client_Signatory_name}}")} {p(data.lastName, "")}
           </p>
           <p className="text-[11px] uppercase tracking-widest mt-3 text-black/60">Date · {date}</p>
         </div>

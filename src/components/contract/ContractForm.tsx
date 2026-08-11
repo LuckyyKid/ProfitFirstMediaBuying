@@ -92,7 +92,7 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
           {t("Informations du client", "Client information")}
         </h2>
         <div className="grid gap-4">
-          <Field label={t("Nom de la marque / entreprise", "Brand / company name")}>
+          <Field label={t("Nom de l'entreprise (Company_name)", "Company name (Company_name)")}>
             <Input
               value={data.nomDuBrand}
               onChange={(e) => update("nomDuBrand", e.target.value)}
@@ -123,39 +123,6 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
               placeholder={t("Ex: client@example.com", "e.g. client@example.com")}
             />
           </Field>
-          <Field label={t("Coût (article 2 — texte libre)", "Cost (article 2 — free text)")}>
-            <Textarea
-              rows={3}
-              value={data.cost}
-              onChange={(e) => update("cost", e.target.value)}
-              placeholder={t(
-                "Ex: Le Client paiera 2 597 $ CAD par mois pendant les 3 premiers mois, puis 3 500 $ CAD par mois.",
-                "e.g. The Client will pay CAD $2,597 per month for the first 3 months, then CAD $3,500 per month.",
-              )}
-            />
-          </Field>
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <Label className="text-sm font-medium text-muted-foreground">
-              {t("Introduction (début du contrat)", "Introduction (start of contract)")}
-            </Label>
-            <Switch
-              checked={data.introductionActive}
-              onCheckedChange={(checked) => update("introductionActive", checked as any)}
-            />
-          </div>
-          {data.introductionActive && (
-            <Field label={t("Texte de l'introduction", "Introduction text")}>
-              <Textarea
-                rows={4}
-                value={data.introduction}
-                onChange={(e) => update("introduction", e.target.value)}
-                placeholder={t(
-                  "Texte d'introduction qui apparaîtra au tout début du contrat...",
-                  "Introduction text that will appear at the very beginning of the contract...",
-                )}
-              />
-            </Field>
-          )}
         </div>
       </div>
 
@@ -164,14 +131,11 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
           {t("Détails du contrat", "Contract details")}
         </h2>
         <div className="grid gap-4">
-          <Field label={t("Date de début des services", "Services start date")}>
-            <Input type="date" value={data.dateDeServices} onChange={(e) => update("dateDeServices", e.target.value)} />
-          </Field>
-          <Field label={t("Prix mensuel (CAD)", "Monthly price (CAD)")}>
+          <Field label={t("Date de début des services (Service_date)", "Services start date (Service_date)")}>
             <Input
-              value={data.prix}
-              onChange={(e) => update("prix", e.target.value)}
-              placeholder={t("Ex: 1 500", "e.g. 1,500")}
+              type="date"
+              value={data.dateDeServices}
+              onChange={(e) => update("dateDeServices", e.target.value)}
             />
           </Field>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
@@ -184,20 +148,41 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
             />
           </div>
           {data.periodeTestActive && (
-            <Field label={t("Durée de la période de test (mois)", "Trial period length (months)")}>
-              <Input
-                value={data.periodeTestMois}
-                onChange={(e) => update("periodeTestMois", e.target.value)}
-                placeholder={t("Ex: 3", "e.g. 3")}
-              />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("Durée de la période de test — mois (Trial_Month_Number)", "Trial length — months (Trial_Month_Number)")}>
+                <Input
+                  value={data.periodeTestMois}
+                  onChange={(e) => update("periodeTestMois", e.target.value)}
+                  placeholder={t("Ex: 3", "e.g. 3")}
+                />
+              </Field>
+              <Field label={t("Prix pendant la période de test (Trial_Price)", "Trial-period price (Trial_Price)")}>
+                <Input
+                  value={data.prixEssai}
+                  onChange={(e) => update("prixEssai", e.target.value)}
+                  placeholder={t("Ex: 2 597 $ CAD", "e.g. CAD $2,597")}
+                />
+              </Field>
+            </div>
           )}
-          <Field label={t("Clause de garantie (article 6)", "Warranty clause (article 6)")}>
-            <Textarea
-              rows={4}
-              value={data.warranty}
-              onChange={(e) => update("warranty", e.target.value)}
-              placeholder={t("Texte de la clause de garantie...", "Warranty clause text...")}
+          <Field
+            label={
+              data.periodeTestActive
+                ? t("Prix mensuel après période de test (Normal_Price)", "Monthly price after trial (Normal_Price)")
+                : t("Prix mensuel (Normal_Price)", "Monthly price (Normal_Price)")
+            }
+          >
+            <Input
+              value={data.prix}
+              onChange={(e) => update("prix", e.target.value)}
+              placeholder={t("Ex: 3 500 $ CAD", "e.g. CAD $3,500")}
+            />
+          </Field>
+          <Field label={t("Créatifs minimum par mois (Creative_minimum)", "Minimum creatives per month (Creative_minimum)")}>
+            <Input
+              value={data.creativeMinimum}
+              onChange={(e) => update("creativeMinimum", e.target.value)}
+              placeholder={t("Ex: 12", "e.g. 12")}
             />
           </Field>
         </div>
@@ -205,12 +190,12 @@ const ContractForm = ({ data, onChange }: ContractFormProps) => {
 
       <div>
         <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-          {t("Clauses importantes", "Important clauses")}
+          {t("Clauses additionnelles (optionnel)", "Additional clauses (optional)")}
         </h2>
         <div className="grid gap-4">
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <Label className="text-sm font-medium text-muted-foreground">
-              {t("Activer les clauses importantes", "Enable important clauses")}
+              {t("Ajouter des clauses personnalisées", "Add custom clauses")}
             </Label>
             <Switch
               checked={data.importantClausesActive}

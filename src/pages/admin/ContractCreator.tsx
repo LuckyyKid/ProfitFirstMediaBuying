@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
-import { ContractData, ContractLanguage, defaultContractData, defaultWarrantyByLang } from "@/types/contract";
+import { ContractData, ContractLanguage, defaultContractData } from "@/types/contract";
 import ContractForm from "@/components/contract/ContractForm";
 import ContractPreview from "@/components/contract/ContractPreview";
 import { Button } from "@/components/ui/button";
@@ -113,16 +113,7 @@ const ContractCreator = () => {
   const t = (fr: string, en: string) => (isEN ? en : fr);
 
   const setLanguage = (lang: ContractLanguage) => {
-    setData((prev) => {
-      if (prev.language === lang) return prev;
-      // Only auto-swap the warranty if the user hasn't customised it —
-      // detect this by comparing to the previous language's default text.
-      const nextWarranty =
-        prev.warranty === defaultWarrantyByLang[prev.language]
-          ? defaultWarrantyByLang[lang]
-          : prev.warranty;
-      return { ...prev, language: lang, warranty: nextWarranty };
-    });
+    setData((prev) => (prev.language === lang ? prev : { ...prev, language: lang }));
   };
 
   const generatePDF = useCallback(async (deliveryMode: "embedded" | "email" = "embedded") => {
