@@ -208,22 +208,46 @@ const AdminDashboard = () => {
       if (dlErr || !blob) {
         throw new Error(dlErr?.message || "Téléchargement du PDF échoué");
       }
-      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+      const fileBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(((reader.result as string) || "").split(",")[1] ?? "");
         reader.onerror = () => reject(reader.error);
         reader.readAsDataURL(blob);
+      });
+      // The bucket now stores .docx (ContractCreator pivoted from HTML→PDF to
+      // filling the original Word template). Detect the extension so DocuSign
+      // gets the bytes tagged with the correct fileExtension — otherwise it
+      // rejects the envelope with "Invalid document" / base64 errors.
+      const isDocx = /\.docx$/i.test(objectPath);
+      const contractField = isDocx ? "contract_docx_base64" : "contract_pdf_base64";
+      console.log("[send-docusign-contract-email] invoking", {
+        objectPath,
+        contractField,
+        base64_length: fileBase64.length,
+        base64_mod4: fileBase64.length % 4,
       });
       const { data, error } = await supabase.functions.invoke("send-docusign-contract-email", {
         body: {
           email: c.email,
           name: signerName,
           client_code: c.client_code,
-          contract_pdf_base64: pdfBase64,
+          [contractField]: fileBase64,
         },
       });
       toast.dismiss(t);
-      if (error) throw error;
+      if (error) {
+        const ctx: any = (error as any)?.context;
+        let detail = "";
+        try {
+          if (ctx?.clone && ctx?.text) detail = (await ctx.clone().text())?.slice(0, 400) || "";
+        } catch { /* ignore */ }
+        console.error("[send-docusign-contract-email] non-2xx", {
+          message: (error as any)?.message,
+          status: ctx?.status,
+          body: detail,
+        });
+        throw new Error(`[${ctx?.status ?? "??"}] ${detail || (error as any)?.message}`);
+      }
       if ((data as any)?.envelopeId) {
         toast.success(`Contrat DocuSign envoyé à ${c.email}`);
       } else {

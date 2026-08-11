@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import logoTDIA from "@/assets/contract/logo-tdia.png";
-import { fillContractDocxBlob, DOCX_MIME } from "@/lib/contract-docx";
+import { fillContractDocxBlob, fillContractDocxBase64, DOCX_MIME } from "@/lib/contract-docx";
 
 type GenerationResult = {
   clientCode: string;
@@ -142,22 +142,15 @@ const ContractCreator = () => {
         return;
       }
 
-      // Fill the .docx template with the current form values — same helper
+      // Fill the .docx template with the current form values — same helpers
       // used by the live preview, so what you see is what the client gets.
-      const blob = await fillContractDocxBlob(data);
+      // Base64 comes straight from pizzip (no data-URI prefix, no whitespace,
+      // padded to a multiple of 4) — DocuSign's .NET decoder is strict.
+      const [blob, docxBase64] = await Promise.all([
+        fillContractDocxBlob(data),
+        fillContractDocxBase64(data),
+      ]);
       const filename = `contrat-${code}-${Date.now()}.docx`;
-
-      // Convert blob to base64 for direct DocuSign upload — bypasses any
-      // storage URL / RLS flakiness that would otherwise fall back to placeholder.
-      const docxBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1] ?? "");
-        };
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(blob);
-      });
 
       // 2) Upload to storage (best-effort — no longer critical to DocuSign flow)
       const path = `${code}/${filename}`;
@@ -205,11 +198,55 @@ const ContractCreator = () => {
                 return_url: `${window.location.origin}/step8`,
                 contract_docx_base64: docxBase64,
               };
+          console.log("[contract → docusign] invoking", fnName, {
+            email: signerEmail,
+            name: fullName,
+            client_code: code,
+            docxBase64_length: docxBase64.length,
+            docxBase64_mod4: docxBase64.length % 4,
+            docxBase64_head: docxBase64.slice(0, 32),
+            docxBase64_tail: docxBase64.slice(-16),
+          });
           const { data: dsData, error: dsErr } = await supabase.functions.invoke(
             fnName,
             { body: invokeBody },
           );
-          if (dsErr) throw dsErr;
+          console.log("[contract → docusign] response", { dsData, dsErr });
+          if (dsErr) {
+            // Supabase wraps non-2xx into FunctionsHttpError; the real payload
+            // lives on error.context (a Response). Try every known surface —
+            // text(), json(), .body — because supabase-js versions differ.
+            const ctx: any = (dsErr as any)?.context;
+            let detail = "";
+            let bodyJson: any = null;
+            try {
+              if (ctx && typeof ctx.clone === "function" && typeof ctx.text === "function") {
+                const raw = await ctx.clone().text();
+                detail = raw?.slice(0, 500) || "";
+                try { bodyJson = JSON.parse(raw); } catch { /* not JSON */ }
+              } else if (ctx?.body) {
+                detail = typeof ctx.body === "string" ? ctx.body.slice(0, 500) : JSON.stringify(ctx.body).slice(0, 500);
+              }
+            } catch (readErr) {
+              console.warn("[contract → docusign] could not read error body", readErr);
+            }
+            console.error("[contract → docusign] non-2xx", {
+              message: dsErr.message,
+              status: ctx?.status,
+              statusText: ctx?.statusText,
+              headers: ctx?.headers ? Object.fromEntries((ctx.headers as any).entries?.() ?? []) : null,
+              body_raw: detail,
+              body_json: bodyJson,
+            });
+            const humanMsg = bodyJson?.error
+              ? (bodyJson.details?.message
+                  ? `${bodyJson.error}: ${bodyJson.details.message}`
+                  : bodyJson.error)
+              : (detail || dsErr.message);
+            throw new Error(
+              `[${ctx?.status ?? "??"}] ${humanMsg}`.slice(0, 400),
+            );
+          }
           envelopeId = (dsData as any)?.envelopeId ?? null;
           emailSentTo = (dsData as any)?.emailSentTo ?? null;
           if (!envelopeId) {

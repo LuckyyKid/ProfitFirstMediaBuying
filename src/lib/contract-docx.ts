@@ -33,10 +33,11 @@ function formatServiceDate(dateStr: string, language: ContractData["language"]) 
   }
 }
 
-// Fill the FR/EN contract template with the 7 variables, strip red highlight
-// on filled runs, and return the resulting .docx as an ArrayBuffer.
-// Shared by ContractCreator (download + DocuSign) and ContractDocxPreview.
-export async function fillContractDocx(data: ContractData): Promise<ArrayBuffer> {
+// Fill the FR/EN template with the 7 variables and strip the red highlight
+// on filled runs. Returns the pizzip instance so callers can serialize to
+// whatever format they need (arraybuffer for docx-preview, blob for download,
+// base64 for DocuSign) — all from the same rendered content.
+async function buildFilledZip(data: ContractData): Promise<PizZip> {
   const buffer = await loadTemplateBuffer(data.language);
   const zip = new PizZip(buffer.slice(0));
   const doc = new Docxtemplater(zip, {
@@ -70,10 +71,23 @@ export async function fillContractDocx(data: ContractData): Promise<ArrayBuffer>
     );
   }
 
-  return rendered.generate({ type: "arraybuffer" });
+  return rendered;
+}
+
+export async function fillContractDocx(data: ContractData): Promise<ArrayBuffer> {
+  const zip = await buildFilledZip(data);
+  return zip.generate({ type: "arraybuffer" });
 }
 
 export async function fillContractDocxBlob(data: ContractData): Promise<Blob> {
-  const buffer = await fillContractDocx(data);
-  return new Blob([buffer], { type: DOCX_MIME });
+  const zip = await buildFilledZip(data);
+  return zip.generate({ type: "blob", mimeType: DOCX_MIME });
+}
+
+// Pure base64 (no data-URI prefix, no whitespace, correct padding) — safe to
+// hand directly to DocuSign. Skips the FileReader.readAsDataURL detour that
+// was corrupting the payload for the email flow.
+export async function fillContractDocxBase64(data: ContractData): Promise<string> {
+  const zip = await buildFilledZip(data);
+  return zip.generate({ type: "base64" });
 }
