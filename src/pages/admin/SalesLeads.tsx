@@ -22,10 +22,11 @@ import {
   ArrowLeft,
   BellRing,
   LogOut,
+  Mail,
+  MessageSquare,
   Plus,
   RefreshCcw,
   Search,
-  Send,
   Users,
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -147,6 +148,7 @@ const SalesLeads = () => {
   const [creating, setCreating] = useState(false);
   const [repsOpen, setRepsOpen] = useState(false);
   const [followingUp, setFollowingUp] = useState<string | null>(null);
+  // `followingUp` = `${lead_code}:${channel}` pendant l'envoi.
 
   const sources = useMemo(() => {
     const set = new Set<string>();
@@ -200,15 +202,19 @@ const SalesLeads = () => {
     return m;
   }, [reps]);
 
-  const onFollowUpNow = async (lead: SalesLead) => {
-    if (!lead.email && !lead.phone) {
-      toast.error("Ce lead n'a ni email ni téléphone");
+  const onFollowUpNow = async (lead: SalesLead, channel: "email" | "sms") => {
+    if (channel === "email" && !lead.email) {
+      toast.error("Ce lead n'a pas d'email");
       return;
     }
-    setFollowingUp(lead.lead_code);
-    const t = toast.loading("Envoi du suivi…");
+    if (channel === "sms" && !lead.phone) {
+      toast.error("Ce lead n'a pas de téléphone");
+      return;
+    }
+    setFollowingUp(`${lead.lead_code}:${channel}`);
+    const t = toast.loading(channel === "email" ? "Envoi de l'email…" : "Envoi du SMS…");
     const { data, error } = await supabase.functions.invoke("follow-up-leads", {
-      body: { lead_code: lead.lead_code, manual: true },
+      body: { lead_code: lead.lead_code, manual: true, channel },
     });
     setFollowingUp(null);
     toast.dismiss(t);
@@ -216,9 +222,20 @@ const SalesLeads = () => {
       toast.error(error.message || "Échec de l'envoi");
       return;
     }
-    const r = data as { emailSent?: boolean; smsSent?: boolean; smsSkipped?: boolean };
-    if (r?.emailSent) toast.success(`Email envoyé à ${lead.email}`);
-    if (r?.smsSkipped) toast.message("SMS non envoyé (Twilio non configuré)");
+    const r = data as {
+      emailSent?: boolean;
+      smsSent?: boolean;
+      smsSkipped?: boolean;
+      error?: string;
+    };
+    if (channel === "email") {
+      if (r?.emailSent) toast.success(`Email envoyé à ${lead.email}`);
+      else toast.error(r?.error || "Échec de l'envoi de l'email");
+    } else {
+      if (r?.smsSent) toast.success(`SMS envoyé au ${lead.phone}`);
+      else if (r?.smsSkipped) toast.error("SMS non envoyé (Twilio non configuré)");
+      else toast.error(r?.error || "Échec de l'envoi du SMS");
+    }
     reload();
   };
 
@@ -473,27 +490,47 @@ const SalesLeads = () => {
                             >
                               Ouvrir
                             </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8"
-                              disabled={
-                                followingUp === l.lead_code ||
+                            {(() => {
+                              const seqBlocked =
                                 l.status === "won" ||
                                 l.status === "lost" ||
                                 !!l.responded_at ||
-                                l.followup_count >= 6 ||
-                                (!l.email && !l.phone)
-                              }
-                              onClick={() => onFollowUpNow(l)}
-                              title="Envoyer relance maintenant"
-                            >
-                              {followingUp === l.lead_code ? (
-                                <BellRing className="h-4 w-4 animate-pulse" />
-                              ) : (
-                                <Send className="h-4 w-4" />
-                              )}
-                            </Button>
+                                l.followup_count >= 6;
+                              const emailBusy = followingUp === `${l.lead_code}:email`;
+                              const smsBusy = followingUp === `${l.lead_code}:sms`;
+                              return (
+                                <>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    disabled={emailBusy || smsBusy || seqBlocked || !l.email}
+                                    onClick={() => onFollowUpNow(l, "email")}
+                                    title={l.email ? `Envoyer un email à ${l.email}` : "Aucun email"}
+                                  >
+                                    {emailBusy ? (
+                                      <BellRing className="h-4 w-4 animate-pulse" />
+                                    ) : (
+                                      <Mail className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    disabled={emailBusy || smsBusy || seqBlocked || !l.phone}
+                                    onClick={() => onFollowUpNow(l, "sms")}
+                                    title={l.phone ? `Envoyer un SMS au ${l.phone}` : "Aucun téléphone"}
+                                  >
+                                    {smsBusy ? (
+                                      <BellRing className="h-4 w-4 animate-pulse" />
+                                    ) : (
+                                      <MessageSquare className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </>
+                              );
+                            })()}
                           </div>
                         </TableCell>
                       </TableRow>

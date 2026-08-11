@@ -174,11 +174,15 @@ serve(async (req) => {
     );
 
     let forceLeadCode: string | null = null;
+    let forceChannel: "email" | "sms" | "both" = "both";
     if (req.method === "POST") {
       try {
         const body = await req.json();
         if (body?.lead_code && typeof body.lead_code === "string") {
           forceLeadCode = body.lead_code;
+        }
+        if (body?.channel === "email" || body?.channel === "sms") {
+          forceChannel = body.channel;
         }
       } catch {
         /* no body */
@@ -239,8 +243,10 @@ serve(async (req) => {
       let didEmail = false;
       let smsRes: SmsResult = { sent: false, skipped: true };
       let leadError: string | undefined;
+      const wantEmail = forceChannel === "email" || forceChannel === "both";
+      const wantSms = forceChannel === "sms" || forceChannel === "both";
 
-      if (lead.email) {
+      if (wantEmail && lead.email) {
         try {
           const { subject, html } = renderEmail(lead);
           await sendResendEmail({
@@ -257,7 +263,7 @@ serve(async (req) => {
         }
       }
 
-      if (lead.phone) {
+      if (wantSms && lead.phone) {
         smsRes = await sendSms(lead.phone, renderSms(lead));
         if (smsRes.sent) smsSent++;
         else if (smsRes.skipped) smsSkipped++;
