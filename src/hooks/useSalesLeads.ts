@@ -32,6 +32,7 @@ export interface SalesLead {
   next_followup_at: string | null;
   last_followup_at: string | null;
   followup_count: number;
+  responded_at: string | null;
   notes: string | null;
   converted_client_code: string | null;
   converted_at: string | null;

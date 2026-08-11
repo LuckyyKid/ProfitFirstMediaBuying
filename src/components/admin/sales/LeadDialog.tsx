@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -91,6 +92,7 @@ export const LeadDialog = ({ lead, reps, onClose, onSaved }: Props) => {
     next_followup_at: toDateInput(lead?.next_followup_at ?? null),
     notes: lead?.notes ?? "",
     converted_client_code: lead?.converted_client_code ?? "",
+    responded: !!lead?.responded_at,
   });
 
   useEffect(() => {
@@ -111,6 +113,7 @@ export const LeadDialog = ({ lead, reps, onClose, onSaved }: Props) => {
         next_followup_at: toDateInput(lead.next_followup_at),
         notes: lead.notes ?? "",
         converted_client_code: lead.converted_client_code ?? "",
+        responded: !!lead.responded_at,
       });
     }
   }, [lead]);
@@ -139,6 +142,11 @@ export const LeadDialog = ({ lead, reps, onClose, onSaved }: Props) => {
     };
     if (form.status === "won" && !lead?.converted_at) {
       payload.converted_at = new Date().toISOString();
+    }
+    if (form.responded && !lead?.responded_at) {
+      payload.responded_at = new Date().toISOString();
+    } else if (!form.responded && lead?.responded_at) {
+      payload.responded_at = null;
     }
 
     let error: { message?: string } | null = null;
@@ -330,6 +338,23 @@ export const LeadDialog = ({ lead, reps, onClose, onSaved }: Props) => {
               placeholder="CLI-XXXXXXXX"
             />
           </Field>
+          <div className="sm:col-span-2 flex items-start gap-2 rounded-md border border-border/40 bg-muted/20 px-3 py-2">
+            <Checkbox
+              id="lead-responded"
+              checked={form.responded}
+              onCheckedChange={(v) => set("responded", v === true)}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <Label htmlFor="lead-responded" className="text-sm font-medium cursor-pointer">
+                Le client a répondu
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Coche cette case pour stopper la séquence de relances automatiques (max 6 relances toutes les 24 h).
+                {lead?.followup_count ? ` Relances envoyées : ${lead.followup_count}/6.` : ""}
+              </p>
+            </div>
+          </div>
           <Field label="Notes" className="sm:col-span-2">
             <Textarea
               value={form.notes}

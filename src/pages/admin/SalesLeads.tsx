@@ -378,19 +378,20 @@ const SalesLeads = () => {
                   <TableHead className="whitespace-nowrap">Onboarding</TableHead>
                   <TableHead className="whitespace-nowrap">Créé</TableHead>
                   <TableHead className="whitespace-nowrap">Relance</TableHead>
+                  <TableHead className="whitespace-nowrap">Suivi</TableHead>
                   <TableHead className="w-[140px] whitespace-nowrap">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={14} className="text-center py-8 text-muted-foreground">
                       Chargement…
                     </TableCell>
                   </TableRow>
                 ) : filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={14} className="text-center py-8 text-muted-foreground">
                       Aucun lead
                     </TableCell>
                   </TableRow>
@@ -452,6 +453,17 @@ const SalesLeads = () => {
                             "—"
                           )}
                         </TableCell>
+                        <TableCell className="text-xs">
+                          {l.responded_at ? (
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] border border-[rgba(122,232,180,0.4)] bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))]">
+                              Répondu
+                            </span>
+                          ) : l.followup_count >= 6 ? (
+                            <span className="text-muted-foreground">6/6 (stop)</span>
+                          ) : (
+                            <span className="text-muted-foreground">{l.followup_count}/6</span>
+                          )}
+                        </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center gap-1">
                             <Button
@@ -469,6 +481,8 @@ const SalesLeads = () => {
                                 followingUp === l.lead_code ||
                                 l.status === "won" ||
                                 l.status === "lost" ||
+                                !!l.responded_at ||
+                                l.followup_count >= 6 ||
                                 (!l.email && !l.phone)
                               }
                               onClick={() => onFollowUpNow(l)}
