@@ -200,6 +200,7 @@ serve(async (req) => {
 
     let forceLeadCode: string | null = null;
     let forceChannel: "email" | "sms" | "both" = "both";
+    let manual = false;
     if (req.method === "POST") {
       try {
         const body = await req.json();
@@ -209,6 +210,7 @@ serve(async (req) => {
         if (body?.channel === "email" || body?.channel === "sms") {
           forceChannel = body.channel;
         }
+        if (body?.manual === true) manual = true;
       } catch {
         /* no body */
       }
@@ -253,14 +255,24 @@ serve(async (req) => {
     for (const raw of data ?? []) {
       const lead = raw as Lead;
 
-      if (lead.responded_at || lead.followup_count >= MAX_FOLLOWUPS ||
-          lead.status === "won" || lead.status === "lost") {
+      // Un envoi manuel (bouton admin) doit toujours partir : on ne bloque
+      // que si le lead est fermé (won/lost). Les gates responded_at / cap 6
+      // restent en place pour le cron uniquement.
+      const shouldSkip = manual
+        ? lead.status === "won" || lead.status === "lost"
+        : lead.responded_at ||
+          lead.followup_count >= MAX_FOLLOWUPS ||
+          lead.status === "won" ||
+          lead.status === "lost";
+      if (shouldSkip) {
         results.push({
           lead_code: lead.lead_code,
           emailSent: false,
           smsSent: false,
           smsSkipped: false,
-          error: "skipped (responded, capped, or closed)",
+          error: manual
+            ? "skipped (lead fermé — won/lost)"
+            : "skipped (responded, capped, or closed)",
         });
         continue;
       }
