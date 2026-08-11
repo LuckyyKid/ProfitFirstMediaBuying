@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
+import { fr, enUS } from "date-fns/locale";
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
 import { ContractData, ContractLanguage, defaultContractData } from "@/types/contract";
 import ContractForm from "@/components/contract/ContractForm";
 import ContractPreview from "@/components/contract/ContractPreview";
@@ -13,12 +17,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { FileDown, Eye, PenLine, Mail, ArrowLeft, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import logoTDIA from "@/assets/contract/logo-tdia.png";
+import contractTemplateFrUrl from "@/assets/contract/contract-fr.docx?url";
+import contractTemplateEnUrl from "@/assets/contract/contract-en.docx?url";
+
+const DOCX_MIME =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 type GenerationResult = {
   clientCode: string;
@@ -116,8 +123,7 @@ const ContractCreator = () => {
     setData((prev) => (prev.language === lang ? prev : { ...prev, language: lang }));
   };
 
-  const generatePDF = useCallback(async (deliveryMode: "embedded" | "email" = "embedded") => {
-    if (!previewRef.current) return;
+  const generateDOCX = useCallback(async (deliveryMode: "embedded" | "email" = "embedded") => {
     const code = (data.clientCode || "").trim().toUpperCase();
     if (!code) {
       toast.error(
@@ -145,189 +151,48 @@ const ContractCreator = () => {
         return;
       }
 
-      const images = previewRef.current.querySelectorAll<HTMLImageElement>("img");
-      const originals: { img: HTMLImageElement; src: string }[] = [];
-      await Promise.all(
-        Array.from(images).map(async (img) => {
-          try {
-            const response = await fetch(img.src);
-            const blob = await response.blob();
-            const base64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-            originals.push({ img, src: img.src });
-            img.src = base64;
-          } catch {/* keep original */}
-        }),
-      );
-
-      // Clone the preview and strip its visual page framing so the content
-      // flows as one continuous document. We then measure each "atomic block"
-      // (article section / cover header / signature page) and slice the
-      // rendered canvas at block boundaries — never mid-section — so a
-      // heading never gets orphaned from its body and the signature page
-      // always starts fresh.
-      const CLONE_WIDTH_PX = 680; // = 180mm at 96dpi → PDF content width
-      const clone = previewRef.current.cloneNode(true) as HTMLElement;
-      clone.className = "";
-      clone.style.cssText = `
-        width: ${CLONE_WIDTH_PX}px;
-        background: #ffffff;
-        color: #000000;
-        font-family: 'Times New Roman', serif;
-        font-size: 12px;
-        line-height: 1.5;
-        margin: 0;
-        padding: 0;
-        position: fixed;
-        top: -100000px;
-        left: 0;
-      `;
-      // Keep .contract-page classes intact (bg-white text-black etc.) so text
-      // inherits correctly; only override the "looks like paper" layout bits
-      // via inline !important. Otherwise, in this dark-themed app, titles
-      // with no explicit color class would inherit near-white --foreground
-      // from body → rendered as white in the PDF.
-      const pageDivs = Array.from(clone.querySelectorAll<HTMLElement>(".contract-page"));
-      pageDivs.forEach((el) => {
-        el.style.setProperty("padding", "0", "important");
-        el.style.setProperty("margin", "0", "important");
-        el.style.setProperty("box-shadow", "none", "important");
-        el.style.setProperty("border", "none", "important");
-        el.style.setProperty("min-height", "0", "important");
-        el.style.setProperty("max-width", "none", "important");
-        el.style.setProperty("width", "100%", "important");
+      // 1) Load the appropriate .docx template (FR/EN) and fill the 7 variables
+      // with docxtemplater. Because we template the *original signed .docx*
+      // verbatim, formatting, fonts and layout are pixel-identical to the
+      // Word file the legal team validated — no HTML→PDF rendering pipeline.
+      const templateUrl = data.language === "en" ? contractTemplateEnUrl : contractTemplateFrUrl;
+      const templateBuffer = await fetch(templateUrl).then((r) => r.arrayBuffer());
+      const zip = new PizZip(templateBuffer);
+      const doc = new Docxtemplater(zip, {
+        delimiters: { start: "{{", end: "}}" },
+        paragraphLoop: true,
+        linebreaks: true,
       });
-      document.body.appendChild(clone);
 
-      // html2canvas 1.4 chokes on modern CSS color functions (oklch,
-      // color-mix, alpha shortcuts like text-black/60), silently rendering
-      // them as transparent — which makes titles and the footer look "cut".
-      // Force every color to concrete RGB/hex by round-tripping through a
-      // Canvas 2D fillStyle (which the browser always normalizes).
-      const colorProbe = document.createElement("canvas").getContext("2d");
-      if (colorProbe) {
-        const toRGB = (color: string): string => {
-          try {
-            colorProbe.fillStyle = "#000";
-            colorProbe.fillStyle = color;
-            return colorProbe.fillStyle as string;
-          } catch {
-            return color;
-          }
-        };
-        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_ELEMENT);
-        let node: Node | null = walker.currentNode;
-        const elements: HTMLElement[] = [clone];
-        while ((node = walker.nextNode())) elements.push(node as HTMLElement);
-        for (const el of elements) {
-          const cs = window.getComputedStyle(el);
-          el.style.color = toRGB(cs.color);
-          if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
-            el.style.backgroundColor = toRGB(cs.backgroundColor);
-          }
-          (["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"] as const).forEach((prop) => {
-            const v = cs[prop];
-            if (v && v !== "rgba(0, 0, 0, 0)") {
-              el.style[prop] = toRGB(v);
+      const serviceDate = data.dateDeServices
+        ? (() => {
+            try {
+              return data.language === "en"
+                ? format(new Date(data.dateDeServices), "MMMM d, yyyy", { locale: enUS })
+                : format(new Date(data.dateDeServices), "d MMMM yyyy", { locale: fr });
+            } catch {
+              return data.dateDeServices;
             }
-          });
-        }
-      }
+          })()
+        : "";
+      const signatoryName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
 
-      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const marginMM = 15;
-      const contentWidthMM = pdfWidth - 2 * marginMM;   // 180mm
-      const contentHeightMM = pdfHeight - 2 * marginMM; // 267mm
-      // Height, in the clone's CSS px space, that maps to one full A4 page.
-      const pageHeightInClonePx = CLONE_WIDTH_PX * (contentHeightMM / contentWidthMM);
+      doc.render({
+        Service_date: serviceDate,
+        Company_name: data.nomDuBrand,
+        Trial_Price: data.prixEssai,
+        Normal_Price: data.prix,
+        Trial_Month_Number: data.periodeTestMois,
+        Creative_minimum: data.creativeMinimum,
+        Client_Signatory_name: signatoryName,
+      });
 
-      try {
-        // Measure atomic blocks in the flattened clone (in the clone's
-        // coordinate space). Signature page = one atomic block with a forced
-        // page break before it (last page div).
-        const cloneTop = clone.getBoundingClientRect().top;
-        const blocks: { top: number; bottom: number; forceNewPage: boolean }[] = [];
-
-        pageDivs.forEach((pageDiv, pageIdx) => {
-          const isSignaturePage = pageIdx === pageDivs.length - 1;
-          if (isSignaturePage) {
-            const rect = pageDiv.getBoundingClientRect();
-            blocks.push({
-              top: rect.top - cloneTop,
-              bottom: rect.bottom - cloneTop,
-              forceNewPage: true,
-            });
-          } else {
-            Array.from(pageDiv.children).forEach((child) => {
-              const rect = (child as HTMLElement).getBoundingClientRect();
-              blocks.push({
-                top: rect.top - cloneTop,
-                bottom: rect.bottom - cloneTop,
-                forceNewPage: false,
-              });
-            });
-          }
-        });
-
-        // Compute page-break offsets: greedy fit blocks onto pages, honoring
-        // forceNewPage. `breaks[i]` is the top-Y (clone px) of page i.
-        const breaks: number[] = [0];
-        for (const block of blocks) {
-          const pageStart = breaks[breaks.length - 1];
-          const wouldOverflow = block.bottom - pageStart > pageHeightInClonePx;
-          const needsNewPage = block.forceNewPage || wouldOverflow;
-          if (needsNewPage && block.top > pageStart) {
-            breaks.push(block.top);
-          }
-        }
-
-        // Render the whole clone once, then slice at the computed boundaries.
-        const canvas = await html2canvas(clone, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-        });
-        const scale = canvas.width / CLONE_WIDTH_PX;
-
-        for (let i = 0; i < breaks.length; i++) {
-          const startPxCanvas = Math.round(breaks[i] * scale);
-          const endPxCanvas = i < breaks.length - 1
-            ? Math.round(breaks[i + 1] * scale)
-            : canvas.height;
-          const sliceHeight = Math.max(1, endPxCanvas - startPxCanvas);
-
-          const sliceCanvas = document.createElement("canvas");
-          sliceCanvas.width = canvas.width;
-          sliceCanvas.height = sliceHeight;
-          const ctx = sliceCanvas.getContext("2d");
-          if (!ctx) throw new Error("Canvas 2D context unavailable");
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-          ctx.drawImage(canvas, 0, -startPxCanvas);
-
-          const imgData = sliceCanvas.toDataURL("image/jpeg", 0.85);
-          const sliceHeightMM = (sliceHeight * contentWidthMM) / canvas.width;
-
-          if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, "JPEG", marginMM, marginMM, contentWidthMM, sliceHeightMM, undefined, "FAST");
-        }
-      } finally {
-        document.body.removeChild(clone);
-        originals.forEach(({ img, src }) => { img.src = src; });
-      }
-
-      const filename = `contrat-${code}-${Date.now()}.pdf`;
-      const blob = pdf.output("blob");
+      const blob = doc.getZip().generate({ type: "blob", mimeType: DOCX_MIME });
+      const filename = `contrat-${code}-${Date.now()}.docx`;
 
       // Convert blob to base64 for direct DocuSign upload — bypasses any
       // storage URL / RLS flakiness that would otherwise fall back to placeholder.
-      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+      const docxBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const result = reader.result as string;
@@ -337,13 +202,13 @@ const ContractCreator = () => {
         reader.readAsDataURL(blob);
       });
 
-      // 1) Upload to storage (best-effort — no longer critical to DocuSign flow)
+      // 2) Upload to storage (best-effort — no longer critical to DocuSign flow)
       const path = `${code}/${filename}`;
       let manualUrl: string | null = null;
       let storageUploaded = false;
       const { error: upErr } = await supabase.storage
         .from("closed-deals-contracts")
-        .upload(path, blob, { contentType: "application/pdf", upsert: true });
+        .upload(path, blob, { contentType: DOCX_MIME, upsert: true });
       if (upErr) console.warn("[contract upload]", upErr);
       else {
         storageUploaded = true;
@@ -353,11 +218,11 @@ const ContractCreator = () => {
         manualUrl = pub.publicUrl;
       }
 
-      // 2) Build the DocuSign envelope RIGHT NOW with the fresh base64. We don't
+      // 3) Build the DocuSign envelope RIGHT NOW with the fresh base64. We don't
       // rely on the edge function re-fetching the URL — we pass the bytes.
+      // DocuSign auto-converts the .docx to PDF for signing.
       const signerEmail = data.email?.trim() || client.email || null;
-      const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim()
-        || client.client_name || code;
+      const fullName = signatoryName || client.client_name || code;
       let envelopeId: string | null = null;
       let emailSentTo: string | null = null;
       let docusignError: string | null = null;
@@ -373,14 +238,14 @@ const ContractCreator = () => {
                 email: signerEmail,
                 name: fullName,
                 client_code: code,
-                contract_pdf_base64: pdfBase64,
+                contract_docx_base64: docxBase64,
               }
             : {
                 email: signerEmail,
                 name: fullName,
                 client_code: code,
                 return_url: `${window.location.origin}/step8`,
-                contract_pdf_base64: pdfBase64,
+                contract_docx_base64: docxBase64,
               };
           const { data: dsData, error: dsErr } = await supabase.functions.invoke(
             fnName,
@@ -406,7 +271,7 @@ const ContractCreator = () => {
           : "Email ou nom du signataire manquant";
       }
 
-      // 3) Persist: link the manual URL and the fresh envelope id (or null if it
+      // 4) Persist: link the manual URL and the fresh envelope id (or null if it
       // failed). In email mode we don't overwrite the embedded envelope id —
       // Step7 keeps working with its own envelope; the email envelope is a
       // separate DocuSign envelope that the client signs from their inbox.
@@ -424,7 +289,16 @@ const ContractCreator = () => {
         .update(progressUpdate)
         .eq("client_code", code);
 
-      pdf.save(filename);
+      // 5) Trigger local download of the .docx
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
       setResult({
         clientCode: code,
         clientName: client.client_name || client.company_name || code,
@@ -439,8 +313,8 @@ const ContractCreator = () => {
       console.error(err);
       toast.error(
         data.language === "en"
-          ? "Error while generating the PDF"
-          : "Erreur lors de la génération du PDF",
+          ? "Error while generating the contract"
+          : "Erreur lors de la génération du contrat",
       );
     } finally {
       setGenerating(false);
@@ -495,14 +369,14 @@ const ContractCreator = () => {
                 <Eye className="w-4 h-4 inline mr-1.5 -mt-0.5" />{t("Aperçu", "Preview")}
               </button>
             </div>
-            <Button onClick={() => generatePDF("embedded")} disabled={generating} className="gap-2">
+            <Button onClick={() => generateDOCX("embedded")} disabled={generating} className="gap-2">
               <FileDown className="w-4 h-4" />
-              {generating ? t("Génération...", "Generating...") : t("Télécharger PDF", "Download PDF")}
+              {generating ? t("Génération...", "Generating...") : t("Télécharger DOCX", "Download DOCX")}
             </Button>
             <Button
               variant="outline"
               disabled={generating || !data.email}
-              onClick={() => generatePDF("email")}
+              onClick={() => generateDOCX("email")}
               className="gap-2 hidden md:inline-flex"
               title={t(
                 "Envoie le contrat par email via DocuSign (séparé du flow Step 7)",
@@ -583,7 +457,7 @@ const ContractCreator = () => {
                     <XCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
                   )}
                   <div className="text-sm">
-                    <p className="font-medium">{t("Téléchargement du PDF", "PDF download")}</p>
+                    <p className="font-medium">{t("Téléchargement du DOCX", "DOCX download")}</p>
                     <p className="text-muted-foreground">
                       {t("Le fichier a été enregistré sur ton appareil.", "The file has been saved to your device.")}
                     </p>
@@ -599,7 +473,7 @@ const ContractCreator = () => {
                     <p className="font-medium">{t("Archivage dans Supabase Storage", "Archived in Supabase Storage")}</p>
                     <p className="text-muted-foreground">
                       {result.storageUploaded
-                        ? t("PDF stocké et associé au client.", "PDF stored and linked to the client.")
+                        ? t("Contrat stocké et associé au client.", "Contract stored and linked to the client.")
                         : t(
                             "Upload échoué (non bloquant, DocuSign reçoit quand même le contrat).",
                             "Upload failed (non-blocking — DocuSign still receives the contract).",

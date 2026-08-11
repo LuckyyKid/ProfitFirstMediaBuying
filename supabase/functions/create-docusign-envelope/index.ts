@@ -173,7 +173,8 @@ Deno.serve(async (req) => {
       client_code,
       return_url,
       envelope_id: existingEnvelopeId,
-      contract_pdf_base64: directBase64,
+      contract_pdf_base64: directPdfBase64,
+      contract_docx_base64: directDocxBase64,
     } = body as {
       email?: string;
       name?: string;
@@ -181,6 +182,7 @@ Deno.serve(async (req) => {
       return_url?: string;
       envelope_id?: string;
       contract_pdf_base64?: string;
+      contract_docx_base64?: string;
     };
 
     if (!email || !name) {
@@ -227,19 +229,33 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch contract PDF: priority to the contract generated via admin Contract Creator
+    // Fetch contract: priority to the contract generated via admin Contract Creator
     // (stored in closed-deals-contracts bucket and linked via client_progress.manual_contract_pdf_url).
     // Fallback to external CRM download-contract function for legacy clients.
+    //
+    // Format is either DOCX (preferred — current admin flow) or PDF (legacy /
+    // external CRM fallback). DocuSign auto-converts DOCX to PDF on their side.
     let contractBase64: string | null = null;
+    let contractFileExtension: "docx" | "pdf" = "pdf";
+    let contractFileName = "Contrat.pdf";
     let contractFetchError: string | null = null;
     let contractSource: string | null = null;
 
-    // Priority 0: caller (e.g. admin Contract Creator) passed the PDF bytes
+    // Priority 0: caller (e.g. admin Contract Creator) passed the contract bytes
     // directly. Skip every DB/URL lookup — bypasses RLS/bucket ACL issues.
-    if (directBase64 && directBase64.length > 0) {
-      contractBase64 = directBase64;
-      contractSource = "direct_base64_upload";
-      console.log(`[docusign] Using directly-provided base64 (${directBase64.length} chars)`);
+    // DOCX takes precedence over PDF when both are provided.
+    if (directDocxBase64 && directDocxBase64.length > 0) {
+      contractBase64 = directDocxBase64;
+      contractFileExtension = "docx";
+      contractFileName = "Contrat.docx";
+      contractSource = "direct_base64_upload_docx";
+      console.log(`[docusign] Using directly-provided DOCX base64 (${directDocxBase64.length} chars)`);
+    } else if (directPdfBase64 && directPdfBase64.length > 0) {
+      contractBase64 = directPdfBase64;
+      contractFileExtension = "pdf";
+      contractFileName = "Contrat.pdf";
+      contractSource = "direct_base64_upload_pdf";
+      console.log(`[docusign] Using directly-provided PDF base64 (${directPdfBase64.length} chars)`);
     }
 
     if (!contractBase64 && client_code) {
@@ -406,7 +422,7 @@ Deno.serve(async (req) => {
       console.log(`[docusign] contract source = ${contractSource}`);
     }
 
-    // Build envelope: prefer fetched PDF, else template, else placeholder
+    // Build envelope: prefer fetched contract (DOCX or PDF), else template, else placeholder
     const envelopePayload: Record<string, unknown> = contractBase64
       ? {
           emailSubject: `Contrat TDIA — ${name}`,
@@ -414,8 +430,8 @@ Deno.serve(async (req) => {
           documents: [
             {
               documentBase64: contractBase64,
-              name: "Contrat.pdf",
-              fileExtension: "pdf",
+              name: contractFileName,
+              fileExtension: contractFileExtension,
               documentId: "1",
             },
           ],

@@ -3,8 +3,9 @@
 // so the Step 7 embedded-signing flow stays untouched.
 //
 // Called from admin/contract-creator when the admin clicks "Envoyer par email".
-// The caller passes the freshly-generated PDF as base64 so we don't rely on
-// any storage / URL lookup.
+// The caller passes the freshly-generated contract (DOCX preferred, PDF for
+// legacy) as base64 so we don't rely on any storage / URL lookup. DocuSign
+// auto-converts DOCX to PDF on their side.
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { SignJWT, importPKCS8 } from "npm:jose@5";
@@ -125,6 +126,7 @@ Deno.serve(async (req) => {
       name,
       client_code,
       contract_pdf_base64,
+      contract_docx_base64,
       email_subject,
       email_body,
     } = body as {
@@ -132,6 +134,7 @@ Deno.serve(async (req) => {
       name?: string;
       client_code?: string;
       contract_pdf_base64?: string;
+      contract_docx_base64?: string;
       email_subject?: string;
       email_body?: string;
     };
@@ -142,9 +145,17 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    if (!contract_pdf_base64 || contract_pdf_base64.length === 0) {
+
+    // Prefer DOCX (current admin flow) over PDF (legacy). DocuSign accepts both
+    // and converts DOCX to PDF internally.
+    const contractBase64 = contract_docx_base64 || contract_pdf_base64;
+    const contractFileExtension = contract_docx_base64 ? "docx" : "pdf";
+    const contractFileName = contract_docx_base64 ? "Contrat.docx" : "Contrat.pdf";
+    if (!contractBase64 || contractBase64.length === 0) {
       return new Response(
-        JSON.stringify({ error: "contract_pdf_base64 is required for email delivery" }),
+        JSON.stringify({
+          error: "contract_docx_base64 or contract_pdf_base64 is required for email delivery",
+        }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -160,9 +171,9 @@ Deno.serve(async (req) => {
       status: "sent",
       documents: [
         {
-          documentBase64: contract_pdf_base64,
-          name: "Contrat.pdf",
-          fileExtension: "pdf",
+          documentBase64: contractBase64,
+          name: contractFileName,
+          fileExtension: contractFileExtension,
           documentId: "1",
         },
       ],
