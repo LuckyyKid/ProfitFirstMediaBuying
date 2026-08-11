@@ -1,12 +1,8 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
-import { format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
-import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
 import { ContractData, ContractLanguage, defaultContractData } from "@/types/contract";
 import ContractForm from "@/components/contract/ContractForm";
-import ContractPreview from "@/components/contract/ContractPreview";
+import ContractDocxPreview from "@/components/contract/ContractDocxPreview";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,11 +17,7 @@ import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import logoTDIA from "@/assets/contract/logo-tdia.png";
-import contractTemplateFrUrl from "@/assets/contract/contract-fr.docx?url";
-import contractTemplateEnUrl from "@/assets/contract/contract-en.docx?url";
-
-const DOCX_MIME =
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+import { fillContractDocxBlob, DOCX_MIME } from "@/lib/contract-docx";
 
 type GenerationResult = {
   clientCode: string;
@@ -47,7 +39,6 @@ const ContractCreator = () => {
   const [params] = useSearchParams();
   const dealId = params.get("deal");
   const clientCode = params.get("client");
-  const previewRef = useRef<HTMLDivElement>(null);
 
   // Prefill from a closed deal or directly from a client_progress row.
   useEffect(() => {
@@ -151,43 +142,9 @@ const ContractCreator = () => {
         return;
       }
 
-      // 1) Load the appropriate .docx template (FR/EN) and fill the 7 variables
-      // with docxtemplater. Because we template the *original signed .docx*
-      // verbatim, formatting, fonts and layout are pixel-identical to the
-      // Word file the legal team validated — no HTML→PDF rendering pipeline.
-      const templateUrl = data.language === "en" ? contractTemplateEnUrl : contractTemplateFrUrl;
-      const templateBuffer = await fetch(templateUrl).then((r) => r.arrayBuffer());
-      const zip = new PizZip(templateBuffer);
-      const doc = new Docxtemplater(zip, {
-        delimiters: { start: "{{", end: "}}" },
-        paragraphLoop: true,
-        linebreaks: true,
-      });
-
-      const serviceDate = data.dateDeServices
-        ? (() => {
-            try {
-              return data.language === "en"
-                ? format(new Date(data.dateDeServices), "MMMM d, yyyy", { locale: enUS })
-                : format(new Date(data.dateDeServices), "d MMMM yyyy", { locale: fr });
-            } catch {
-              return data.dateDeServices;
-            }
-          })()
-        : "";
-      const signatoryName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
-
-      doc.render({
-        Service_date: serviceDate,
-        Company_name: data.nomDuBrand,
-        Trial_Price: data.prixEssai,
-        Normal_Price: data.prix,
-        Trial_Month_Number: data.periodeTestMois,
-        Creative_minimum: data.creativeMinimum,
-        Client_Signatory_name: signatoryName,
-      });
-
-      const blob = doc.getZip().generate({ type: "blob", mimeType: DOCX_MIME });
+      // Fill the .docx template with the current form values — same helper
+      // used by the live preview, so what you see is what the client gets.
+      const blob = await fillContractDocxBlob(data);
       const filename = `contrat-${code}-${Date.now()}.docx`;
 
       // Convert blob to base64 for direct DocuSign upload — bypasses any
@@ -222,6 +179,7 @@ const ContractCreator = () => {
       // rely on the edge function re-fetching the URL — we pass the bytes.
       // DocuSign auto-converts the .docx to PDF for signing.
       const signerEmail = data.email?.trim() || client.email || null;
+      const signatoryName = [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
       const fullName = signatoryName || client.client_name || code;
       let envelopeId: string | null = null;
       let emailSentTo: string | null = null;
@@ -310,11 +268,13 @@ const ContractCreator = () => {
         docusignError,
       });
     } catch (err) {
-      console.error(err);
+      console.error("[ContractCreator generateDOCX]", err);
+      const detail = (err as Error)?.message?.slice(0, 200) || "";
       toast.error(
-        data.language === "en"
+        (data.language === "en"
           ? "Error while generating the contract"
-          : "Erreur lors de la génération du contrat",
+          : "Erreur lors de la génération du contrat")
+        + (detail ? ` — ${detail}` : ""),
       );
     } finally {
       setGenerating(false);
@@ -405,7 +365,7 @@ const ContractCreator = () => {
             <ContractForm data={data} onChange={setData} />
           </div>
           <div className="overflow-y-auto max-h-[calc(100vh-120px)] rounded-xl">
-            <ContractPreview ref={previewRef} data={data} onChange={setData} />
+            <ContractDocxPreview data={data} />
           </div>
         </div>
         <div className="sm:hidden mt-4">
@@ -415,7 +375,7 @@ const ContractCreator = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <ContractPreview ref={previewRef} data={data} onChange={setData} />
+              <ContractDocxPreview data={data} />
             </div>
           )}
         </div>
