@@ -283,12 +283,22 @@ const AdminDashboard = () => {
       return;
     }
     const r = data as { channelId?: string | null; slackUserId?: string | null; inviteUrl?: string | null; errors?: string[] };
-    if (r.errors && r.errors.length > 0) {
-      toast.error(`Slack errors: ${r.errors.join(" | ")}`, { duration: 15000 });
-    } else if (r.inviteUrl) {
-      toast.success(`Invitation Slack envoyée à ${c.email}`);
+    // Prioritize success signals — the function has multiple fallback paths
+    // (users.lookupByEmail → conversations.invite → inviteShared), so partial
+    // errors are expected when a scope is missing but a later path recovered.
+    // A red toast when inviteUrl actually landed just confuses the admin.
+    const hasErrors = !!(r.errors && r.errors.length > 0);
+    const errorNote = hasErrors ? ` (avertissements: ${r.errors!.join(" | ")})` : "";
+    if (r.inviteUrl) {
+      toast.success(`Invitation Slack envoyée à ${c.email}${errorNote}`, {
+        duration: hasErrors ? 10000 : 4000,
+      });
     } else if (r.slackUserId) {
-      toast.success(`Client déjà membre du workspace, ajouté au canal`);
+      toast.success(`Client déjà membre du workspace, ajouté au canal${errorNote}`, {
+        duration: hasErrors ? 10000 : 4000,
+      });
+    } else if (hasErrors) {
+      toast.error(`Slack errors: ${r.errors!.join(" | ")}`, { duration: 15000 });
     } else {
       toast.message("Appel exécuté sans erreur, mais aucun inviteUrl ni slackUserId retourné — vérifier logs edge function", { duration: 15000 });
     }
