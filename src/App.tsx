@@ -19,6 +19,7 @@ import ClosedDeals from "./pages/admin/ClosedDeals";
 import ContractCreator from "./pages/admin/ContractCreator";
 import FollowUps from "./pages/admin/FollowUps";
 import Notifications from "./pages/admin/Notifications";
+import SalesLeads from "./pages/admin/SalesLeads";
 import NotFound from "./pages/NotFound";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import AgentOpsLayout from "./components/agentOps/AgentOpsLayout";
@@ -127,6 +128,7 @@ const App = () => (
           <Route path="/admin/contract-creator" element={<ContractCreator />} />
           <Route path="/admin/followups" element={<FollowUps />} />
           <Route path="/admin/notifications" element={<Notifications />} />
+          <Route path="/admin/sales" element={<SalesLeads />} />
           <Route path="/admin/clients/:clientCode" element={<ClientDetail />} />
           <Route path="/admin/ops" element={<AgentOpsLayout />}>
             <Route index element={<OpsDashboard />} />
