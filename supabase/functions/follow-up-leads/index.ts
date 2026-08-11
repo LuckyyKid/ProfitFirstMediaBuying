@@ -160,13 +160,23 @@ const EMAIL_COPY: Array<{ subject: string; body: (l: Lead) => string }> = [
   },
 ];
 
+// Copies SMS pro : vouvoiement, sans emoji, CTA `TDIA` (rappel humain) et
+// opt-out `STOP` (conformité Twilio/CRTC). Chaque message est calibré
+// < 160 car. GSM-7 pour rester en un seul segment — évite donc les accents
+// ê/ô/î/û/â/ï qui forceraient l'encodage UCS-2 (70 car./segment).
 const SMS_COPY: Array<(l: Lead) => string> = [
-  (l) => `${l.first_name ? l.first_name + ", " : ""}c'est TDIA — on donne suite à notre échange ? Un simple oui/non m'aide 🙂`,
-  (l) => `${l.first_name ? l.first_name + ", " : ""}petit rappel TDIA : dispo cette semaine pour caler un créneau si tu veux avancer.`,
-  (l) => `${l.first_name ? l.first_name + ", " : ""}on n'a pas eu de retour — est-ce toujours le bon moment pour ce projet ?`,
-  (l) => `${l.first_name ? l.first_name + ", " : ""}dis-moi franchement si on stoppe ou si on avance, je te laisse tranquille sinon.`,
-  (l) => `${l.first_name ? l.first_name + ", " : ""}un mot rapide : on avance, on reporte, ou on ferme ?`,
-  (l) => `${l.first_name ? l.first_name + ", " : ""}dernière relance de ma part — porte ouverte, écris-moi quand tu veux. TDIA`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, ici L'équipe TDIA. Merci pour votre demande — souhaitez-vous qu'on vous rappelle pour en discuter ? Répondez TDIA, STOP pour ne plus recevoir.`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, souhaitez-vous toujours qu'on vous rappelle au sujet de votre projet publicitaire ? Répondez TDIA, STOP pour ne plus recevoir.`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, est-ce toujours le bon moment pour discuter de vos campagnes publicitaires ? Répondez TDIA pour un rappel, STOP pour ne plus recevoir.`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, nous ne voulons pas vous déranger — souhaitez-vous encore qu'on vous contacte ? Répondez TDIA, STOP pour ne plus recevoir.`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, un simple mot nous aiderait à savoir si vous souhaitez avancer. Répondez TDIA pour un rappel, STOP pour ne plus recevoir.`,
+  (l) =>
+    `Bonjour${l.first_name ? " " + l.first_name : ""}, dernier message de notre part. Répondez TDIA si vous voulez qu'on vous rappelle, sinon STOP pour ne plus recevoir.`,
 ];
 
 function renderEmail(lead: Lead): { subject: string; html: string } {
