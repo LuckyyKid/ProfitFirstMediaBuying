@@ -490,11 +490,9 @@ const SalesLeads = () => {
                               Ouvrir
                             </Button>
                             {(() => {
-                              const seqBlocked =
-                                l.status === "won" ||
-                                l.status === "lost" ||
-                                !!l.responded_at ||
-                                l.followup_count >= 6;
+                              // Manuel = seul `won`/`lost` bloque. Le cap 6 et `responded_at`
+                              // concernent uniquement la séquence automatique.
+                              const closed = l.status === "won" || l.status === "lost";
                               const emailBusy = followingUp === `${l.lead_code}:email`;
                               const smsBusy = followingUp === `${l.lead_code}:sms`;
                               return (
@@ -503,9 +501,15 @@ const SalesLeads = () => {
                                     size="icon"
                                     variant="ghost"
                                     className="h-8 w-8"
-                                    disabled={emailBusy || smsBusy || seqBlocked || !l.email}
+                                    disabled={emailBusy || smsBusy || closed || !l.email}
                                     onClick={() => onFollowUpNow(l, "email")}
-                                    title={l.email ? `Envoyer un email à ${l.email}` : "Aucun email"}
+                                    title={
+                                      closed
+                                        ? "Lead fermé (won/lost)"
+                                        : l.email
+                                          ? `Envoyer un email à ${l.email}`
+                                          : "Aucun email"
+                                    }
                                   >
                                     {emailBusy ? (
                                       <BellRing className="h-4 w-4 animate-pulse" />
@@ -517,9 +521,15 @@ const SalesLeads = () => {
                                     size="icon"
                                     variant="ghost"
                                     className="h-8 w-8"
-                                    disabled={emailBusy || smsBusy || seqBlocked || !l.phone}
+                                    disabled={emailBusy || smsBusy || closed || !l.phone}
                                     onClick={() => onFollowUpNow(l, "sms")}
-                                    title={l.phone ? `Envoyer un SMS au ${l.phone}` : "Aucun téléphone"}
+                                    title={
+                                      closed
+                                        ? "Lead fermé (won/lost)"
+                                        : l.phone
+                                          ? `Envoyer un SMS au ${l.phone}`
+                                          : "Aucun téléphone"
+                                    }
                                   >
                                     {smsBusy ? (
                                       <BellRing className="h-4 w-4 animate-pulse" />
