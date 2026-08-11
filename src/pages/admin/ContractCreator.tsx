@@ -163,25 +163,164 @@ const ContractCreator = () => {
         }),
       );
 
-      const pages = previewRef.current.querySelectorAll<HTMLElement>(".contract-page");
+      // Clone the preview and strip its visual page framing so the content
+      // flows as one continuous document. We then measure each "atomic block"
+      // (article section / cover header / signature page) and slice the
+      // rendered canvas at block boundaries — never mid-section — so a
+      // heading never gets orphaned from its body and the signature page
+      // always starts fresh.
+      const CLONE_WIDTH_PX = 680; // = 180mm at 96dpi → PDF content width
+      const clone = previewRef.current.cloneNode(true) as HTMLElement;
+      clone.className = "";
+      clone.style.cssText = `
+        width: ${CLONE_WIDTH_PX}px;
+        background: #ffffff;
+        color: #000000;
+        font-family: 'Times New Roman', serif;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        top: -100000px;
+        left: 0;
+      `;
+      // Keep .contract-page classes intact (bg-white text-black etc.) so text
+      // inherits correctly; only override the "looks like paper" layout bits
+      // via inline !important. Otherwise, in this dark-themed app, titles
+      // with no explicit color class would inherit near-white --foreground
+      // from body → rendered as white in the PDF.
+      const pageDivs = Array.from(clone.querySelectorAll<HTMLElement>(".contract-page"));
+      pageDivs.forEach((el) => {
+        el.style.setProperty("padding", "0", "important");
+        el.style.setProperty("margin", "0", "important");
+        el.style.setProperty("box-shadow", "none", "important");
+        el.style.setProperty("border", "none", "important");
+        el.style.setProperty("min-height", "0", "important");
+        el.style.setProperty("max-width", "none", "important");
+        el.style.setProperty("width", "100%", "important");
+      });
+      document.body.appendChild(clone);
+
+      // html2canvas 1.4 chokes on modern CSS color functions (oklch,
+      // color-mix, alpha shortcuts like text-black/60), silently rendering
+      // them as transparent — which makes titles and the footer look "cut".
+      // Force every color to concrete RGB/hex by round-tripping through a
+      // Canvas 2D fillStyle (which the browser always normalizes).
+      const colorProbe = document.createElement("canvas").getContext("2d");
+      if (colorProbe) {
+        const toRGB = (color: string): string => {
+          try {
+            colorProbe.fillStyle = "#000";
+            colorProbe.fillStyle = color;
+            return colorProbe.fillStyle as string;
+          } catch {
+            return color;
+          }
+        };
+        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_ELEMENT);
+        let node: Node | null = walker.currentNode;
+        const elements: HTMLElement[] = [clone];
+        while ((node = walker.nextNode())) elements.push(node as HTMLElement);
+        for (const el of elements) {
+          const cs = window.getComputedStyle(el);
+          el.style.color = toRGB(cs.color);
+          if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
+            el.style.backgroundColor = toRGB(cs.backgroundColor);
+          }
+          (["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"] as const).forEach((prop) => {
+            const v = cs[prop];
+            if (v && v !== "rgba(0, 0, 0, 0)") {
+              el.style[prop] = toRGB(v);
+            }
+          });
+        }
+      }
+
       const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
+      const marginMM = 15;
+      const contentWidthMM = pdfWidth - 2 * marginMM;   // 180mm
+      const contentHeightMM = pdfHeight - 2 * marginMM; // 267mm
+      // Height, in the clone's CSS px space, that maps to one full A4 page.
+      const pageHeightInClonePx = CLONE_WIDTH_PX * (contentHeightMM / contentWidthMM);
 
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
+      try {
+        // Measure atomic blocks in the flattened clone (in the clone's
+        // coordinate space). Signature page = one atomic block with a forced
+        // page break before it (last page div).
+        const cloneTop = clone.getBoundingClientRect().top;
+        const blocks: { top: number; bottom: number; forceNewPage: boolean }[] = [];
+
+        pageDivs.forEach((pageDiv, pageIdx) => {
+          const isSignaturePage = pageIdx === pageDivs.length - 1;
+          if (isSignaturePage) {
+            const rect = pageDiv.getBoundingClientRect();
+            blocks.push({
+              top: rect.top - cloneTop,
+              bottom: rect.bottom - cloneTop,
+              forceNewPage: true,
+            });
+          } else {
+            Array.from(pageDiv.children).forEach((child) => {
+              const rect = (child as HTMLElement).getBoundingClientRect();
+              blocks.push({
+                top: rect.top - cloneTop,
+                bottom: rect.bottom - cloneTop,
+                forceNewPage: false,
+              });
+            });
+          }
+        });
+
+        // Compute page-break offsets: greedy fit blocks onto pages, honoring
+        // forceNewPage. `breaks[i]` is the top-Y (clone px) of page i.
+        const breaks: number[] = [0];
+        for (const block of blocks) {
+          const pageStart = breaks[breaks.length - 1];
+          const wouldOverflow = block.bottom - pageStart > pageHeightInClonePx;
+          const needsNewPage = block.forceNewPage || wouldOverflow;
+          if (needsNewPage && block.top > pageStart) {
+            breaks.push(block.top);
+          }
+        }
+
+        // Render the whole clone once, then slice at the computed boundaries.
+        const canvas = await html2canvas(clone, {
           scale: 2,
           useCORS: true,
           allowTaint: true,
           backgroundColor: "#ffffff",
         });
-        const imgData = canvas.toDataURL("image/jpeg", 0.7);
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight), undefined, "FAST");
-      }
+        const scale = canvas.width / CLONE_WIDTH_PX;
 
-      originals.forEach(({ img, src }) => { img.src = src; });
+        for (let i = 0; i < breaks.length; i++) {
+          const startPxCanvas = Math.round(breaks[i] * scale);
+          const endPxCanvas = i < breaks.length - 1
+            ? Math.round(breaks[i + 1] * scale)
+            : canvas.height;
+          const sliceHeight = Math.max(1, endPxCanvas - startPxCanvas);
+
+          const sliceCanvas = document.createElement("canvas");
+          sliceCanvas.width = canvas.width;
+          sliceCanvas.height = sliceHeight;
+          const ctx = sliceCanvas.getContext("2d");
+          if (!ctx) throw new Error("Canvas 2D context unavailable");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+          ctx.drawImage(canvas, 0, -startPxCanvas);
+
+          const imgData = sliceCanvas.toDataURL("image/jpeg", 0.85);
+          const sliceHeightMM = (sliceHeight * contentWidthMM) / canvas.width;
+
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, "JPEG", marginMM, marginMM, contentWidthMM, sliceHeightMM, undefined, "FAST");
+        }
+      } finally {
+        document.body.removeChild(clone);
+        originals.forEach(({ img, src }) => { img.src = src; });
+      }
 
       const filename = `contrat-${code}-${Date.now()}.pdf`;
       const blob = pdf.output("blob");
