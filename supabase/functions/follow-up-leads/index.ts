@@ -48,11 +48,36 @@ interface SmsResult {
   error?: string;
 }
 
+// Twilio n'accepte qu'E.164 (`+15145551234`). Nos leads Quebec/Canada sont
+// souvent stockés en `514-555-1234`, `(514) 555-1234`, `1 514 555 1234`, etc.
+// Défaut pays = +1 (Amérique du Nord) si pas de code pays explicite.
+function toE164(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Déjà +… : on garde le + et les chiffres uniquement.
+  if (trimmed.startsWith("+")) {
+    const digits = trimmed.slice(1).replace(/\D/g, "");
+    if (digits.length < 8 || digits.length > 15) return null;
+    return `+${digits}`;
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;              // 5145551234
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`; // 15145551234
+  if (digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+  return null;
+}
+
 async function sendSms(phone: string, body: string): Promise<SmsResult> {
   const sid = Deno.env.get("TWILIO_ACCOUNT_SID");
   const auth = Deno.env.get("TWILIO_AUTH_TOKEN");
   const from = Deno.env.get("TWILIO_FROM_NUMBER");
-  if (!sid || !auth || !from) return { sent: false, skipped: true };
+  if (!sid || !auth || !from) {
+    return { sent: false, skipped: true, error: "Twilio secrets manquants (SID/token/from)" };
+  }
+  const to = toE164(phone);
+  if (!to) {
+    return { sent: false, skipped: false, error: `Numéro invalide (${phone}) — E.164 requis` };
+  }
   try {
     const res = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
@@ -62,12 +87,12 @@ async function sendSms(phone: string, body: string): Promise<SmsResult> {
           Authorization: "Basic " + btoa(`${sid}:${auth}`),
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({ To: phone, From: from, Body: body }),
+        body: new URLSearchParams({ To: to, From: from, Body: body }),
       },
     );
     if (!res.ok) {
       const t = await res.text();
-      return { sent: false, skipped: false, error: `Twilio ${res.status}: ${t.slice(0, 160)}` };
+      return { sent: false, skipped: false, error: `Twilio ${res.status}: ${t.slice(0, 240)}` };
     }
     return { sent: true, skipped: false };
   } catch (e) {

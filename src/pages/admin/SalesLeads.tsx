@@ -233,8 +233,7 @@ const SalesLeads = () => {
       else toast.error(r?.error || "Échec de l'envoi de l'email");
     } else {
       if (r?.smsSent) toast.success(`SMS envoyé au ${lead.phone}`);
-      else if (r?.smsSkipped) toast.error("SMS non envoyé (Twilio non configuré)");
-      else toast.error(r?.error || "Échec de l'envoi du SMS");
+      else toast.error(r?.error || (r?.smsSkipped ? "SMS non envoyé (Twilio non configuré)" : "Échec de l'envoi du SMS"));
     }
     reload();
   };
