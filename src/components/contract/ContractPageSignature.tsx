@@ -23,7 +23,7 @@ const ContractPageSignature = ({ data, date, p }: Props) => {
 
       <p className="mb-12 text-justify">
         {isEN
-          ? "The undersigned, acting in their respective capacities, acknowledge having read and understood all the terms and conditions of this Contract and consent to them without reservation."
+          ? "The undersigned, acting in their respective capacities, acknowledge having read and understood the entirety of the terms and conditions of this Agreement and consent to them without reservation."
           : "Les soussignés, agissant en leur capacité respective, reconnaissent avoir lu et compris l'intégralité des termes et conditions du présent Contrat et y consentent sans réserve."}
       </p>
 
@@ -50,7 +50,7 @@ const ContractPageSignature = ({ data, date, p }: Props) => {
             )}
           </div>
           <p className="font-bold uppercase tracking-wide text-[13px] mt-3">
-            {p(data.nomDuBrand, "{{Company_name}}")} Inc.
+            {p(data.nomDuBrand, "{{Company_name}}")}.
           </p>
           <p className="text-[12px]">
             {p(data.firstName, "{{Client_Signatory_name}}")} {p(data.lastName, "")}

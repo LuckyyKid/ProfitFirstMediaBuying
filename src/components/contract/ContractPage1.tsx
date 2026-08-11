@@ -47,8 +47,8 @@ const ContractPage1 = ({ data, date, p }: Props) => {
         >
           {isEN ? (
             <>
-              Sale
-              <br />& Service
+              Sale & Service
+              <br />Agreement
             </>
           ) : (
             <>
@@ -156,10 +156,10 @@ const ContractPage1 = ({ data, date, p }: Props) => {
         <p>
           {isEN
             ? trial
-              ? `The Client will pay ${trialPrice} monthly during the trial period, and ${normalPrice} monthly after the trial period.`
+              ? `The Client will pay ${trialPrice} monthly during the trial period, and ${normalPrice} after the trial period.`
               : `The Client will pay ${normalPrice} monthly.`
             : trial
-              ? `Le Client paiera ${trialPrice} mensuellement pendant la période de test et ${normalPrice} mensuellement après la période de test.`
+              ? `Le Client paiera ${trialPrice} mensuellement pendant la période de test et ${normalPrice} après la période de test.`
               : `Le Client paiera ${normalPrice} mensuellement.`}
         </p>
       </Section>
