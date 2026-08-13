@@ -30,11 +30,21 @@ import {
   Users,
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useSalesLeads, type BusinessType, type LeadStatus, type SalesLead } from "@/hooks/useSalesLeads";
+import {
+  useSalesLeads,
+  updateLeadStatus,
+  LEAD_STATUS_LABEL,
+  LEAD_STATUS_CLASS,
+  LEAD_STATUS_ORDER,
+  type BusinessType,
+  type LeadStatus,
+  type SalesLead,
+} from "@/hooks/useSalesLeads";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LeadDialog } from "@/components/admin/sales/LeadDialog";
 import { SalesRepsDialog } from "@/components/admin/sales/SalesRepsDialog";
+import { LayoutGrid } from "lucide-react";
 
 type PeriodKey = "today" | "week" | "month" | "quarter" | "year" | "all";
 
@@ -64,31 +74,8 @@ const BUSINESS_TYPES: { key: BusinessType | "all"; label: string }[] = [
 
 const STATUSES: { key: LeadStatus | "all"; label: string }[] = [
   { key: "all", label: "Tous statuts" },
-  { key: "new", label: "Nouveau" },
-  { key: "contacted", label: "Contacté" },
-  { key: "qualified", label: "Qualifié" },
-  { key: "proposal", label: "Proposition" },
-  { key: "won", label: "Gagné" },
-  { key: "lost", label: "Perdu" },
+  ...LEAD_STATUS_ORDER.map((s) => ({ key: s, label: LEAD_STATUS_LABEL[s] })),
 ];
-
-const STATUS_LABEL: Record<LeadStatus, string> = {
-  new: "Nouveau",
-  contacted: "Contacté",
-  qualified: "Qualifié",
-  proposal: "Proposition",
-  won: "Gagné",
-  lost: "Perdu",
-};
-
-const STATUS_CLASS: Record<LeadStatus, string> = {
-  new: "border-[rgba(148,170,215,0.4)] bg-[rgba(148,170,215,0.08)] text-[#c8d5f2]",
-  contacted: "border-[rgba(77,159,255,0.4)] bg-[rgba(77,159,255,0.08)] text-[#9ec8ff]",
-  qualified: "border-[rgba(200,120,255,0.4)] bg-[rgba(200,120,255,0.08)] text-[#e0b3ff]",
-  proposal: "border-[rgba(255,184,77,0.4)] bg-[rgba(255,184,77,0.08)] text-[hsl(var(--watch))]",
-  won: "border-[rgba(122,232,180,0.4)] bg-[rgba(122,232,180,0.08)] text-[hsl(var(--good))]",
-  lost: "border-[rgba(255,110,110,0.4)] bg-[rgba(255,110,110,0.08)] text-[hsl(var(--bad))]",
-};
 
 function periodStart(key: PeriodKey): Date | null {
   const now = new Date();
@@ -149,6 +136,20 @@ const SalesLeads = () => {
   const [repsOpen, setRepsOpen] = useState(false);
   const [followingUp, setFollowingUp] = useState<string | null>(null);
   // `followingUp` = `${lead_code}:${channel}` pendant l'envoi.
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+
+  const onStatusChange = async (lead: SalesLead, next: LeadStatus) => {
+    if (next === lead.status) return;
+    setStatusUpdating(lead.lead_code);
+    const { error } = await updateLeadStatus(lead.lead_code, next, lead.converted_at);
+    setStatusUpdating(null);
+    if (error) {
+      toast.error(error || "Échec de la mise à jour du statut");
+      return;
+    }
+    toast.success(`Statut mis à jour : ${LEAD_STATUS_LABEL[next]}`);
+    reload();
+  };
 
   const sources = useMemo(() => {
     const set = new Set<string>();
@@ -261,6 +262,11 @@ const SalesLeads = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link to="/admin/sales/kanban">
+                <LayoutGrid className="h-4 w-4 mr-2" /> Vue Kanban
+              </Link>
+            </Button>
             <Button size="sm" variant="outline" onClick={() => setRepsOpen(true)}>
               <Users className="h-4 w-4 mr-2" /> Vendeurs
             </Button>
@@ -435,12 +441,25 @@ const SalesLeads = () => {
                           {l.business_type ? BUSINESS_TYPE_LABEL[l.business_type] : "—"}
                         </TableCell>
                         <TableCell className="text-sm">{l.source || "—"}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-md text-xs border ${STATUS_CLASS[l.status]}`}
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={l.status}
+                            disabled={statusUpdating === l.lead_code}
+                            onValueChange={(v) => onStatusChange(l, v as LeadStatus)}
                           >
-                            {STATUS_LABEL[l.status]}
-                          </span>
+                            <SelectTrigger
+                              className={`h-7 w-[130px] px-2 py-0 text-xs border ${LEAD_STATUS_CLASS[l.status]}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LEAD_STATUS_ORDER.map((s) => (
+                                <SelectItem key={s} value={s}>
+                                  {LEAD_STATUS_LABEL[s]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-sm">
                           {l.qualification_score ? `${l.qualification_score}/5` : "—"}
