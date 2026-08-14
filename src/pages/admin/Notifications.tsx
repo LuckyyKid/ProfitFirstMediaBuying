@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, ExternalLink, Mail, MessageSquare, RefreshCcw, Search, Send, Hash, CheckCheck } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Mail, MessageSquare, RefreshCcw, Search, Send, Hash, CheckCheck } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { timeAgo } from "@/lib/onboardingHelpers";
 
 const STORAGE_KEY = "admin_notifications_last_seen";
 const LOOKBACK_DAYS = 30;
+const PAGE_SIZE = 25;
 
 type Row = {
   id: string;
@@ -51,6 +52,7 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const load = async () => {
     setLoading(true);
@@ -107,6 +109,13 @@ const Notifications = () => {
       return hay.includes(q);
     });
   }, [rows, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [search]);
 
   const markAllRead = () => {
     localStorage.setItem(STORAGE_KEY, new Date().toISOString());
@@ -229,7 +238,7 @@ const Notifications = () => {
                     </TableCell>
                   </TableRow>
                 )}
-                {filtered.map((r) => {
+                {pageRows.map((r) => {
                   const info = eventInfo(r.event_type);
                   const Icon = info.icon;
                   return (
@@ -287,6 +296,37 @@ const Notifications = () => {
               </TableBody>
             </Table>
           </div>
+
+          {filtered.length > PAGE_SIZE && (
+            <div className="flex items-center justify-between gap-2 mt-4 text-sm">
+              <span className="text-muted-foreground">
+                {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} sur {filtered.length}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Précédent
+                </Button>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  Page {currentPage} / {totalPages}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Suivant
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
     </div>

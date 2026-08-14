@@ -178,20 +178,28 @@ Deno.serve(async (req) => {
 
     if (!extRes.ok || !snap?.success) {
       const err = snap?.error || `HTTP ${extRes.status}`;
+      // A "not found" from the external CRM is expected for churned/deleted
+      // clients that still exist locally. Store the reason on the row for the
+      // client fiche, but don't spam client_activity_log — admins can't act on
+      // it and it produced infinite bell notifications.
+      const isNotFound =
+        extRes.status === 404 || /not\s*found|introuvable|no\s*such/i.test(err);
       if (local?.client_code) {
         await supabase
           .from("client_progress")
           .update({ external_sync_error: err })
           .eq("client_code", local.client_code);
-        await supabase.from("client_activity_log").insert({
-          client_code: local.client_code,
-          event_type: "external_sync",
-          status: "error",
-          error: err,
-        });
+        if (!isNotFound) {
+          await supabase.from("client_activity_log").insert({
+            client_code: local.client_code,
+            event_type: "external_sync",
+            status: "error",
+            error: err,
+          });
+        }
       }
       return new Response(
-        JSON.stringify({ outcome: "error", error: err }),
+        JSON.stringify({ outcome: isNotFound ? "not_found" : "error", error: err }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
