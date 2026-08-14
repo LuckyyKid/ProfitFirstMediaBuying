@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ArrowRight, Lock, UserRound } from "lucide-react";
+import { ArrowRight, Lock, ShieldCheck, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const translations = {
@@ -11,6 +11,10 @@ const translations = {
     onboardingTitle: "Client onboarding",
     onboardingDescription: "First visit? Open your onboarding to identify yourself with your client information.",
     onboardingAction: "Start onboarding",
+    portalTitle: "Client portal",
+    portalDescription: "Already onboarded? Sign in with your email and password to access your dashboard.",
+    portalAction: "Sign in to your portal",
+    portalSignup: "Don't have an account yet? Create one with your client code →",
     adminTitle: "Administrator access",
     adminDescription: "Go to the TDIA admin portal to access the dashboard.",
     adminAction: "Continue as admin",
@@ -21,6 +25,10 @@ const translations = {
     onboardingTitle: "Onboarding client",
     onboardingDescription: "Première visite ? Ouvrez votre onboarding et identifiez-vous avec vos informations client.",
     onboardingAction: "Démarrer l'onboarding",
+    portalTitle: "Portail client",
+    portalDescription: "Déjà onboardé ? Connectez-vous avec votre email et votre mot de passe pour accéder à votre dashboard.",
+    portalAction: "Se connecter à mon portail",
+    portalSignup: "Pas encore de compte ? Créez-le avec votre code client →",
     adminTitle: "Accès administrateur",
     adminDescription: "Accédez au portail admin TDIA pour ouvrir le dashboard.",
     adminAction: "Continuer comme administrateur",
@@ -33,9 +41,10 @@ type CardProps = {
   description: string;
   action: string;
   onClick: () => void;
+  footer?: React.ReactNode;
 };
 
-const AccessCard = ({ icon, title, description, action, onClick }: CardProps) => (
+const AccessCard = ({ icon, title, description, action, onClick, footer }: CardProps) => (
   <div className="group rounded-3xl border border-border bg-card/70 p-6 md:p-8 text-left transition-all hover:border-primary/50 hover:bg-card flex flex-col">
     <div className="flex items-start justify-between gap-4">
       <div className="space-y-4">
@@ -53,6 +62,7 @@ const AccessCard = ({ icon, title, description, action, onClick }: CardProps) =>
       {action}
       <ArrowRight className="h-4 w-4" />
     </Button>
+    {footer && <div className="mt-3">{footer}</div>}
   </div>
 );
 
@@ -83,13 +93,29 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 max-w-3xl mx-auto">
+          <div className="grid gap-4 md:grid-cols-3 max-w-5xl mx-auto">
             <AccessCard
               icon={<UserRound className="h-6 w-6" />}
               title={t.onboardingTitle}
               description={t.onboardingDescription}
               action={t.onboardingAction}
               onClick={() => navigate("/client")}
+            />
+            <AccessCard
+              icon={<ShieldCheck className="h-6 w-6" />}
+              title={t.portalTitle}
+              description={t.portalDescription}
+              action={t.portalAction}
+              onClick={() => navigate("/portail/login")}
+              footer={
+                <button
+                  type="button"
+                  onClick={() => navigate("/portail/signup")}
+                  className="text-xs text-muted-foreground hover:text-primary text-left w-full transition-colors"
+                >
+                  {t.portalSignup}
+                </button>
+              }
             />
             <AccessCard
               icon={<Lock className="h-6 w-6" />}

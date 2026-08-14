@@ -74,7 +74,19 @@
       "Bash(git -C \"C:/Users/bafin/Downloads/!300\" ls-files tdia-audit/export.py)",
       "Bash(git -C \"C:/Users/bafin/Downloads/!300\" log --oneline -- tdia-audit/export.py)",
       "Bash(.venv/Scripts/python.exe -c \"from app.main import app; print\\([r.path for r in app.routes if hasattr\\(r, 'path'\\)]\\)\")",
-      "Bash(.venv/Scripts/python.exe *)"
+      "Bash(.venv/Scripts/python.exe *)",
+      "Bash(xargs -I{} grep -l \"insert into storage.buckets\\\\|storage.buckets\" supabase/migrations/{})",
+      "Bash(form_answer\")",
+      "Bash(mkdir -p /tmp/contract_fr /tmp/contract_en)",
+      "Bash(unzip -o \"FR _ TDIA - CONTRAT UPDATED 2026 - good.docx\" -d /tmp/contract_fr)",
+      "Bash(unzip -o \"ENG _ TDIA - CONTRAT UPDATED 2026 - Good.docx\" -d /tmp/contract_en)",
+      "Bash(cygpath -w /tmp/contract_fr)",
+      "Bash(python3 -c ' *)",
+      "Bash(py --version)",
+      "Bash(py *)",
+      "Bash(unzip -o \"/c/Users/bafin/Downloads/!300/ENG _ TDIA - CONTRAT UPDATED 2026 - Good.docx\" -d eng_contract)",
+      "Bash(npx vite *)",
+      "Bash(find . -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"completed_at\\\\|onboarding.*complete\" {} \\\\;)"
     ]
   }
 }

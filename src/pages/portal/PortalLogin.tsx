@@ -9,6 +9,17 @@ import { toast } from "sonner";
 import { ArrowLeft, UserRound, AlertCircle } from "lucide-react";
 
 const STORAGE_KEY = "tdia_portal_email";
+const PENDING_CODE_KEY = "tdia_portal_pending_code";
+
+const mapRedeemError = (raw: string): string => {
+  if (raw.includes("unknown_client_code"))
+    return "Aucun dossier client trouvé pour ce code. Vérifiez le code fourni par votre account manager.";
+  if (raw.includes("email_mismatch"))
+    return "L'email connecté ne correspond pas à celui enregistré dans votre dossier client.";
+  if (raw.includes("client_email_missing"))
+    return "Aucun email n'est enregistré pour ce dossier client. Contactez votre account manager.";
+  return raw;
+};
 
 const PortalLogin = () => {
   const navigate = useNavigate();
@@ -49,6 +60,27 @@ const PortalLogin = () => {
       return;
     }
     try { localStorage.setItem(STORAGE_KEY, email.trim()); } catch { /* ignore */ }
+
+    // If the user just came from the signup → confirmation-link flow, a
+    // pending client_code is stashed in localStorage. Redeem it now so the
+    // dossier gets linked to this fresh session. Failure here is not fatal
+    // (they still get into /portail); the error tells them what to do.
+    let pendingCode = "";
+    try { pendingCode = (localStorage.getItem(PENDING_CODE_KEY) ?? "").trim().toUpperCase(); }
+    catch { /* ignore */ }
+    if (pendingCode) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: redeemError } = await (supabase as any).rpc("redeem_portal_client_code", {
+        p_client_code: pendingCode,
+      });
+      if (redeemError) {
+        toast.error(`Portail non rattaché : ${mapRedeemError(redeemError.message)}`);
+      } else {
+        try { localStorage.removeItem(PENDING_CODE_KEY); } catch { /* ignore */ }
+        toast.success("Votre accès portail est activé.");
+      }
+    }
+
     navigate("/portail", { replace: true });
   };
 

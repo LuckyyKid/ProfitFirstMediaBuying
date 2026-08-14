@@ -24,11 +24,13 @@ import {
   timeAgo,
 } from "@/lib/onboardingHelpers";
 import {
-  ArrowLeft, Check, Copy, Download, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Mail, Pencil,
+  ArrowLeft, Check, Copy, Download, ExternalLink, FileText, RefreshCw, Sparkles, X, CheckCircle2, RotateCcw, Mail, Pencil, KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { MetaAdsIntegrationCard } from "@/components/admin/MetaAdsIntegrationCard";
+import { MetaAdsReportSender } from "@/components/admin/MetaAdsReportSender";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -64,6 +66,7 @@ const ClientDetail = () => {
   const [savingInfo, setSavingInfo] = useState(false);
   const [regeneratingStripe, setRegeneratingStripe] = useState(false);
   const [exportingXlsx, setExportingXlsx] = useState(false);
+  const [resettingPortal, setResettingPortal] = useState(false);
 
   const exportAnswers = async () => {
     const code = client?.client_code;
@@ -180,6 +183,110 @@ const ClientDetail = () => {
       toast.error(err?.message || "Échec");
     } finally {
       setTogglingComplete(false);
+    }
+  };
+
+  const resetPortalAccess = async () => {
+    const tag = "[resetPortalAccess]";
+    console.log(`${tag} click`, {
+      client_code: client?.client_code,
+      email: client?.email,
+      hasClientCode: Boolean(client?.client_code),
+      hasEmail: Boolean(client?.email),
+    });
+
+    if (!client?.client_code || !client?.email) {
+      console.warn(`${tag} early-exit: missing client_code or email`);
+      toast.error("Ce dossier n'a pas de client_code ou d'email — impossible de réinitialiser.");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Réinitialiser l'accès portail de ${client.email} ?\n\n` +
+        `Le compte de login sera supprimé. Le dossier client, les deals et l'historique restent intacts. ` +
+        `Le client devra refaire /portail/signup avec son code ${client.client_code}.`
+    );
+    if (!confirmed) {
+      console.log(`${tag} user cancelled`);
+      return;
+    }
+    setResettingPortal(true);
+
+    // Log the current session so we can see whether the JWT is present and
+    // whose it is — 401 from the edge function usually means either no session
+    // or a session for a user without global_admin role.
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log(`${tag} caller session`, {
+        hasSession: Boolean(sessionData?.session),
+        user_id: sessionData?.session?.user?.id,
+        user_email: sessionData?.session?.user?.email,
+        expires_at: sessionData?.session?.expires_at,
+      });
+    } catch (e) {
+      console.error(`${tag} could not read session`, e);
+    }
+
+    const t0 = performance.now();
+    try {
+      console.log(`${tag} invoking edge function reset-portal-access`, {
+        body: { client_code: client.client_code },
+      });
+      const invokeResult = await supabase.functions.invoke("reset-portal-access", {
+        body: { client_code: client.client_code },
+      });
+      const { data, error } = invokeResult;
+      console.log(`${tag} invoke returned in ${Math.round(performance.now() - t0)}ms`, {
+        data,
+        error,
+        errorMessage: error?.message,
+        errorName: error?.name,
+        // FunctionsHttpError shape carries a Response via .context
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        errorContext: (error as any)?.context,
+      });
+
+      if (error) {
+        // Try to extract the response body from the FunctionsHttpError to get
+        // the real server-side error message.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ctx = (error as any)?.context;
+        let serverBody: unknown = null;
+        if (ctx && typeof ctx.text === "function") {
+          try {
+            const raw = await ctx.text();
+            console.log(`${tag} error body raw`, raw);
+            try { serverBody = JSON.parse(raw); } catch { serverBody = raw; }
+          } catch (e) {
+            console.error(`${tag} could not read error body`, e);
+          }
+        }
+        console.error(`${tag} edge function returned error`, {
+          status: ctx?.status,
+          serverBody,
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const serverErr = (serverBody as any)?.error;
+        throw new Error(
+          serverErr ||
+            `${error.message} (status ${ctx?.status ?? "?"})`
+        );
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const r = data as any;
+      console.log(`${tag} success payload`, r);
+      if (r?.ok === false) throw new Error(r.error || "Échec de la réinitialisation");
+      if (r?.deleted) {
+        toast.success(`Accès portail supprimé pour ${r.email}. Le client peut refaire signup.`);
+      } else {
+        toast.info(r?.message || "Aucun compte à supprimer.");
+      }
+    } catch (err: unknown) {
+      console.error(`${tag} caught exception`, err);
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`Réinitialisation impossible : ${msg}`);
+    } finally {
+      setResettingPortal(false);
     }
   };
 
@@ -594,11 +701,41 @@ const ClientDetail = () => {
           </div>
         </Card>
 
+        <Card className="p-4 glass-card">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary shrink-0">
+              <KeyRound className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                Accès portail client
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-sm text-muted-foreground">
+                  Supprime uniquement le login <code className="font-mono">auth.users</code>. Utile quand un client
+                  a confirmé son compte puis ne peut plus recevoir de code OTP (limite Supabase),
+                  ou pour repartir de zéro sur un dossier de test.
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={resetPortalAccess}
+                  disabled={resettingPortal || !client.email}
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                  {resettingPortal ? "Réinitialisation…" : "Réinitialiser l'accès portail"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         <Tabs defaultValue="info" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="info" className="text-xs sm:text-sm">Infos</TabsTrigger>
             <TabsTrigger value="progress" className="text-xs sm:text-sm">Progression</TabsTrigger>
             <TabsTrigger value="platforms" className="text-xs sm:text-sm">Plateformes</TabsTrigger>
+            <TabsTrigger value="meta-ads" className="text-xs sm:text-sm">Meta Ads</TabsTrigger>
             <TabsTrigger value="quiz" className="text-xs sm:text-sm">Quiz intégration</TabsTrigger>
             <TabsTrigger value="founder" className="text-xs sm:text-sm">Founder Scan</TabsTrigger>
             <TabsTrigger value="payment" className="text-xs sm:text-sm">Paiement</TabsTrigger>
@@ -781,6 +918,20 @@ const ClientDetail = () => {
                 );
               })}
             </Card>
+          </TabsContent>
+
+          <TabsContent value="meta-ads">
+            {client.client_code ? (
+              <div className="space-y-4">
+                <MetaAdsIntegrationCard clientCode={client.client_code} />
+                <MetaAdsReportSender clientCode={client.client_code} />
+              </div>
+            ) : (
+              <Card className="p-6 glass-card text-sm text-muted-foreground">
+                Ce client n'a pas de <span className="font-mono">client_code</span> —
+                l'intégration Meta Ads n'est pas disponible.
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="quiz">
