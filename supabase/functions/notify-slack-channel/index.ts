@@ -5,16 +5,29 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// channel: "profile" -> SLACK_WEBHOOK_URL ; "tracker" -> SLACK_WEBHOOK_URL_TRACKER
+// channel routing:
+//   "profile"               -> SLACK_WEBHOOK_URL                       (#head-of-things, default)
+//   "tracker"               -> SLACK_WEBHOOK_URL_TRACKER               (client onboarding tracker)
+//   "alerts"                -> SLACK_WEBHOOK_URL_ALERTS                (#alertes-comptes — ad anomaly S1/S2/S3)
+//   "heartbeat"             -> SLACK_WEBHOOK_URL_HEARTBEAT             (#ops-heartbeat — daily ad anomaly green check)
+//   "automations_alerts"    -> SLACK_WEBHOOK_URL_AUTOMATIONS_ALERTS    (#automations-alertes — workflow failures / cadence-missed)
+//   "automations_heartbeat" -> SLACK_WEBHOOK_URL_AUTOMATIONS_HEARTBEAT (#automations-heartbeat — daily watchdog green check)
+const CHANNEL_ENV: Record<string, string> = {
+  profile: "SLACK_WEBHOOK_URL",
+  tracker: "SLACK_WEBHOOK_URL_TRACKER",
+  alerts: "SLACK_WEBHOOK_URL_ALERTS",
+  heartbeat: "SLACK_WEBHOOK_URL_HEARTBEAT",
+  automations_alerts: "SLACK_WEBHOOK_URL_AUTOMATIONS_ALERTS",
+  automations_heartbeat: "SLACK_WEBHOOK_URL_AUTOMATIONS_HEARTBEAT",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const { channel, text, blocks } = await req.json();
-    const url =
-      channel === "tracker"
-        ? Deno.env.get("SLACK_WEBHOOK_URL_TRACKER")
-        : Deno.env.get("SLACK_WEBHOOK_URL");
-    if (!url) throw new Error(`Slack webhook for channel "${channel}" not configured`);
+    const envKey = CHANNEL_ENV[channel as string] ?? CHANNEL_ENV.profile;
+    const url = Deno.env.get(envKey);
+    if (!url) throw new Error(`Slack webhook for channel "${channel}" (${envKey}) not configured`);
 
     const body: Record<string, unknown> = {};
     if (text) body.text = text;

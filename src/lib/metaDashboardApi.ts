@@ -6,6 +6,23 @@ export interface MetaDashboardConfig {
   tab_name: string;
   active: boolean;
   updated_at?: string;
+  // Anomaly-check fields (added by check-ad-anomalies system).
+  // Optional because Lovable's meta-dashboard-config-get may not return them
+  // until its query is updated — the UI reads them defensively.
+  client_type?: "ecom" | "local";
+  daily_budget_planned?: number;
+  conversion_metric?: "purchases" | "leads";
+  target_cpl_or_roas?: number;
+  anomaly_checks_enabled?: boolean;
+}
+
+export interface AnomalyConfigPatch {
+  client_code: string;
+  client_type?: "ecom" | "local";
+  daily_budget_planned?: number;
+  conversion_metric?: "purchases" | "leads";
+  target_cpl_or_roas?: number;
+  anomaly_checks_enabled?: boolean;
 }
 
 export interface MetaDashboardKpis {
@@ -126,6 +143,19 @@ export async function testMetaDashboardSheet(payload: {
   tab_name?: string;
 }) {
   return invoke<TestSheetResult>("meta-dashboard-test-sheet", payload);
+}
+
+export async function updateAnomalyConfig(payload: AnomalyConfigPatch) {
+  return invoke<{
+    config: {
+      client_code: string;
+      client_type: "ecom" | "local";
+      daily_budget_planned: number;
+      conversion_metric: "purchases" | "leads";
+      target_cpl_or_roas: number;
+      anomaly_checks_enabled: boolean;
+    };
+  }>("meta-dashboard-config-anomaly-set", payload);
 }
 
 export async function fetchMetaDashboardData(payload: {

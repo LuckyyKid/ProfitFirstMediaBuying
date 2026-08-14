@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { MetaAdsIntegrationCard } from "@/components/admin/MetaAdsIntegrationCard";
+import { MetaAdsAnomalyConfigCard } from "@/components/admin/MetaAdsAnomalyConfigCard";
 import { MetaAdsReportSender } from "@/components/admin/MetaAdsReportSender";
 
 const UUID_RE =
@@ -924,6 +925,7 @@ const ClientDetail = () => {
             {client.client_code ? (
               <div className="space-y-4">
                 <MetaAdsIntegrationCard clientCode={client.client_code} />
+                <MetaAdsAnomalyConfigCard clientCode={client.client_code} />
                 <MetaAdsReportSender clientCode={client.client_code} />
               </div>
             ) : (
