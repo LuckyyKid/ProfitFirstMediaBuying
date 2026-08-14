@@ -21,6 +21,14 @@ import FollowUps from "./pages/admin/FollowUps";
 import Notifications from "./pages/admin/Notifications";
 import SalesLeads from "./pages/admin/SalesLeads";
 import SalesKanban from "./pages/admin/SalesKanban";
+import MetaAdsMonitor from "./pages/admin/MetaAdsMonitor";
+import PortalLogin from "./pages/portal/PortalLogin";
+import PortalSignup from "./pages/portal/PortalSignup";
+import PortalForgotPassword from "./pages/portal/PortalForgotPassword";
+import PortalResetPassword from "./pages/portal/PortalResetPassword";
+import PortalConfirmEmail from "./pages/portal/PortalConfirmEmail";
+import PortalClient from "./pages/PortalClient";
+import PortalAuthGate from "./components/PortalAuthGate";
 import NotFound from "./pages/NotFound";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import AgentOpsLayout from "./components/agentOps/AgentOpsLayout";
@@ -118,10 +126,23 @@ const App = () => (
           <Route path="/step8" element={<Step8 />} />
           <Route path="/step9" element={<Step9 />} />
 
-          <Route path="/portail" element={<Navigate to="/client" replace />} />
-          <Route path="/portail/*" element={<Navigate to="/client" replace />} />
-          <Route path="/portal" element={<Navigate to="/client" replace />} />
-          <Route path="/portal/*" element={<Navigate to="/client" replace />} />
+          <Route path="/portail/login" element={<PortalLogin />} />
+          <Route path="/portail/signup" element={<PortalSignup />} />
+          <Route path="/portail/confirm" element={<PortalConfirmEmail />} />
+          <Route path="/portail/forgot-password" element={<PortalForgotPassword />} />
+          <Route path="/portail/reset-password" element={<PortalResetPassword />} />
+          <Route
+            path="/portail"
+            element={
+              <PortalAuthGate>
+                {({ clientCode, logout }) => (
+                  <PortalClient clientCode={clientCode} onLogout={logout} />
+                )}
+              </PortalAuthGate>
+            }
+          />
+          <Route path="/portal" element={<Navigate to="/portail" replace />} />
+          <Route path="/portal/*" element={<Navigate to="/portail" replace />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
@@ -131,6 +152,7 @@ const App = () => (
           <Route path="/admin/notifications" element={<Notifications />} />
           <Route path="/admin/sales" element={<SalesLeads />} />
           <Route path="/admin/sales/kanban" element={<SalesKanban />} />
+          <Route path="/admin/meta-ads" element={<MetaAdsMonitor />} />
           <Route path="/admin/clients/:clientCode" element={<ClientDetail />} />
           <Route path="/admin/ops" element={<AgentOpsLayout />}>
             <Route index element={<OpsDashboard />} />

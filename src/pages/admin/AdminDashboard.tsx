@@ -50,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Archive, ArchiveRestore, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Target, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, BarChart3, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -350,6 +350,12 @@ const AdminDashboard = () => {
               <Link to="/admin/deals">
                 <Handshake className="h-4 w-4 mr-2" />
                 Deals closés
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="hero">
+              <Link to="/admin/meta-ads">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Performances clients
               </Link>
             </Button>
             <Button asChild size="sm" variant="hero">
