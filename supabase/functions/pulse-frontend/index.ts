@@ -1,8 +1,9 @@
 // pulse-frontend — JSON API pour la page /pulse de l'app React.
 // Le client entre son code client sur la page, cette function :
-//   - action="lookup" → renvoie le pulse ouvert le plus récent pour ce code
-//   - action="capture" → insère la réponse (score), post Slack, comment ClickUp
-//   - action="verbatim" → update le verbatim de la réponse déjà capturée
+//   - action="lookup"        → renvoie le pulse ouvert le plus récent pour ce code
+//   - action="capture"       → insère la réponse (score), post Slack, comment ClickUp
+//   - action="communication" → update communication_score (onboarding only), post Slack complémentaire
+//   - action="verbatim"      → update le verbatim de la réponse déjà capturée
 //
 // verify_jwt = false (voir config.toml). Auth par code client + survey_id qui
 // doit matcher (empêche le spoof : il faut connaître son code ET récupérer un
@@ -133,6 +134,30 @@ async function postSlack(survey: SurveyRow, client: ClientRow, score: number): P
   }
 }
 
+async function postCommunicationSlack(survey: SurveyRow, client: ClientRow, commScore: number): Promise<boolean> {
+  const supaUrl = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!supaUrl || !anon) return false;
+  const badge = scoreBadge(commScore);
+  const clientDisplay = client.company_name || client.client_name || client.client_code;
+  const hint = commScore <= 6
+    ? "Signal communication faible — revoir cadence / clarté / responsiveness"
+    : commScore <= 8
+    ? "Communication passable — potentiel d'ajustement"
+    : "Communication perçue comme forte — capitaliser sur ce qui a marché";
+  const text = `${badge.emoji} *Communication onboarding* — *${clientDisplay}* — *${commScore}/10* — _${badge.label_fr}_\n> ${hint}`;
+  try {
+    const res = await fetch(`${supaUrl}/functions/v1/notify-slack-channel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${anon}` },
+      body: JSON.stringify({ channel: SLACK_CHANNEL, text }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function commentClickUp(taskId: string, survey: SurveyRow, score: number): Promise<boolean> {
   const token = Deno.env.get("CLICKUP_API_TOKEN");
   if (!token) return false;
@@ -205,7 +230,7 @@ serve(async (req) => {
       // Existante réponse ? (permet de renvoyer directement le score au form verbatim)
       const { data: existing } = await supabase
         .from("pulse_responses")
-        .select("score, verbatim")
+        .select("score, communication_score, verbatim")
         .eq("survey_id", survey.id)
         .maybeSingle();
 
@@ -298,6 +323,43 @@ serve(async (req) => {
     } catch (e) {
       console.error("[pulse-frontend] capture error", (e as Error).message);
       return json({ error: "capture_failed", detail: (e as Error).message }, 500);
+    }
+  }
+
+  // ─── COMMUNICATION : update le communication_score (onboarding only) ─────
+  if (action === "communication") {
+    const surveyId = String(body.survey_id ?? "").trim();
+    const commScore = Number(body.communication_score);
+    if (!surveyId) return json({ error: "survey_id_required" }, 400);
+    if (!Number.isInteger(commScore) || commScore < 0 || commScore > 10) {
+      return json({ error: "communication_score_invalid" }, 400);
+    }
+
+    try {
+      const survey = await loadSurveyForCapture(supabase, surveyId, clientCode);
+      if (!survey) return json({ error: "survey_not_found_for_client" }, 404);
+      if (survey.type !== "onboarding") {
+        return json({ error: "communication_score_only_for_onboarding" }, 400);
+      }
+
+      const { error: upErr } = await supabase
+        .from("pulse_responses")
+        .update({ communication_score: commScore })
+        .eq("survey_id", surveyId);
+      if (upErr) {
+        console.error("[pulse-frontend] communication update failed", upErr.message);
+        return json({ error: "communication_update_failed", detail: upErr.message }, 500);
+      }
+
+      const client = await loadClient(supabase, clientCode);
+      let slackPosted = false;
+      if (client) {
+        slackPosted = await postCommunicationSlack(survey, client, commScore);
+      }
+      return json({ ok: true, communication_score: commScore, slack_posted: slackPosted });
+    } catch (e) {
+      console.error("[pulse-frontend] communication error", (e as Error).message);
+      return json({ error: "communication_failed", detail: (e as Error).message }, 500);
     }
   }
 

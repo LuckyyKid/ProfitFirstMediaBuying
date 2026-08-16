@@ -28,6 +28,7 @@ interface Row {
   clickup_commented_at: string | null;
   response: {
     score: number;
+    communication_score: number | null;
     verbatim: string | null;
     responded_at: string;
     source: string;
@@ -92,7 +93,7 @@ export default function AdminPulseResponses() {
 
       const [respRes, clientRes] = await Promise.all([
         ids.length
-          ? supabase.from("pulse_responses").select("survey_id, score, verbatim, responded_at, source").in("survey_id", ids)
+          ? supabase.from("pulse_responses").select("survey_id, score, communication_score, verbatim, responded_at, source").in("survey_id", ids)
           : Promise.resolve({ data: [], error: null }),
         codes.length
           ? supabase.from("client_progress").select("client_code, client_name, company_name").in("client_code", codes)
@@ -104,7 +105,11 @@ export default function AdminPulseResponses() {
       const respByS = new Map<string, Row["response"]>();
       for (const r of (respRes as any).data ?? []) {
         respByS.set(r.survey_id, {
-          score: r.score, verbatim: r.verbatim, responded_at: r.responded_at, source: r.source,
+          score: r.score,
+          communication_score: r.communication_score ?? null,
+          verbatim: r.verbatim,
+          responded_at: r.responded_at,
+          source: r.source,
         });
       }
       const displayByCode = new Map<string, string | null>();
@@ -144,7 +149,12 @@ export default function AdminPulseResponses() {
     const escalated = filtered.filter(r => r.escalated_at).length;
     const scores = filtered.map(r => r.response?.score).filter((s): s is number => s != null);
     const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : "—";
-    return { total: filtered.length, answered, pending, escalated, avg };
+    const commScores = filtered
+      .filter(r => r.type === "onboarding")
+      .map(r => r.response?.communication_score)
+      .filter((s): s is number => s != null);
+    const commAvg = commScores.length ? (commScores.reduce((a, b) => a + b, 0) / commScores.length).toFixed(1) : "—";
+    return { total: filtered.length, answered, pending, escalated, avg, commAvg };
   }, [filtered]);
 
   const copyPulseUrl = () => {
@@ -176,12 +186,13 @@ export default function AdminPulseResponses() {
         </div>
       </div>
 
-      <Card className="p-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <Card className="p-4 grid grid-cols-2 sm:grid-cols-6 gap-3">
         <div><div className="text-xs text-muted-foreground">Total</div><div className="text-2xl font-bold">{stats?.total ?? "—"}</div></div>
         <div><div className="text-xs text-muted-foreground">Répondus</div><div className="text-2xl font-bold text-emerald-500">{stats?.answered ?? "—"}</div></div>
         <div><div className="text-xs text-muted-foreground">En attente</div><div className="text-2xl font-bold text-blue-500">{stats?.pending ?? "—"}</div></div>
         <div><div className="text-xs text-muted-foreground">Escaladés</div><div className="text-2xl font-bold text-orange-500">{stats?.escalated ?? "—"}</div></div>
         <div><div className="text-xs text-muted-foreground">Score moyen</div><div className="text-2xl font-bold">{stats?.avg ?? "—"}</div></div>
+        <div><div className="text-xs text-muted-foreground">Com. moy. (onb.)</div><div className="text-2xl font-bold">{stats?.commAvg ?? "—"}</div></div>
       </Card>
 
       <Card className="p-4 flex flex-wrap gap-3 items-end">
@@ -252,6 +263,16 @@ export default function AdminPulseResponses() {
                     <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.score, r.previous_score)}`}>
                       {r.response.score}/10
                       {r.previous_score != null && ` (dernier : ${r.previous_score})`}
+                    </Badge>
+                  )}
+                  {r.response?.communication_score != null && (
+                    <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.communication_score, null)}`}>
+                      com {r.response.communication_score}/10
+                    </Badge>
+                  )}
+                  {r.type === "onboarding" && r.response && r.response.communication_score == null && (
+                    <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">
+                      com : —
                     </Badge>
                   )}
                   {r.followup_sent_at && !r.response && (

@@ -20,7 +20,7 @@ interface Row {
   manual: boolean;
   slack_posted_at: string | null;
   clickup_commented_at: string | null;
-  response: { score: number; verbatim: string | null; responded_at: string; source: string } | null;
+  response: { score: number; communication_score: number | null; verbatim: string | null; responded_at: string; source: string } | null;
 }
 
 const TRAJECTORY_DROP = 2;
@@ -77,7 +77,7 @@ export function PulseHistoryCard({ clientCode }: Props) {
       if (ids.length > 0) {
         const { data: responses, error: rErr } = await supabase
           .from("pulse_responses")
-          .select("survey_id, score, verbatim, responded_at, source")
+          .select("survey_id, score, communication_score, verbatim, responded_at, source")
           .in("survey_id", ids);
         if (rErr) {
           setErr(rErr.message);
@@ -87,6 +87,7 @@ export function PulseHistoryCard({ clientCode }: Props) {
         for (const r of responses ?? []) {
           respByS.set(r.survey_id, {
             score: r.score,
+            communication_score: (r as any).communication_score ?? null,
             verbatim: r.verbatim,
             responded_at: r.responded_at,
             source: r.source,
@@ -146,6 +147,16 @@ export function PulseHistoryCard({ clientCode }: Props) {
                   <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.score, r.previous_score)}`}>
                     {r.response.score}/10
                     {r.previous_score != null && ` (dernier : ${r.previous_score})`}
+                  </Badge>
+                )}
+                {r.response?.communication_score != null && (
+                  <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.communication_score, null)}`}>
+                    com {r.response.communication_score}/10
+                  </Badge>
+                )}
+                {r.type === "onboarding" && r.response && r.response.communication_score == null && (
+                  <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">
+                    com : —
                   </Badge>
                 )}
                 {r.followup_sent_at && !r.response && (

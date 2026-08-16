@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, AlertCircle, Heart, Send } from "lucide-react";
 
-type Step = "enter_code" | "picker" | "verbatim" | "done" | "no_open" | "expired";
+type Step = "enter_code" | "picker" | "picker_communication" | "verbatim" | "done" | "no_open" | "expired";
 
 interface OpenPulse {
   survey_id: string;
@@ -68,6 +68,8 @@ export default function PulseFeedback() {
   const [pulse, setPulse] = useState<OpenPulse | null>(null);
   const [capturedScore, setCapturedScore] = useState<number | null>(null);
   const [pickingScore, setPickingScore] = useState<number | null>(null);
+  const [capturedCommScore, setCapturedCommScore] = useState<number | null>(null);
+  const [pickingCommScore, setPickingCommScore] = useState<number | null>(null);
   const [verbatim, setVerbatim] = useState("");
   const [verbatimSubmitting, setVerbatimSubmitting] = useState(false);
   const autoTriggeredRef = useRef(false);
@@ -84,6 +86,12 @@ export default function PulseFeedback() {
     step1_cta: lang === "en" ? "Continue" : "Continuer",
     step2_title: lang === "en" ? "Out of 10, how would you rate?" : "Sur 10, tu donnes combien ?",
     step2_note: lang === "en" ? "One tap. That's it." : "Un tap. C'est tout.",
+    step2_onboarding_title: lang === "en" ? "Overall — out of 10?" : "Globalement, sur 10 ?",
+    step2_onboarding_note: lang === "en" ? "How was your first week with us?" : "Comment s'est passée ta 1re semaine avec nous ?",
+    step2b_title: lang === "en" ? "And our communication?" : "Et notre communication ?",
+    step2b_note: lang === "en"
+      ? "How well did we keep you in the loop — cadence, clarity, responsiveness?"
+      : "Est-ce qu'on t'a bien tenu au courant — cadence, clarté, réactivité ?",
     step3_thanks: lang === "en" ? "Got it" : "C'est reçu",
     step3_ask: lang === "en" ? "Optional — one line to help us." : "Optionnel — une ligne pour nous aider.",
     step3_placeholder: lang === "en" ? "Type your note..." : "Ton mot ici...",
@@ -116,6 +124,9 @@ export default function PulseFeedback() {
     err_capture_generic: lang === "en"
       ? "Couldn't save your answer. Try again in a moment."
       : "Impossible d'enregistrer ta réponse. Réessaie dans un instant.",
+    err_comm_generic: lang === "en"
+      ? "Couldn't save your communication score. Try again."
+      : "Impossible d'enregistrer ta note communication. Réessaie.",
     err_network: lang === "en" ? "Network error. Try again." : "Erreur réseau. Réessaie.",
     err_empty_code: lang === "en" ? "Enter your client code." : "Entre ton code client.",
     change_code: lang === "en" ? "Not you? Change code" : "Pas toi ? Changer de code",
@@ -137,12 +148,33 @@ export default function PulseFeedback() {
         return;
       }
       setCapturedScore(score);
-      setStep("verbatim");
+      setStep(openPulse.type === "onboarding" ? "picker_communication" : "verbatim");
     } catch (e) {
       setError(t.err_network);
       console.error("[pulse-feedback] capture failed", e);
     } finally {
       setPickingScore(null);
+    }
+  };
+
+  const submitCommScore = async (score: number, openPulse: OpenPulse, clientCode: string) => {
+    setPickingCommScore(score);
+    setError(null);
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("pulse-frontend", {
+        body: { action: "communication", client_code: clientCode, survey_id: openPulse.survey_id, communication_score: score },
+      });
+      if (fnErr || !data?.ok) {
+        setError(t.err_comm_generic);
+        return;
+      }
+      setCapturedCommScore(score);
+      setStep("verbatim");
+    } catch (e) {
+      setError(t.err_network);
+      console.error("[pulse-feedback] communication failed", e);
+    } finally {
+      setPickingCommScore(null);
     }
   };
 
@@ -198,7 +230,14 @@ export default function PulseFeedback() {
       if (data.response?.score != null) {
         setCapturedScore(data.response.score);
         setVerbatim(data.response.verbatim ?? "");
-        setStep("verbatim");
+        if (data.response.communication_score != null) {
+          setCapturedCommScore(data.response.communication_score);
+          setStep("verbatim");
+        } else if (openPulse.type === "onboarding") {
+          setStep("picker_communication");
+        } else {
+          setStep("verbatim");
+        }
         return;
       }
 
@@ -258,6 +297,7 @@ export default function PulseFeedback() {
     setStep("enter_code");
     setPulse(null);
     setCapturedScore(null);
+    setCapturedCommScore(null);
     setVerbatim("");
     setError(null);
   };
@@ -319,11 +359,22 @@ export default function PulseFeedback() {
           {step === "picker" && pulse && (
             <>
               <div className="space-y-1">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-bold">
-                  {typeLabel[pulse.type]}
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-bold">
+                    {typeLabel[pulse.type]}
+                  </div>
+                  {pulse.type === "onboarding" && (
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-bold">
+                      {lang === "en" ? "1 of 2" : "1 sur 2"}
+                    </div>
+                  )}
                 </div>
-                <h1 className="text-xl font-bold text-foreground tracking-tight">{t.step2_title}</h1>
-                <p className="text-sm text-muted-foreground">{t.step2_note}</p>
+                <h1 className="text-xl font-bold text-foreground tracking-tight">
+                  {pulse.type === "onboarding" ? t.step2_onboarding_title : t.step2_title}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {pulse.type === "onboarding" ? t.step2_onboarding_note : t.step2_note}
+                </p>
                 {pulse.previous_score != null && (
                   <p className="pt-1 text-xs text-muted-foreground">
                     {lang === "en" ? "Last score: " : "Dernier score : "}
@@ -360,6 +411,53 @@ export default function PulseFeedback() {
             </>
           )}
 
+          {step === "picker_communication" && pulse && capturedScore != null && (
+            <>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-bold">
+                    {typeLabel[pulse.type]}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-bold">
+                    {lang === "en" ? "2 of 2" : "2 sur 2"}
+                  </div>
+                </div>
+                <h1 className="text-xl font-bold text-foreground tracking-tight">{t.step2b_title}</h1>
+                <p className="text-sm text-muted-foreground">{t.step2b_note}</p>
+                <p className="pt-1 text-xs text-muted-foreground">
+                  {lang === "en" ? "Overall: " : "Global : "}
+                  <span className="font-semibold text-foreground">{capturedScore}/10</span>
+                </p>
+              </div>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="grid grid-cols-6 gap-2">
+                {Array.from({ length: 11 }, (_, n) => n).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    disabled={pickingCommScore != null}
+                    onClick={() => void submitCommScore(n, pulse, code)}
+                    className={scoreClass(n, pickingCommScore === n)}
+                  >
+                    {pickingCommScore === n ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : n}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground pt-1 px-1">
+                <span>{lang === "en" ? "0 = poor" : "0 = faible"}</span>
+                <span>{lang === "en" ? "10 = excellent" : "10 = excellent"}</span>
+              </div>
+            </>
+          )}
+
           {step === "verbatim" && pulse && capturedScore != null && (
             <>
               <div className="flex items-start gap-3">
@@ -369,6 +467,11 @@ export default function PulseFeedback() {
                 <div className="space-y-1">
                   <h1 className="text-xl font-bold text-foreground tracking-tight">
                     {t.step3_thanks} — <span className="text-primary">{capturedScore}/10</span>
+                    {capturedCommScore != null && (
+                      <span className="text-muted-foreground text-base font-medium ml-2">
+                        · {lang === "en" ? "comm" : "com"} <span className="text-foreground">{capturedCommScore}/10</span>
+                      </span>
+                    )}
                   </h1>
                   <p className="text-sm text-muted-foreground">{questionForScore(capturedScore, lang)}</p>
                 </div>

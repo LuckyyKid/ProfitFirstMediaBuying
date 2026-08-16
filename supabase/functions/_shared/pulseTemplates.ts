@@ -52,16 +52,16 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
     onboarding: {
       initial: {
         subject: () => "Ta 1re semaine chez TDIA — ça va ?",
-        headline: "Une seule question.",
-        question: "Sur 10, comment s'est passée ton entrée chez nous ?",
-        cta: "Répondre en 20 secondes",
+        headline: "Deux questions rapides.",
+        question: "Sur 10, comment s'est passée ton entrée chez nous ? Et sur 10, comment tu notes notre communication ?",
+        cta: "Répondre en 30 secondes",
         codeIntro: "Ton code client (à saisir sur la page) :",
         microNote: "On lit chaque réponse. Promis.",
       },
       followup: {
-        subject: () => "Toujours 20 secondes 👋",
+        subject: () => "Toujours 30 secondes 👋",
         headline: "Petit rappel.",
-        question: "Sur 10, comment s'est passée ta 1re semaine chez nous ?",
+        question: "Sur 10, comment s'est passée ta 1re semaine ? Et sur 10, comment tu notes notre communication ?",
         cta: "Répondre maintenant",
         codeIntro: "Ton code client (à saisir sur la page) :",
         microNote: "Ton feedback compte plus que tu penses.",
@@ -110,16 +110,16 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
     onboarding: {
       initial: {
         subject: () => "Your 1st week at TDIA — how did it go?",
-        headline: "One question.",
-        question: "Out of 10, how did your first week with us go?",
-        cta: "Answer in 20 seconds",
+        headline: "Two quick questions.",
+        question: "Out of 10, how was your first week with us? And out of 10, how would you rate our communication?",
+        cta: "Answer in 30 seconds",
         codeIntro: "Your client code (enter it on the page):",
         microNote: "We read every reply. Promise.",
       },
       followup: {
-        subject: () => "Still 20 seconds 👋",
+        subject: () => "Still 30 seconds 👋",
         headline: "Quick reminder.",
-        question: "Out of 10, how did your first week with us go?",
+        question: "Out of 10, how was your first week? And out of 10, how would you rate our communication?",
         cta: "Answer now",
         codeIntro: "Your client code (enter it on the page):",
         microNote: "Your feedback matters more than you think.",
@@ -167,8 +167,8 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
 export const PULSE_SMS_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, (name: string, code: string, url: string) => string>>> = {
   fr: {
     onboarding: {
-      initial: (n, code, url) => `Salut ${n || ""}, c'est TDIA. Ça fait 1 semaine — 20 sec pour ton feedback. Code client : ${code}. Réponds ici : ${url}`,
-      followup: (n, code, url) => `Salut ${n || ""}, TDIA — juste un rappel, 20 sec pour ton feedback. Code : ${code}. ${url}`,
+      initial: (n, code, url) => `Salut ${n || ""}, c'est TDIA. Ça fait 1 semaine — 2 questions rapides (30 sec). Code client : ${code}. Réponds ici : ${url}`,
+      followup: (n, code, url) => `Salut ${n || ""}, TDIA — rappel, 30 sec pour tes 2 réponses. Code : ${code}. ${url}`,
     },
     monthly: {
       initial: (n, code, url) => `Salut ${n || ""}, TDIA. 20 sec pour ton feedback du mois. Code client : ${code}. Réponds ici : ${url}`,
@@ -181,8 +181,8 @@ export const PULSE_SMS_COPY: Record<Lang, Record<PulseType, Record<PulseVariant,
   },
   en: {
     onboarding: {
-      initial: (n, code, url) => `Hi ${n || ""}, TDIA here. It's been a week — 20 sec for your feedback. Client code: ${code}. Answer here: ${url}`,
-      followup: (n, code, url) => `Hi ${n || ""}, TDIA — quick reminder, 20 sec for your feedback. Code: ${code}. ${url}`,
+      initial: (n, code, url) => `Hi ${n || ""}, TDIA here. It's been a week — 2 quick questions (30 sec). Client code: ${code}. Answer here: ${url}`,
+      followup: (n, code, url) => `Hi ${n || ""}, TDIA — reminder, 30 sec for your 2 answers. Code: ${code}. ${url}`,
     },
     monthly: {
       initial: (n, code, url) => `Hi ${n || ""}, TDIA. 20 sec for your monthly feedback. Client code: ${code}. Answer here: ${url}`,
