@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.notify-christmas-gifts]
 verify_jwt = false
+
+[functions.pulse-response]
+verify_jwt = false
+
+[functions.pulse-frontend]
+verify_jwt = false

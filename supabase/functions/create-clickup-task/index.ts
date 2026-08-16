@@ -2,6 +2,12 @@
 // Fills the JOUR 1 fields with the info we already have from the deal.
 // Fields left empty on purpose (filled later by the AM or other automations):
 //   AM Owner, Meta / Shopify / Gates / CRM fields.
+//
+// Si `client_code` est fourni dans le body, on met à jour
+// client_progress.clickup_task_id avec l'id retourné par ClickUp — utilisé par
+// pulse-response pour commenter la tâche client.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,6 +43,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const {
+      client_code, // optionnel — si fourni, on stocke le task_id dans client_progress.clickup_task_id
       client_name,
       contact_name,
       email,
@@ -121,8 +128,35 @@ Deno.serve(async (req) => {
 
     const data = JSON.parse(text);
     console.log("[clickup] task created", data?.id, "launch=", launchIso);
+
+    // Persiste le lien client_code ↔ task_id pour que pulse-response puisse
+    // commenter la tâche du client (Tranche 5 du Client Pulse System).
+    let linked = false;
+    if (client_code && data?.id) {
+      const supaUrl = Deno.env.get("SUPABASE_URL");
+      const svcKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (supaUrl && svcKey) {
+        try {
+          const sb = createClient(supaUrl, svcKey);
+          const { error: upErr } = await sb
+            .from("client_progress")
+            .update({ clickup_task_id: String(data.id) })
+            .eq("client_code", client_code);
+          if (upErr) {
+            console.warn("[clickup] failed to persist task_id on client_progress", upErr.message);
+          } else {
+            linked = true;
+          }
+        } catch (e) {
+          console.warn("[clickup] persist task_id exception", (e as Error).message);
+        }
+      } else {
+        console.warn("[clickup] SUPABASE_URL / SERVICE_ROLE_KEY manquants — skip persist");
+      }
+    }
+
     return new Response(
-      JSON.stringify({ ok: true, task_id: data?.id, url: data?.url, launch_target_date: launchIso }),
+      JSON.stringify({ ok: true, task_id: data?.id, url: data?.url, launch_target_date: launchIso, linked }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e: any) {

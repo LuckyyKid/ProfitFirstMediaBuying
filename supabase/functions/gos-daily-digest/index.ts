@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendResendEmail } from "../_shared/resend.ts";
+import { pingAutomation } from "../_shared/automationPing.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -247,10 +248,26 @@ serve(async (req) => {
       out.push(await processClient(sb, cid, { overrideTo, dryRun }));
     }
 
+    // Only ping on the cron path — single-client / dry-run invocations from the
+    // admin UI are not cadence events.
+    if (!singleClient && !dryRun) {
+      await pingAutomation({
+        workflow_id: "internal_notifications",
+        status: "success",
+        items_count: out.length,
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true, count: out.length, results: out }), {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+    const msg = (e as Error).message;
+    await pingAutomation({
+      workflow_id: "internal_notifications",
+      status: "failure",
+      error_message: msg,
+    });
+    return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
   }
 });

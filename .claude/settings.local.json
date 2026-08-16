@@ -86,7 +86,11 @@
       "Bash(py *)",
       "Bash(unzip -o \"/c/Users/bafin/Downloads/!300/ENG _ TDIA - CONTRAT UPDATED 2026 - Good.docx\" -d eng_contract)",
       "Bash(npx vite *)",
-      "Bash(find . -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"completed_at\\\\|onboarding.*complete\" {} \\\\;)"
+      "Bash(find . -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"completed_at\\\\|onboarding.*complete\" {} \\\\;)",
+      "Bash(watchdog)",
+      "Bash(anomaly)",
+      "Bash(follow-up\")",
+      "Bash(schedule\")"
     ]
   }
 }

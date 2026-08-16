@@ -22,6 +22,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { pingAutomation } from "../_shared/automationPing.ts";
 
 // ── Config (tune here, don't scatter magic numbers) ─────────────────────────
 const CHECK_2_OVER_PCT = 1.4;   // > 140 % of budget → overspend
@@ -579,6 +580,11 @@ serve(async (req) => {
           },
         ]);
       } catch { /* if heartbeat fails, don't 500 — logs still capture the run */ }
+      await pingAutomation({
+        workflow_id: "ad_anomaly_check",
+        status: "success",
+        items_count: clientsChecked,
+      });
     }
 
     return new Response(
@@ -609,6 +615,11 @@ serve(async (req) => {
         }],
       );
     } catch { /* nothing more to do */ }
+    await pingAutomation({
+      workflow_id: "ad_anomaly_check",
+      status: "failure",
+      error_message: msg,
+    });
     return new Response(
       JSON.stringify({ ok: false, error: msg }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },

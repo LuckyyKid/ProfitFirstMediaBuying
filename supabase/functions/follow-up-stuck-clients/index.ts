@@ -6,6 +6,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { followUpEmailSubject, normalizeLang, renderFollowUpEmail, STEP_NAMES_EN } from "../_shared/email-design.ts";
 import { sendResendEmail } from "../_shared/resend.ts";
+import { pingAutomation } from "../_shared/automationPing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -149,11 +150,27 @@ serve(async (req) => {
       }
     }
 
+    // Only ping the watchdog on cron runs — a manual "force one client" push
+    // from the admin UI is not a cadence event.
+    if (!forceClientCode) {
+      await pingAutomation({
+        workflow_id: "follow_up_stuck_clients",
+        status: "success",
+        items_count: sent + callbacks + reset,
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true, scanned: data?.length ?? 0, sent, callbacks, reset, slackPosted }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), {
+    const msg = (e as Error).message;
+    await pingAutomation({
+      workflow_id: "follow_up_stuck_clients",
+      status: "failure",
+      error_message: msg,
+    });
+    return new Response(JSON.stringify({ ok: false, error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

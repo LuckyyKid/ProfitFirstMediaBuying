@@ -32,6 +32,7 @@ import * as XLSX from "xlsx";
 import { MetaAdsIntegrationCard } from "@/components/admin/MetaAdsIntegrationCard";
 import { MetaAdsAnomalyConfigCard } from "@/components/admin/MetaAdsAnomalyConfigCard";
 import { MetaAdsReportSender } from "@/components/admin/MetaAdsReportSender";
+import { PulseHistoryCard } from "@/components/admin/PulseHistoryCard";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -742,6 +743,7 @@ const ClientDetail = () => {
             <TabsTrigger value="payment" className="text-xs sm:text-sm">Paiement</TabsTrigger>
             <TabsTrigger value="contract" className="text-xs sm:text-sm">Contrat</TabsTrigger>
             <TabsTrigger value="kickoff" className="text-xs sm:text-sm">Kick-off</TabsTrigger>
+            <TabsTrigger value="pulse" className="text-xs sm:text-sm">Pulse</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs sm:text-sm">Logs</TabsTrigger>
           </TabsList>
 
@@ -1017,6 +1019,17 @@ const ClientDetail = () => {
               <Field label="Lien meeting" value={client.kickoff_meeting_link} />
               <Field label="Lien calendrier" value={client.kickoff_calendar_link} />
             </Card>
+          </TabsContent>
+
+          <TabsContent value="pulse">
+            {client.client_code ? (
+              <PulseHistoryCard clientCode={client.client_code} />
+            ) : (
+              <Card className="p-6 glass-card text-sm text-muted-foreground">
+                Ce client n'a pas de <span className="font-mono">client_code</span> —
+                l'historique pulse n'est pas disponible.
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="logs">

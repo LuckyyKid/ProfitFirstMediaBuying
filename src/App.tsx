@@ -22,6 +22,8 @@ import Notifications from "./pages/admin/Notifications";
 import SalesLeads from "./pages/admin/SalesLeads";
 import SalesKanban from "./pages/admin/SalesKanban";
 import MetaAdsMonitor from "./pages/admin/MetaAdsMonitor";
+import AdminPulseResponses from "./pages/admin/AdminPulseResponses";
+import PulseFeedback from "./pages/PulseFeedback";
 import PortalLogin from "./pages/portal/PortalLogin";
 import PortalSignup from "./pages/portal/PortalSignup";
 import PortalForgotPassword from "./pages/portal/PortalForgotPassword";
@@ -153,6 +155,8 @@ const App = () => (
           <Route path="/admin/sales" element={<SalesLeads />} />
           <Route path="/admin/sales/kanban" element={<SalesKanban />} />
           <Route path="/admin/meta-ads" element={<MetaAdsMonitor />} />
+          <Route path="/admin/pulse" element={<AdminPulseResponses />} />
+          <Route path="/pulse" element={<PulseFeedback />} />
           <Route path="/admin/clients/:clientCode" element={<ClientDetail />} />
           <Route path="/admin/ops" element={<AgentOpsLayout />}>
             <Route index element={<OpsDashboard />} />

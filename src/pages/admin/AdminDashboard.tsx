@@ -50,8 +50,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Archive, ArchiveRestore, BarChart3, BellRing, ExternalLink, FileSignature, Handshake, Hash, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Target, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, BarChart3, BellRing, ExternalLink, FileSignature, Handshake, Hash, Heart, LayoutDashboard, LogOut, Mail, MailCheck, MessageSquare, MoreHorizontal, RefreshCcw, Search, Send, Target, Trash2, Zap } from "lucide-react";
 import { NotificationBell } from "@/components/admin/NotificationBell";
+import { LogNpsDialog } from "@/components/admin/LogNpsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -82,6 +83,7 @@ const AdminDashboard = () => {
   const [runningCheck, setRunningCheck] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [confirmDelete, setConfirmDelete] = useState<{ id?: string | null; code?: string | null; name?: string } | null>(null);
+  const [npsDialogClient, setNpsDialogClient] = useState<{ client_code: string; client_name?: string | null; company_name?: string | null } | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -168,6 +170,26 @@ const AdminDashboard = () => {
     if (error) toast.error(error.message || "Échec de l'envoi");
     else if ((data as any)?.sent > 0) toast.success(`Email de suivi envoyé à ${c.email}`);
     else toast.message("Aucun email envoyé (vérifie l'email du client)");
+  };
+
+  const onSendPulse = async (c: any, type: "onboarding" | "monthly") => {
+    if (!c.email && !c.phone) {
+      toast.error("Aucun email ni téléphone pour ce client");
+      return;
+    }
+    const label = type === "onboarding" ? "onboarding" : "mensuel";
+    const t = toast.loading(`Envoi du pulse ${label}…`);
+    const { data, error } = await supabase.functions.invoke("pulse-send", {
+      body: { client_code: c.client_code, type, manual: true, created_by: "admin_manual" },
+    });
+    toast.dismiss(t);
+    if (error || (data as any)?.error) {
+      toast.error(error?.message || (data as any)?.error || "Échec de l'envoi");
+      return;
+    }
+    const sent = (data as any)?.sent ?? 0;
+    if (sent > 0) toast.success(`Pulse ${label} envoyé à ${c.email || c.phone}`);
+    else toast.message(`Aucun envoi (vérifie email/téléphone/logs)`);
   };
 
   const onSendSmsFollowUp = async (c: any) => {
@@ -359,6 +381,18 @@ const AdminDashboard = () => {
               </Link>
             </Button>
             <Button asChild size="sm" variant="hero">
+              <Link to="/admin/pulse">
+                <Heart className="h-4 w-4 mr-2" />
+                Pulse — réponses
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/pulse" target="_blank">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Page /pulse
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="hero">
               <Link to="/admin/contract-creator">
                 <FileSignature className="h-4 w-4 mr-2" />
                 Générateur de contrats
@@ -538,6 +572,31 @@ const AdminDashboard = () => {
                                 Envoyer contrat par email
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => onSendPulse(c, "onboarding")}
+                                disabled={!c.email && !c.phone}
+                              >
+                                <Zap className="h-4 w-4 mr-2" />
+                                Envoyer pulse onboarding
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => onSendPulse(c, "monthly")}
+                                disabled={!c.email && !c.phone}
+                              >
+                                <Zap className="h-4 w-4 mr-2" />
+                                Envoyer pulse mensuel
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setNpsDialogClient({
+                                  client_code: c.client_code,
+                                  client_name: c.client_name,
+                                  company_name: c.company_name || c.brand_name,
+                                })}
+                              >
+                                <Heart className="h-4 w-4 mr-2" />
+                                Logger NPS relationnel
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onArchive(c)}>
                                 {archived ? (
                                   <><ArchiveRestore className="h-4 w-4 mr-2" />Restaurer</>
@@ -589,6 +648,12 @@ const AdminDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <LogNpsDialog
+        open={!!npsDialogClient}
+        onOpenChange={(o) => !o && setNpsDialogClient(null)}
+        client={npsDialogClient}
+      />
     </div>
   );
 };

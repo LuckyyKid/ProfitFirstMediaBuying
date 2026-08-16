@@ -427,6 +427,7 @@ const ClosedDeals = () => {
       supabase.functions
         .invoke("create-clickup-task", {
           body: {
+            client_code: finalCode,
             client_name: form.company_name.trim(),
             contact_name: form.contact_name || effOwnerName,
             email: effOwnerEmail,
