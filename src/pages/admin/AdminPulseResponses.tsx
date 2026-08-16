@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,8 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, ExternalLink, Copy } from "lucide-react";
+import { ArrowLeft, ExternalLink, Copy, Send, CheckCircle2, Circle, Info, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { SendManualPulseDialog } from "@/components/admin/SendManualPulseDialog";
+import {
+  computeAllScheduledPulses,
+  type ClientLite,
+  type ScheduledPulse,
+} from "@/lib/pulseSchedule";
 
 type PulseType = "onboarding" | "monthly" | "relational";
 
@@ -67,29 +73,52 @@ function fmtDate(iso: string | null): string {
 
 export default function AdminPulseResponses() {
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [activeClients, setActiveClients] = useState<ClientLite[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | PulseType>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "answered" | "pending" | "escalated">("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "auto" | "manual">("all");
   const [search, setSearch] = useState("");
+  const [manualDialogOpen, setManualDialogOpen] = useState(false);
+  const [manualDefaultCode, setManualDefaultCode] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
+
+  const openManualDialog = useCallback((code: string | null) => {
+    setManualDefaultCode(code);
+    setManualDialogOpen(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setErr(null);
-      const { data: surveys, error } = await supabase
-        .from("pulse_surveys")
-        .select("id, client_code, type, sent_at, closed_at, escalated_at, followup_sent_at, previous_score, sent_channels, manual, created_by, slack_posted_at, clickup_commented_at")
-        .order("sent_at", { ascending: false })
-        .limit(200);
+      const [surveyRes, activeRes] = await Promise.all([
+        supabase
+          .from("pulse_surveys")
+          .select("id, client_code, type, sent_at, closed_at, escalated_at, followup_sent_at, previous_score, sent_channels, manual, created_by, slack_posted_at, clickup_commented_at")
+          .order("sent_at", { ascending: false })
+          .limit(200),
+        supabase
+          .from("client_progress")
+          .select("client_code, client_name, company_name, email, phone, archived_at, completed_at")
+          .is("archived_at", null)
+          .not("completed_at", "is", null)
+          .limit(500),
+      ]);
+
       if (cancelled) return;
-      if (error) {
-        setErr(error.message);
+      if (surveyRes.error) {
+        setErr(surveyRes.error.message);
         setRows([]);
+        setActiveClients([]);
         return;
       }
+      const surveys = surveyRes.data ?? [];
+      const activeList = (activeRes.data ?? []) as ClientLite[];
+      setActiveClients(activeList);
 
-      const ids = (surveys ?? []).map((s: any) => s.id);
-      const codes = Array.from(new Set((surveys ?? []).map((s: any) => s.client_code)));
+      const ids = surveys.map((s: any) => s.id);
+      const codes = Array.from(new Set(surveys.map((s: any) => s.client_code)));
 
       const [respRes, clientRes] = await Promise.all([
         ids.length
@@ -117,14 +146,27 @@ export default function AdminPulseResponses() {
         displayByCode.set(c.client_code, c.company_name || c.client_name || c.client_code);
       }
 
-      setRows((surveys ?? []).map((s: any) => ({
+      setRows(surveys.map((s: any) => ({
         ...s,
         response: respByS.get(s.id) ?? null,
         client_display: displayByCode.get(s.client_code) ?? s.client_code,
       })));
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadTick]);
+
+  const scheduled = useMemo<ScheduledPulse[] | null>(() => {
+    if (!activeClients || !rows) return null;
+    const pulses = rows
+      .filter(r => r.type !== "relational")
+      .map(r => ({ client_code: r.client_code, type: r.type as "onboarding" | "monthly", sent_at: r.sent_at }));
+    return computeAllScheduledPulses(activeClients, pulses);
+  }, [activeClients, rows]);
+
+  const upcomingScheduled = useMemo(() => {
+    if (!scheduled) return null;
+    return scheduled.filter(s => s.status !== "already_sent").slice(0, 12);
+  }, [scheduled]);
 
   const filtered = useMemo(() => {
     if (!rows) return null;
@@ -134,13 +176,15 @@ export default function AdminPulseResponses() {
       if (statusFilter === "answered" && !r.response) return false;
       if (statusFilter === "pending" && (r.response || r.closed_at)) return false;
       if (statusFilter === "escalated" && !r.escalated_at) return false;
+      if (sourceFilter === "auto" && r.manual) return false;
+      if (sourceFilter === "manual" && !r.manual) return false;
       if (q) {
         const haystack = `${r.client_code} ${r.client_display ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [rows, typeFilter, statusFilter, search]);
+  }, [rows, typeFilter, statusFilter, sourceFilter, search]);
 
   const stats = useMemo(() => {
     if (!filtered) return null;
@@ -178,11 +222,28 @@ export default function AdminPulseResponses() {
           <Button variant="outline" size="sm" onClick={copyPulseUrl}>
             <Copy className="h-4 w-4 mr-1" /> Copier URL /pulse
           </Button>
+          <Button size="sm" variant="outline" onClick={() => openManualDialog(null)}>
+            <Send className="h-4 w-4 mr-1" /> Envoyer pulse manuel
+          </Button>
           <Link to="/pulse" target="_blank">
             <Button size="sm">
               <ExternalLink className="h-4 w-4 mr-1" /> Ouvrir /pulse
             </Button>
           </Link>
+        </div>
+      </div>
+
+      <ScheduledPulsesCard
+        list={upcomingScheduled}
+        totalScheduled={scheduled?.filter(s => s.status !== "already_sent").length ?? 0}
+        onForce={(code) => openManualDialog(code)}
+      />
+
+      <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3 flex gap-2 items-start text-xs">
+        <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+        <div className="text-blue-100/90">
+          Un envoi <b>manuel</b> déclenche le même workflow que le cron : relance email + SMS à J+1,
+          escalade Slack <code>#head-of-things</code> à J+2 si pas de réponse.
         </div>
       </div>
 
@@ -221,6 +282,17 @@ export default function AdminPulseResponses() {
               <SelectItem value="answered">Répondus</SelectItem>
               <SelectItem value="pending">En attente</SelectItem>
               <SelectItem value="escalated">Escaladés</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-[160px]">
+          <label className="text-xs text-muted-foreground">Source</label>
+          <Select value={sourceFilter} onValueChange={(v: any) => setSourceFilter(v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem value="auto">Auto (cron)</SelectItem>
+              <SelectItem value="manual">Manuel</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -284,6 +356,7 @@ export default function AdminPulseResponses() {
                   {r.response && ` · Répondu le ${fmtDate(r.response.responded_at)} (${r.response.source})`}
                   {r.escalated_at && ` · Escaladé le ${fmtDate(r.escalated_at)}`}
                 </div>
+                <FollowupTimeline r={r} />
                 {r.response?.verbatim && (
                   <div className="italic text-sm text-foreground/90 pt-2 border-t border-border/40">
                     &ldquo;{r.response.verbatim}&rdquo;
@@ -294,6 +367,164 @@ export default function AdminPulseResponses() {
           })}
         </div>
       )}
+
+      <SendManualPulseDialog
+        open={manualDialogOpen}
+        onOpenChange={setManualDialogOpen}
+        defaultClientCode={manualDefaultCode}
+        onSent={() => setReloadTick((t) => t + 1)}
+      />
     </div>
+  );
+}
+
+// Timeline visuelle de la relance : [Envoyé] → [Relance J+1] → [Escaladé J+2]
+// ou [Envoyé] → [Répondu] quand le client a répondu.
+function FollowupTimeline({ r }: { r: Row }) {
+  const responded = !!r.response;
+  const followupDone = !!r.followup_sent_at;
+  const escalated = !!r.escalated_at;
+  const closed = !!r.closed_at && !responded;
+
+  const StepIcon = ({ done, active }: { done: boolean; active?: boolean }) =>
+    done ? (
+      <CheckCircle2 className="h-3 w-3" />
+    ) : active ? (
+      <Circle className="h-3 w-3 animate-pulse" />
+    ) : (
+      <Circle className="h-3 w-3" />
+    );
+
+  const sep = <span className="text-muted-foreground/60">→</span>;
+
+  return (
+    <div className="flex items-center gap-2 text-[11px] pt-1.5 border-t border-border/40">
+      <span className="flex items-center gap-1 text-emerald-500">
+        <StepIcon done /> Envoyé J+0
+      </span>
+      {sep}
+      {responded ? (
+        <span className="flex items-center gap-1 text-emerald-500 font-medium">
+          <CheckCircle2 className="h-3 w-3" /> Répondu
+        </span>
+      ) : (
+        <>
+          <span className={`flex items-center gap-1 ${followupDone ? "text-blue-500" : "text-muted-foreground"}`}>
+            <StepIcon done={followupDone} active={!followupDone && !closed} /> Relance J+1
+          </span>
+          {sep}
+          <span className={`flex items-center gap-1 ${escalated ? "text-orange-500 font-medium" : "text-muted-foreground"}`}>
+            <StepIcon done={escalated} active={followupDone && !escalated && !closed} /> Escalade J+2
+          </span>
+          {closed && !escalated && (
+            <>
+              {sep}
+              <span className="text-muted-foreground">Fermé sans réponse</span>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// Nouveau bloc en haut de page : liste les prochains envois auto par
+// client actif, avec countdown "dans X jours". Chaque ligne a un bouton
+// "Forcer envoi" qui pré-remplit le dialog manuel avec ce client.
+function ScheduledPulsesCard({
+  list,
+  totalScheduled,
+  onForce,
+}: {
+  list: ScheduledPulse[] | null;
+  totalScheduled: number;
+  onForce: (clientCode: string) => void;
+}) {
+  if (list === null) {
+    return (
+      <Card className="p-4 space-y-2">
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div>
+          <h2 className="text-base font-semibold flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" /> Prochains envois programmés
+          </h2>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Basé sur le cron pulse-send · fenêtre de dédup 30j (onboarding) / 20j (mensuel) ·
+            monthly = dernier jour ouvrable America/Toronto
+          </p>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {totalScheduled} envoi{totalScheduled > 1 ? "s" : ""} planifié{totalScheduled > 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {list.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-4 text-center">
+          Aucun envoi programmé pour l'instant.
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {list.map((s, i) => {
+            const canReach = s.channels.email || s.channels.sms;
+            return (
+              <div
+                key={`${s.client_code}-${s.type}-${i}`}
+                className="grid grid-cols-12 gap-2 items-center text-xs rounded-md border border-border/50 bg-background/40 px-3 py-2"
+              >
+                <div className="col-span-4 truncate">
+                  <Link to={`/admin/clients/${s.client_code}`} className="font-medium hover:underline">
+                    {s.display_name}
+                  </Link>
+                  <span className="text-muted-foreground ml-1">· {s.client_code}</span>
+                </div>
+                <div className="col-span-2">
+                  <Badge variant="outline" className="text-[10px]">
+                    {s.type === "onboarding" ? "Onboarding J+7" : "Mensuel"}
+                  </Badge>
+                </div>
+                <div className="col-span-3">
+                  <div className="font-medium">
+                    {s.days_until === 0 ? "Aujourd'hui" : `Dans ${s.days_until}j`}
+                  </div>
+                  <div className="text-muted-foreground text-[10px]">
+                    {s.next_send_at.toLocaleDateString("fr-CA")}
+                  </div>
+                </div>
+                <div className="col-span-2 flex gap-1">
+                  {s.channels.email && <Badge variant="outline" className="text-[10px]">email</Badge>}
+                  {s.channels.sms && <Badge variant="outline" className="text-[10px]">SMS</Badge>}
+                  {!canReach && (
+                    <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-500 border-red-500/40">
+                      aucun canal
+                    </Badge>
+                  )}
+                </div>
+                <div className="col-span-1 flex justify-end">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-[11px]"
+                    disabled={!canReach}
+                    onClick={() => onForce(s.client_code)}
+                    title={canReach ? "Forcer l'envoi maintenant" : "Client sans email ni téléphone"}
+                  >
+                    <Send className="h-3 w-3 mr-1" /> Forcer
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
   );
 }
