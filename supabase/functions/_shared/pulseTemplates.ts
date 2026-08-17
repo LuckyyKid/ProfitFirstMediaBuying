@@ -221,8 +221,8 @@ export const PULSE_SMS_COPY: Record<Lang, Record<PulseType, Record<PulseVariant,
       followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA — petit rappel. Ton ID client : ${code}. ${url}`,
     },
     weekly: {
-      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Ton point rapide de la semaine avant notre prochain meeting — 4 questions, 30 secondes. Ton ID client (${code}) est déjà pré-rempli dans le lien. Réponds ici : ${url}`,
-      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Petit rappel — 30 secondes pour ton point de la semaine avant qu'on se voie. Ton ID client : ${code} (déjà pré-rempli). Réponds ici : ${url}`,
+      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA.\n\n4 petites questions avant notre meeting — ça prend environ 30 secondes.\n\nTon ID client (${code}) est déjà pré-rempli dans le lien.\n\nRéponds ici :\n${url}`,
+      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA.\n\nPetit rappel — 4 questions avant notre meeting, ça prend environ 30 secondes.\n\nTon ID client (${code}) est déjà pré-rempli dans le lien.\n\nRéponds ici :\n${url}`,
     },
   },
   en: {
@@ -239,8 +239,8 @@ export const PULSE_SMS_COPY: Record<Lang, Record<PulseType, Record<PulseVariant,
       followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team — quick reminder. Your client ID: ${code}. ${url}`,
     },
     weekly: {
-      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick weekly check-in before our next meeting — 4 questions, 30 seconds. Your client ID (${code}) is already pre-filled in the link. Just tap here: ${url}`,
-      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick reminder — 30 seconds for your weekly read before we meet. Your client ID: ${code} (already pre-filled). Just tap here: ${url}`,
+      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team.\n\n4 quick questions before our meeting — takes about 30 seconds.\n\nYour client ID (${code}) is already pre-filled in the link.\n\nJust tap here:\n${url}`,
+      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team.\n\nQuick reminder — 4 questions before our meeting, takes about 30 seconds.\n\nYour client ID (${code}) is already pre-filled in the link.\n\nJust tap here:\n${url}`,
     },
   },
 };

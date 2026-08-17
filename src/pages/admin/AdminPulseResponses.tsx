@@ -11,9 +11,12 @@ import { ArrowLeft, ExternalLink, Copy, Send, CheckCircle2, Circle, Info, Zap } 
 import { toast } from "sonner";
 import { SendManualPulseDialog } from "@/components/admin/SendManualPulseDialog";
 import {
-  computeAllScheduledPulses,
+  computeAllScheduledEvents,
+  EVENT_LABEL,
   type ClientLite,
-  type ScheduledPulse,
+  type MeetingLite,
+  type OpenSurveyLite,
+  type ScheduledPulseEvent,
 } from "@/lib/pulseSchedule";
 
 type PulseType = "onboarding" | "monthly" | "relational" | "weekly";
@@ -104,6 +107,8 @@ function fmtDate(iso: string | null): string {
 export default function AdminPulseResponses() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [activeClients, setActiveClients] = useState<ClientLite[] | null>(null);
+  const [openSurveys, setOpenSurveys] = useState<OpenSurveyLite[] | null>(null);
+  const [upcomingMeetings, setUpcomingMeetings] = useState<MeetingLite[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | PulseType>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "answered" | "pending" | "escalated">("all");
@@ -122,7 +127,8 @@ export default function AdminPulseResponses() {
     let cancelled = false;
     (async () => {
       setErr(null);
-      const [surveyRes, activeRes] = await Promise.all([
+      const nowIso = new Date().toISOString();
+      const [surveyRes, activeRes, openSurveyRes, meetingRes] = await Promise.all([
         supabase
           .from("pulse_surveys")
           .select("id, client_code, type, sent_at, closed_at, escalated_at, followup_sent_at, previous_score, sent_channels, manual, created_by, slack_posted_at, clickup_commented_at")
@@ -134,6 +140,19 @@ export default function AdminPulseResponses() {
           .is("archived_at", null)
           .not("completed_at", "is", null)
           .limit(500),
+        supabase
+          .from("pulse_surveys")
+          .select("id, client_code, type, sent_at, followup_sent_at, escalated_at, closed_at, expires_at")
+          .is("closed_at", null)
+          .order("sent_at", { ascending: false })
+          .limit(500),
+        supabase
+          .from("client_meetings")
+          .select("id, client_code, scheduled_at, pulse_survey_id, initial_sent_at, last_followup_at, slack_reminded_at")
+          .is("slack_reminded_at", null)
+          .gte("scheduled_at", nowIso)
+          .order("scheduled_at", { ascending: true })
+          .limit(200),
       ]);
 
       if (cancelled) return;
@@ -141,11 +160,15 @@ export default function AdminPulseResponses() {
         setErr(surveyRes.error.message);
         setRows([]);
         setActiveClients([]);
+        setOpenSurveys([]);
+        setUpcomingMeetings([]);
         return;
       }
       const surveys = surveyRes.data ?? [];
       const activeList = (activeRes.data ?? []) as ClientLite[];
       setActiveClients(activeList);
+      setOpenSurveys((openSurveyRes.data ?? []) as unknown as OpenSurveyLite[]);
+      setUpcomingMeetings((meetingRes.data ?? []) as unknown as MeetingLite[]);
 
       const ids = surveys.map((s: any) => s.id);
       const codes = Array.from(new Set(surveys.map((s: any) => s.client_code)));
@@ -195,18 +218,18 @@ export default function AdminPulseResponses() {
     return () => { cancelled = true; };
   }, [reloadTick]);
 
-  const scheduled = useMemo<ScheduledPulse[] | null>(() => {
-    if (!activeClients || !rows) return null;
-    const pulses = rows
-      .filter(r => r.type !== "relational")
+  const scheduledEvents = useMemo<ScheduledPulseEvent[] | null>(() => {
+    if (!activeClients || !rows || !openSurveys || !upcomingMeetings) return null;
+    const pastPulses = rows
+      .filter(r => r.type === "onboarding" || r.type === "monthly")
       .map(r => ({ client_code: r.client_code, type: r.type as "onboarding" | "monthly", sent_at: r.sent_at }));
-    return computeAllScheduledPulses(activeClients, pulses);
-  }, [activeClients, rows]);
+    return computeAllScheduledEvents(activeClients, pastPulses, openSurveys, upcomingMeetings);
+  }, [activeClients, rows, openSurveys, upcomingMeetings]);
 
-  const upcomingScheduled = useMemo(() => {
-    if (!scheduled) return null;
-    return scheduled.filter(s => s.status !== "already_sent").slice(0, 12);
-  }, [scheduled]);
+  const upcomingEvents = useMemo(() => {
+    if (!scheduledEvents) return null;
+    return scheduledEvents.slice(0, 20);
+  }, [scheduledEvents]);
 
   const filtered = useMemo(() => {
     if (!rows) return null;
@@ -274,8 +297,8 @@ export default function AdminPulseResponses() {
       </div>
 
       <ScheduledPulsesCard
-        list={upcomingScheduled}
-        totalScheduled={scheduled?.filter(s => s.status !== "already_sent").length ?? 0}
+        list={upcomingEvents}
+        totalScheduled={scheduledEvents?.length ?? 0}
         onForce={(code) => openManualDialog(code)}
       />
 
@@ -365,7 +388,7 @@ export default function AdminPulseResponses() {
             return (
               <Card key={r.id} className="p-4 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/admin/clients/${r.client_code}`} className="font-semibold hover:underline">
+                  <Link to={`/admin/pulse/${r.client_code}`} className="font-semibold hover:underline">
                     {r.client_display}
                   </Link>
                   <span className="text-xs text-muted-foreground">{r.client_code}</span>
@@ -494,15 +517,15 @@ function FollowupTimeline({ r }: { r: Row }) {
   );
 }
 
-// Nouveau bloc en haut de page : liste les prochains envois auto par
-// client actif, avec countdown "dans X jours". Chaque ligne a un bouton
-// "Forcer envoi" qui pré-remplit le dialog manuel avec ce client.
+// Nouveau bloc en haut de page : liste TOUS les prochains évènements auto
+// (envois initiaux + relances J+1 + escalades J+2 + weekly T-48h/+24h/J-0h).
+// Chaque ligne a un bouton "Forcer envoi" qui pré-remplit le dialog manuel.
 function ScheduledPulsesCard({
   list,
   totalScheduled,
   onForce,
 }: {
-  list: ScheduledPulse[] | null;
+  list: ScheduledPulseEvent[] | null;
   totalScheduled: number;
   onForce: (clientCode: string) => void;
 }) {
@@ -516,6 +539,20 @@ function ScheduledPulsesCard({
     );
   }
 
+  const kindTone = (kind: ScheduledPulseEvent["kind"]) => {
+    if (kind.endsWith("_escalation") || kind === "weekly_slack_reminder") {
+      return "bg-orange-500/15 text-orange-500 border-orange-500/40";
+    }
+    if (kind.endsWith("_followup")) return "bg-blue-500/15 text-blue-500 border-blue-500/40";
+    return "bg-muted text-muted-foreground";
+  };
+
+  const relativeLabel = (ev: ScheduledPulseEvent) => {
+    if (ev.hours_until <= 0.5) return "Maintenant";
+    if (ev.hours_until < 24) return `Dans ${Math.round(ev.hours_until)}h`;
+    return `Dans ${ev.days_until}j`;
+  };
+
   return (
     <Card className="p-4 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -524,12 +561,11 @@ function ScheduledPulsesCard({
             <Zap className="h-4 w-4 text-primary" /> Prochains envois programmés
           </h2>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Basé sur le cron pulse-send · fenêtre de dédup 30j (onboarding) / 20j (mensuel) ·
-            monthly = dernier jour ouvrable America/Toronto
+            Envois initiaux, relances J+1, escalades J+2 et cycle weekly (T-48h · +24h · ping Slack J-0)
           </p>
         </div>
         <div className="text-xs text-muted-foreground">
-          {totalScheduled} envoi{totalScheduled > 1 ? "s" : ""} planifié{totalScheduled > 1 ? "s" : ""}
+          {totalScheduled} évènement{totalScheduled > 1 ? "s" : ""} planifié{totalScheduled > 1 ? "s" : ""}
         </div>
       </div>
 
@@ -539,39 +575,47 @@ function ScheduledPulsesCard({
         </div>
       ) : (
         <div className="space-y-1.5">
-          {list.map((s, i) => {
-            const canReach = s.channels.email || s.channels.sms;
+          {list.map((ev) => {
+            const canReach = ev.channels.email || ev.channels.sms;
+            const isSlack = ev.kind === "weekly_slack_reminder";
+            const isEscalation = ev.kind.endsWith("_escalation");
+            const canForce = !isSlack && !isEscalation && canReach;
             return (
               <div
-                key={`${s.client_code}-${s.type}-${i}`}
+                key={ev.key}
                 className="grid grid-cols-12 gap-2 items-center text-xs rounded-md border border-border/50 bg-background/40 px-3 py-2"
               >
                 <div className="col-span-4 truncate">
-                  <Link to={`/admin/clients/${s.client_code}`} className="font-medium hover:underline">
-                    {s.display_name}
+                  <Link to={`/admin/pulse/${ev.client_code}`} className="font-medium hover:underline">
+                    {ev.display_name}
                   </Link>
-                  <span className="text-muted-foreground ml-1">· {s.client_code}</span>
-                </div>
-                <div className="col-span-2">
-                  <Badge variant="outline" className="text-[10px]">
-                    {s.type === "onboarding" ? "Onboarding J+7" : "Mensuel"}
-                  </Badge>
+                  <span className="text-muted-foreground ml-1">· {ev.client_code}</span>
                 </div>
                 <div className="col-span-3">
-                  <div className="font-medium">
-                    {s.days_until === 0 ? "Aujourd'hui" : `Dans ${s.days_until}j`}
-                  </div>
+                  <Badge variant="outline" className={`text-[10px] ${kindTone(ev.kind)}`}>
+                    {EVENT_LABEL[ev.kind]}
+                  </Badge>
+                </div>
+                <div className="col-span-2">
+                  <div className="font-medium">{relativeLabel(ev)}</div>
                   <div className="text-muted-foreground text-[10px]">
-                    {s.next_send_at.toLocaleDateString("fr-CA")}
+                    {ev.next_send_at.toLocaleDateString("fr-CA")} · {ev.next_send_at.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
-                <div className="col-span-2 flex gap-1">
-                  {s.channels.email && <Badge variant="outline" className="text-[10px]">email</Badge>}
-                  {s.channels.sms && <Badge variant="outline" className="text-[10px]">SMS</Badge>}
-                  {!canReach && (
-                    <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-500 border-red-500/40">
-                      aucun canal
-                    </Badge>
+                <div className="col-span-2 flex gap-1 flex-wrap">
+                  {isSlack ? (
+                    <Badge variant="outline" className="text-[10px]">Slack</Badge>
+                  ) : (
+                    <>
+                      {ev.channels.email && <Badge variant="outline" className="text-[10px]">email</Badge>}
+                      {ev.channels.sms && <Badge variant="outline" className="text-[10px]">SMS</Badge>}
+                      {isEscalation && <Badge variant="outline" className="text-[10px]">+ Slack</Badge>}
+                      {!canReach && !isEscalation && (
+                        <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-500 border-red-500/40">
+                          aucun canal
+                        </Badge>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="col-span-1 flex justify-end">
@@ -579,9 +623,14 @@ function ScheduledPulsesCard({
                     size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-[11px]"
-                    disabled={!canReach}
-                    onClick={() => onForce(s.client_code)}
-                    title={canReach ? "Forcer l'envoi maintenant" : "Client sans email ni téléphone"}
+                    disabled={!canForce}
+                    onClick={() => onForce(ev.client_code)}
+                    title={
+                      isSlack ? "Ping Slack automatique — non forçable"
+                      : isEscalation ? "Escalade Slack automatique — non forçable"
+                      : canReach ? "Forcer l'envoi maintenant"
+                      : "Client sans email ni téléphone"
+                    }
                   >
                     <Send className="h-3 w-3 mr-1" /> Forcer
                   </Button>
