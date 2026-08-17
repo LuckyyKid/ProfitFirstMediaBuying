@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, Send } from "lucide-react";
 
-type ManualPulseType = "onboarding" | "monthly";
+type ManualPulseType = "onboarding" | "monthly" | "weekly";
 
 interface Props {
   open: boolean;
@@ -40,10 +40,13 @@ interface ClientOption {
   completed_at: string | null;
 }
 
-// Modal : lance un pulse manuel (onboarding ou monthly) sur un client.
-// Appelle l'edge function pulse-send avec {manual:true}. Rappelle à l'admin
-// que le workflow de suivi automatique (relance J+1, escalade J+2) s'active
-// pareil qu'un envoi cron.
+// Modal : lance un pulse manuel (onboarding / monthly / weekly) sur un client.
+// Appelle l'edge function pulse-send avec {manual:true}.
+//   - onboarding & monthly : le suivi auto (relance J+1, escalade Slack J+2)
+//     s'active pareil qu'un envoi cron.
+//   - weekly : one-shot. Pas de suivi auto car le scheduler weekly orchestre
+//     à partir d'un meeting (client_meetings) — un envoi manuel n'en crée pas.
+//     Utile pour rejouer un test ou envoyer un weekly hors cycle meeting.
 export function SendManualPulseDialog({ open, onOpenChange, defaultClientCode, onSent }: Props) {
   const [clients, setClients] = useState<ClientOption[] | null>(null);
   const [loadingClients, setLoadingClients] = useState(false);
@@ -130,9 +133,10 @@ export function SendManualPulseDialog({ open, onOpenChange, defaultClientCode, o
         const chans: string[] = [];
         if (first?.email_sent) chans.push("email");
         if (first?.sms_sent) chans.push("SMS");
+        const suivi = type === "weekly" ? "One-shot, pas de relance auto." : "Suivi J+1/J+2 actif.";
         toast.success(
           chans.length
-            ? `Pulse ${type} envoyé (${chans.join(" + ")}). Suivi J+1/J+2 actif.`
+            ? `Pulse ${type} envoyé (${chans.join(" + ")}). ${suivi}`
             : `Pulse ${type} créé mais aucun canal envoyé.`,
         );
       }
@@ -160,8 +164,18 @@ export function SendManualPulseDialog({ open, onOpenChange, defaultClientCode, o
           <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 p-3 flex gap-2 items-start text-xs">
             <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
             <div className="text-orange-100/90">
-              Le workflow de suivi automatique s'active exactement comme un envoi cron :
-              relance email + SMS à J+1, escalade Slack #head-of-things à J+2.
+              {type === "weekly" ? (
+                <>
+                  Envoi <strong>one-shot</strong> — pas de relance auto (le suivi weekly
+                  est piloté par le scheduler de meetings, un envoi manuel ne crée pas
+                  de meeting). Utile pour tester ou rejouer un weekly hors cycle.
+                </>
+              ) : (
+                <>
+                  Le workflow de suivi automatique s'active exactement comme un envoi cron :
+                  relance email + SMS à J+1, escalade Slack #head-of-things à J+2.
+                </>
+              )}
             </div>
           </div>
 
@@ -172,6 +186,7 @@ export function SendManualPulseDialog({ open, onOpenChange, defaultClientCode, o
               <SelectContent>
                 <SelectItem value="monthly">Pulse mensuel</SelectItem>
                 <SelectItem value="onboarding">Onboarding J+7</SelectItem>
+                <SelectItem value="weekly">Pulse hebdo (meeting)</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-[11px] text-muted-foreground mt-1">

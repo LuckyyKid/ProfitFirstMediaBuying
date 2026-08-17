@@ -5,13 +5,16 @@
 // courriel + rappelé dans le SMS) pour accéder au picker de score puis au
 // verbatim. Les liens pointent tous vers `${appUrl}/pulse`.
 //
-// URL principale : ${appUrl}/pulse?code=${client_code}
-// Le pré-remplissage via ?code=X est un confort — la page fonctionne aussi
-// si le client colle son code manuellement.
+// URL principale : ${appUrl}/pulse?code=${client_code}&t=${token}
+// - `code` : pré-remplissage du code client (confort — la page marche aussi
+//   si le client le colle manuellement).
+// - `t`   : token du pulse_surveys — sert à désambiguïser quand plusieurs
+//   pulses sont ouverts en parallèle pour le même client (ex: weekly + monthly).
+//   Sans token, le lookup tombe sur le pulse le plus récent = collision possible.
 
 import { esc, normalizeLang, type Lang } from "./email-design.ts";
 
-export type PulseType = "onboarding" | "monthly" | "relational";
+export type PulseType = "onboarding" | "monthly" | "relational" | "weekly";
 export type PulseVariant = "initial" | "followup";
 
 export interface PulseTemplateParams {
@@ -23,6 +26,7 @@ export interface PulseTemplateParams {
   clientCode: string;          // affiché en gros dans l'email + rappelé en SMS
   appUrl: string;              // base de l'app frontend (ex: https://tdiaonboarding.lovable.app)
   language?: string | null;
+  token?: string | null;       // token de survey — ajouté en query (?t=) pour désambiguïser si plusieurs pulses ouverts
 }
 
 // TDIA palette (miroir de email-design.ts pour cohérence visuelle).
@@ -51,38 +55,38 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
   fr: {
     onboarding: {
       initial: {
-        subject: () => "Ta 1re semaine chez TDIA — ça va ?",
-        headline: "Deux questions rapides.",
-        question: "Sur 10, comment s'est passée ton entrée chez nous ? Et sur 10, comment tu notes notre communication ?",
-        cta: "Répondre en 30 secondes",
-        codeIntro: "Ton code client (à saisir sur la page) :",
-        microNote: "On lit chaque réponse. Promis.",
+        subject: () => "Ta 1re semaine chez TDIA — comment ça s'est passé ?",
+        headline: "Ta 1re semaine est faite.",
+        question: "Sur 10, comment ça s'est passé ?",
+        cta: "Répondre en 10 secondes",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "10 secondes, promis.",
       },
       followup: {
-        subject: () => "Toujours 30 secondes 👋",
+        subject: () => "Petit rappel — 10 secondes",
         headline: "Petit rappel.",
-        question: "Sur 10, comment s'est passée ta 1re semaine ? Et sur 10, comment tu notes notre communication ?",
+        question: "On aimerait avoir ton retour, ça ne prend que 10 secondes.",
         cta: "Répondre maintenant",
-        codeIntro: "Ton code client (à saisir sur la page) :",
-        microNote: "Ton feedback compte plus que tu penses.",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "10 secondes, c'est tout.",
       },
     },
     monthly: {
       initial: {
-        subject: (name) => `${name ? name + ", " : ""}ton feedback en 20 secondes`,
-        headline: "On fait le point.",
+        subject: (name) => `${name ? name + ", " : ""}ton feedback du mois — 10 secondes`,
+        headline: "Le mois avec nous.",
         question: "Sur 10, comment s'est passé le dernier mois avec nous ?",
-        cta: "Répondre en 20 secondes",
-        codeIntro: "Ton code client (à saisir sur la page) :",
-        microNote: "Un score + une phrase, c'est suffisant.",
+        cta: "Répondre en 10 secondes",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "10 secondes, promis.",
       },
       followup: {
-        subject: () => "Juste 20 secondes 👋",
-        headline: "Rapide rappel.",
-        question: "Sur 10, comment s'est passé le dernier mois avec nous ?",
+        subject: () => "Petit rappel — 10 secondes",
+        headline: "Petit rappel.",
+        question: "On aimerait avoir ton retour, ça ne prend que 10 secondes.",
         cta: "Répondre maintenant",
-        codeIntro: "Ton code client (à saisir sur la page) :",
-        microNote: "Ton avis nous aide à ajuster ce qu'on fait pour toi.",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "10 secondes, c'est tout.",
       },
     },
     // relational : jamais envoyé par email (logué manuellement par l'AM).
@@ -105,42 +109,62 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
         microNote: "Ton avis compte.",
       },
     },
+    // weekly : déclenché à la création d'un meeting (webhook externe). Court
+    // formulaire de 4 questions — se concentre sur la semaine qui vient de passer.
+    weekly: {
+      initial: {
+        subject: (name) => `${name ? name + ", " : ""}ton point rapide de la semaine — 30 secondes`,
+        headline: "Ta semaine avec nous.",
+        question: "Comment ça a avancé cette semaine ? On veut ton ressenti avant notre prochain meeting.",
+        cta: "Répondre en 30 secondes",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "4 questions, 30 secondes.",
+      },
+      followup: {
+        subject: () => "Petit rappel — 30 secondes avant le meeting",
+        headline: "Petit rappel.",
+        question: "On aimerait avoir ton point de la semaine avant qu'on se voie — 30 secondes.",
+        cta: "Répondre maintenant",
+        codeIntro: "Ton ID client (déjà pré-rempli dans le lien) :",
+        microNote: "30 secondes, c'est tout.",
+      },
+    },
   },
   en: {
     onboarding: {
       initial: {
         subject: () => "Your 1st week at TDIA — how did it go?",
-        headline: "Two quick questions.",
-        question: "Out of 10, how was your first week with us? And out of 10, how would you rate our communication?",
-        cta: "Answer in 30 seconds",
-        codeIntro: "Your client code (enter it on the page):",
-        microNote: "We read every reply. Promise.",
+        headline: "Your 1st week is done.",
+        question: "Out of 10, how did it go?",
+        cta: "Answer in 10 seconds",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "10 seconds, promise.",
       },
       followup: {
-        subject: () => "Still 30 seconds 👋",
+        subject: () => "Quick reminder — 10 seconds",
         headline: "Quick reminder.",
-        question: "Out of 10, how was your first week? And out of 10, how would you rate our communication?",
+        question: "We'd love your feedback — it only takes 10 seconds.",
         cta: "Answer now",
-        codeIntro: "Your client code (enter it on the page):",
-        microNote: "Your feedback matters more than you think.",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "10 seconds, that's it.",
       },
     },
     monthly: {
       initial: {
-        subject: (name) => `${name ? name + ", " : ""}your feedback in 20 seconds`,
-        headline: "Quick check-in.",
-        question: "Out of 10, how was the last month working with us?",
-        cta: "Answer in 20 seconds",
-        codeIntro: "Your client code (enter it on the page):",
-        microNote: "One score + one line is enough.",
+        subject: (name) => `${name ? name + ", " : ""}your monthly feedback — 10 seconds`,
+        headline: "This past month with us.",
+        question: "Out of 10, how was this past month with us?",
+        cta: "Answer in 10 seconds",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "10 seconds, promise.",
       },
       followup: {
-        subject: () => "Just 20 seconds 👋",
+        subject: () => "Quick reminder — 10 seconds",
         headline: "Quick reminder.",
-        question: "Out of 10, how was the last month working with us?",
+        question: "We'd love your feedback — it only takes 10 seconds.",
         cta: "Answer now",
-        codeIntro: "Your client code (enter it on the page):",
-        microNote: "Your input helps us adjust.",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "10 seconds, that's it.",
       },
     },
     relational: {
@@ -161,36 +185,62 @@ export const PULSE_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, {
         microNote: "Your input matters.",
       },
     },
+    weekly: {
+      initial: {
+        subject: (name) => `${name ? name + ", " : ""}your quick weekly check-in — 30 seconds`,
+        headline: "Your week with us.",
+        question: "How did things move this week? We want your read before our next meeting.",
+        cta: "Answer in 30 seconds",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "4 questions, 30 seconds.",
+      },
+      followup: {
+        subject: () => "Quick reminder — 30 seconds before the meeting",
+        headline: "Quick reminder.",
+        question: "We'd love your weekly read before we meet — takes 30 seconds.",
+        cta: "Answer now",
+        codeIntro: "Your client ID (already pre-filled in the link):",
+        microNote: "30 seconds, that's it.",
+      },
+    },
   },
 };
 
 export const PULSE_SMS_COPY: Record<Lang, Record<PulseType, Record<PulseVariant, (name: string, code: string, url: string) => string>>> = {
   fr: {
     onboarding: {
-      initial: (n, code, url) => `Salut ${n || ""}, c'est TDIA. Ça fait 1 semaine — 2 questions rapides (30 sec). Code client : ${code}. Réponds ici : ${url}`,
-      followup: (n, code, url) => `Salut ${n || ""}, TDIA — rappel, 30 sec pour tes 2 réponses. Code : ${code}. ${url}`,
+      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Tu viens de terminer ta 1re semaine avec nous — sur 10, comment ça s'est passé ? Ça prend 10 secondes. Ton ID client (${code}) est déjà pré-rempli dans le lien. Réponds ici : ${url}`,
+      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Petit rappel — on aimerait avoir ton retour, ça ne prend que 10 secondes. Ton ID client : ${code} (déjà pré-rempli dans le lien). Réponds ici : ${url}`,
     },
     monthly: {
-      initial: (n, code, url) => `Salut ${n || ""}, TDIA. 20 sec pour ton feedback du mois. Code client : ${code}. Réponds ici : ${url}`,
-      followup: (n, code, url) => `Salut ${n || ""}, TDIA — petit rappel, ton feedback en 20 sec. Code : ${code}. ${url}`,
+      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Sur 10, comment s'est passé le dernier mois avec nous ? Ça prend 10 secondes. Ton ID client (${code}) est déjà pré-rempli dans le lien. Réponds ici : ${url}`,
+      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Petit rappel — on aimerait avoir ton retour, ça ne prend que 10 secondes. Ton ID client : ${code} (déjà pré-rempli dans le lien). Réponds ici : ${url}`,
     },
     relational: {
-      initial: (n, code, url) => `Salut ${n || ""}, TDIA. 20 sec pour ton feedback NPS. Code client : ${code}. Réponds ici : ${url}`,
-      followup: (n, code, url) => `Salut ${n || ""}, TDIA — rappel : Code ${code}, ${url}`,
+      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. 20 secondes pour ton feedback NPS. Ton ID client : ${code}. Réponds ici : ${url}`,
+      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA — petit rappel. Ton ID client : ${code}. ${url}`,
+    },
+    weekly: {
+      initial: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Ton point rapide de la semaine avant notre prochain meeting — 4 questions, 30 secondes. Ton ID client (${code}) est déjà pré-rempli dans le lien. Réponds ici : ${url}`,
+      followup: (n, code, url) => `Salut${n ? " " + n : ""}, c'est l'équipe TDIA. Petit rappel — 30 secondes pour ton point de la semaine avant qu'on se voie. Ton ID client : ${code} (déjà pré-rempli). Réponds ici : ${url}`,
     },
   },
   en: {
     onboarding: {
-      initial: (n, code, url) => `Hi ${n || ""}, TDIA here. It's been a week — 2 quick questions (30 sec). Client code: ${code}. Answer here: ${url}`,
-      followup: (n, code, url) => `Hi ${n || ""}, TDIA — reminder, 30 sec for your 2 answers. Code: ${code}. ${url}`,
+      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. You've completed your first week with us — out of 10, how did it go? It takes 10 seconds. Your client ID (${code}) is already pre-filled in the link. Just tap here: ${url}`,
+      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick reminder — we'd love your feedback, it only takes 10 seconds. Your client ID: ${code} (already pre-filled in the link). Just tap here: ${url}`,
     },
     monthly: {
-      initial: (n, code, url) => `Hi ${n || ""}, TDIA. 20 sec for your monthly feedback. Client code: ${code}. Answer here: ${url}`,
-      followup: (n, code, url) => `Hi ${n || ""}, TDIA — quick reminder, your feedback in 20 sec. Code: ${code}. ${url}`,
+      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Out of 10, how was this past month with us? It takes 10 seconds. Your client ID (${code}) is already pre-filled in the link. Just tap here: ${url}`,
+      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick reminder — we'd love your feedback, it only takes 10 seconds. Your client ID: ${code} (already pre-filled in the link). Just tap here: ${url}`,
     },
     relational: {
-      initial: (n, code, url) => `Hi ${n || ""}, TDIA. 20 sec for your NPS feedback. Client code: ${code}. Answer here: ${url}`,
-      followup: (n, code, url) => `Hi ${n || ""}, TDIA — reminder: Code ${code}, ${url}`,
+      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. 20 seconds for your NPS feedback. Your client ID: ${code}. Answer here: ${url}`,
+      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team — quick reminder. Your client ID: ${code}. ${url}`,
+    },
+    weekly: {
+      initial: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick weekly check-in before our next meeting — 4 questions, 30 seconds. Your client ID (${code}) is already pre-filled in the link. Just tap here: ${url}`,
+      followup: (n, code, url) => `Hi${n ? " " + n : ""}, it's the TDIA team. Quick reminder — 30 seconds for your weekly read before we meet. Your client ID: ${code} (already pre-filled). Just tap here: ${url}`,
     },
   },
 };
@@ -201,9 +251,11 @@ function firstNameFrom(params: PulseTemplateParams): string {
   return raw.split(/\s+/)[0];
 }
 
-function pulsePageUrl(appUrl: string, clientCode: string): string {
+function pulsePageUrl(appUrl: string, clientCode: string, token?: string | null): string {
   const base = appUrl.replace(/\/+$/, "");
-  return `${base}/pulse?code=${encodeURIComponent(clientCode)}`;
+  const codeParam = `code=${encodeURIComponent(clientCode)}`;
+  const tokenParam = token ? `&t=${encodeURIComponent(token)}` : "";
+  return `${base}/pulse?${codeParam}${tokenParam}`;
 }
 
 export interface RenderedPulseEmail {
@@ -217,9 +269,11 @@ export function renderPulseEmail(params: PulseTemplateParams): RenderedPulseEmai
   const variant: PulseVariant = params.variant || "initial";
   const copy = PULSE_COPY[lang][params.type][variant];
   const name = firstNameFrom(params);
-  const greeting = lang === "en" ? `Hi ${name || "there"},` : `Salut ${name || ""},`;
+  const greeting = lang === "en"
+    ? `Hi ${name || "there"},`
+    : `Salut${name ? " " + name : ""},`;
   const subject = copy.subject(name);
-  const pageUrl = pulsePageUrl(params.appUrl, params.clientCode);
+  const pageUrl = pulsePageUrl(params.appUrl, params.clientCode, params.token);
 
   const inner = `
     <div style="font-family:${SANS};font-size:15px;line-height:1.6;color:${BODY};margin:0 0 6px;">${esc(greeting)}</div>
@@ -291,6 +345,6 @@ ${copy.microNote}
 export function renderPulseSMS(params: PulseTemplateParams): string {
   const lang: Lang = normalizeLang(params.language);
   const variant: PulseVariant = params.variant || "initial";
-  const url = pulsePageUrl(params.appUrl, params.clientCode);
+  const url = pulsePageUrl(params.appUrl, params.clientCode, params.token);
   return PULSE_SMS_COPY[lang][params.type][variant](firstNameFrom(params), params.clientCode, url);
 }

@@ -12,6 +12,7 @@ const corsHeaders = {
 //   "heartbeat"             -> SLACK_WEBHOOK_URL_HEARTBEAT             (#ops-heartbeat — daily ad anomaly green check)
 //   "automations_alerts"    -> SLACK_WEBHOOK_URL_AUTOMATIONS_ALERTS    (#automations-alertes — workflow failures / cadence-missed)
 //   "automations_heartbeat" -> SLACK_WEBHOOK_URL_AUTOMATIONS_HEARTBEAT (#automations-heartbeat — daily watchdog green check)
+//   "client_nps"            -> SLACK_WEBHOOK_URL_CLIENT_NPS            (#client-nps — rappel jour du meeting si NPS hebdo non rempli)
 const CHANNEL_ENV: Record<string, string> = {
   profile: "SLACK_WEBHOOK_URL",
   tracker: "SLACK_WEBHOOK_URL_TRACKER",
@@ -19,6 +20,7 @@ const CHANNEL_ENV: Record<string, string> = {
   heartbeat: "SLACK_WEBHOOK_URL_HEARTBEAT",
   automations_alerts: "SLACK_WEBHOOK_URL_AUTOMATIONS_ALERTS",
   automations_heartbeat: "SLACK_WEBHOOK_URL_AUTOMATIONS_HEARTBEAT",
+  client_nps: "SLACK_WEBHOOK_URL_CLIENT_NPS",
 };
 
 serve(async (req) => {

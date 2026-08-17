@@ -10,7 +10,7 @@ interface Props {
 
 interface Row {
   id: string;
-  type: "onboarding" | "monthly" | "relational";
+  type: "onboarding" | "monthly" | "relational" | "weekly";
   sent_at: string;
   closed_at: string | null;
   escalated_at: string | null;
@@ -20,15 +20,75 @@ interface Row {
   manual: boolean;
   slack_posted_at: string | null;
   clickup_commented_at: string | null;
-  response: { score: number; communication_score: number | null; verbatim: string | null; responded_at: string; source: string } | null;
+  response: {
+    score: number | null;
+    communication_score: number | null;
+    verbatim: string | null;
+    responded_at: string;
+    source: string;
+    nps_score: number | null;
+    confidence_next_month: number | null;
+    collab_health: "very_healthy" | "good" | "fragile" | "at_risk" | null;
+    improvement_one_thing: string | null;
+    keep_doing: string | null;
+    difficulties: string[] | null;
+    difficulties_other: string | null;
+    business_impact: number | null;
+    next_month_priority: string | null;
+    next_month_priority_other: string | null;
+    monthly_completed_at: string | null;
+    weekly_pace_score: number | null;
+    weekly_blocker: string | null;
+    weekly_next_priority: string | null;
+    weekly_completed_at: string | null;
+  } | null;
 }
+
+const COLLAB_LABEL: Record<string, string> = {
+  very_healthy: "Très sain",
+  good: "Bon",
+  fragile: "Fragile",
+  at_risk: "À risque",
+};
+const COLLAB_TONE: Record<string, string> = {
+  very_healthy: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",
+  good: "bg-yellow-500/15 text-yellow-500 border-yellow-500/40",
+  fragile: "bg-orange-500/15 text-orange-500 border-orange-500/40",
+  at_risk: "bg-red-500/15 text-red-500 border-red-500/40",
+};
+const PRIORITY_LABEL: Record<string, string> = {
+  volume: "Volume",
+  profitability: "Rentabilité",
+  test_angles: "Nouveaux angles",
+  creatives: "Créas",
+  foundation: "Fondations",
+  stabilize: "Stabiliser",
+  other: "Autre",
+};
+const DIFF_LABEL: Record<string, string> = {
+  communication: "Communication",
+  creative_quality: "Qualité créa",
+  creative_volume: "Volume créa",
+  strategy: "Stratégie",
+  timelines: "Délais",
+  reporting: "Reporting",
+  brand_understanding: "Compréhension marque",
+  other: "Autre",
+};
 
 const TRAJECTORY_DROP = 2;
 
 function typeLabel(t: Row["type"]): string {
   if (t === "onboarding") return "Onboarding J+7";
   if (t === "monthly") return "Mensuel";
+  if (t === "weekly") return "Hebdo (meeting)";
   return "NPS relationnel";
+}
+
+function paceTone(pace: number): string {
+  if (pace <= 2) return "bg-red-500/15 text-red-500 border-red-500/40";
+  if (pace === 3) return "bg-yellow-500/15 text-yellow-500 border-yellow-500/40";
+  return "bg-green-500/15 text-green-500 border-green-500/40";
 }
 
 function scoreTone(score: number, previous_score: number | null): string {
@@ -77,7 +137,14 @@ export function PulseHistoryCard({ clientCode }: Props) {
       if (ids.length > 0) {
         const { data: responses, error: rErr } = await supabase
           .from("pulse_responses")
-          .select("survey_id, score, communication_score, verbatim, responded_at, source")
+          .select(`
+            survey_id, score, communication_score, verbatim, responded_at, source,
+            nps_score, confidence_next_month, collab_health,
+            improvement_one_thing, keep_doing, difficulties, difficulties_other,
+            business_impact, next_month_priority, next_month_priority_other,
+            monthly_completed_at,
+            weekly_pace_score, weekly_blocker, weekly_next_priority, weekly_completed_at
+          `)
           .in("survey_id", ids);
         if (rErr) {
           setErr(rErr.message);
@@ -91,6 +158,21 @@ export function PulseHistoryCard({ clientCode }: Props) {
             verbatim: r.verbatim,
             responded_at: r.responded_at,
             source: r.source,
+            nps_score: (r as any).nps_score ?? null,
+            confidence_next_month: (r as any).confidence_next_month ?? null,
+            collab_health: (r as any).collab_health ?? null,
+            improvement_one_thing: (r as any).improvement_one_thing ?? null,
+            keep_doing: (r as any).keep_doing ?? null,
+            difficulties: (r as any).difficulties ?? null,
+            difficulties_other: (r as any).difficulties_other ?? null,
+            business_impact: (r as any).business_impact ?? null,
+            next_month_priority: (r as any).next_month_priority ?? null,
+            next_month_priority_other: (r as any).next_month_priority_other ?? null,
+            monthly_completed_at: (r as any).monthly_completed_at ?? null,
+            weekly_pace_score: (r as any).weekly_pace_score ?? null,
+            weekly_blocker: (r as any).weekly_blocker ?? null,
+            weekly_next_priority: (r as any).weekly_next_priority ?? null,
+            weekly_completed_at: (r as any).weekly_completed_at ?? null,
           });
         }
       }
@@ -143,10 +225,15 @@ export function PulseHistoryCard({ clientCode }: Props) {
                 <span className="font-medium text-sm">{typeLabel(r.type)}</span>
                 {r.manual && <Badge variant="outline" className="text-[10px]">manuel</Badge>}
                 <Badge variant="outline" className={`text-[10px] ${status.className}`}>{status.label}</Badge>
-                {r.response && (
+                {r.response && r.response.score != null && (
                   <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.score, r.previous_score)}`}>
                     {r.response.score}/10
                     {r.previous_score != null && ` (dernier : ${r.previous_score})`}
+                  </Badge>
+                )}
+                {r.type === "weekly" && r.response?.weekly_pace_score != null && (
+                  <Badge variant="outline" className={`text-[10px] ${paceTone(r.response.weekly_pace_score)}`}>
+                    pace {r.response.weekly_pace_score}/5
                   </Badge>
                 )}
                 {r.response?.communication_score != null && (
@@ -167,7 +254,13 @@ export function PulseHistoryCard({ clientCode }: Props) {
                 Envoyé le {fmtDate(r.sent_at)} · Canaux : {channels}
                 {r.response && ` · Répondu le ${fmtDate(r.response.responded_at)}`}
               </div>
-              {r.response?.verbatim && (
+              {r.response && r.type === "monthly" && (
+                <MonthlyDetail response={r.response} />
+              )}
+              {r.response && r.type === "weekly" && (
+                <WeeklyDetail response={r.response} />
+              )}
+              {r.response?.verbatim && r.type !== "monthly" && r.type !== "weekly" && (
                 <div className="italic text-foreground/90 pt-1 border-t border-border/40">
                   &ldquo;{r.response.verbatim}&rdquo;
                 </div>
@@ -177,5 +270,141 @@ export function PulseHistoryCard({ clientCode }: Props) {
         })}
       </div>
     </Card>
+  );
+}
+
+// Détail des 10 champs mensuels — affiché sous chaque ligne de type "monthly"
+function MonthlyDetail({ response }: { response: NonNullable<Row["response"]> }) {
+  const r = response;
+  const hasAny =
+    r.nps_score != null ||
+    r.confidence_next_month != null ||
+    r.collab_health ||
+    r.improvement_one_thing ||
+    r.keep_doing ||
+    (r.difficulties && r.difficulties.length > 0) ||
+    r.business_impact != null ||
+    r.next_month_priority ||
+    r.verbatim;
+  if (!hasAny) return null;
+
+  const diffLabels = (r.difficulties ?? [])
+    .filter((c) => c !== "other")
+    .map((c) => DIFF_LABEL[c] ?? c);
+  if ((r.difficulties ?? []).includes("other") && r.difficulties_other) {
+    diffLabels.push(`Autre — ${r.difficulties_other}`);
+  }
+
+  const priorityLabel = r.next_month_priority === "other"
+    ? `Autre — ${r.next_month_priority_other ?? "(non précisé)"}`
+    : (r.next_month_priority ? PRIORITY_LABEL[r.next_month_priority] : null);
+
+  return (
+    <div className="mt-2 pt-2 border-t border-border/40 space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {r.monthly_completed_at ? (
+          <Badge variant="outline" className="text-[10px] bg-emerald-500/15 text-emerald-500 border-emerald-500/40">
+            formulaire complet
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-500 border-yellow-500/40">
+            formulaire partiel
+          </Badge>
+        )}
+        {r.nps_score != null && (
+          <Badge variant="outline" className={`text-[10px] ${scoreTone(r.nps_score, null)}`}>
+            NPS {r.nps_score}/10
+          </Badge>
+        )}
+        {r.confidence_next_month != null && (
+          <Badge variant="outline" className="text-[10px]">
+            confiance {r.confidence_next_month}/5
+          </Badge>
+        )}
+        {r.business_impact != null && (
+          <Badge variant="outline" className="text-[10px]">
+            impact {r.business_impact}/5
+          </Badge>
+        )}
+        {r.collab_health && (
+          <Badge variant="outline" className={`text-[10px] ${COLLAB_TONE[r.collab_health] ?? ""}`}>
+            collab : {COLLAB_LABEL[r.collab_health] ?? r.collab_health}
+          </Badge>
+        )}
+        {priorityLabel && (
+          <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/40">
+            priorité : {priorityLabel}
+          </Badge>
+        )}
+      </div>
+
+      {diffLabels.length > 0 && (
+        <div className="text-[11px] text-muted-foreground">
+          <span className="font-medium text-foreground/80">Difficultés : </span>
+          {diffLabels.join(", ")}
+        </div>
+      )}
+
+      {r.verbatim && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">Raison du score : </span>
+          &ldquo;{r.verbatim}&rdquo;
+        </div>
+      )}
+      {r.improvement_one_thing && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">À améliorer : </span>
+          &ldquo;{r.improvement_one_thing}&rdquo;
+        </div>
+      )}
+      {r.keep_doing && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">À garder : </span>
+          &ldquo;{r.keep_doing}&rdquo;
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Détail des 4 champs weekly (déclenché par meeting-scheduled)
+function WeeklyDetail({ response }: { response: NonNullable<Row["response"]> }) {
+  const r = response;
+  const hasAny = r.weekly_pace_score != null || r.verbatim || r.weekly_blocker || r.weekly_next_priority;
+  if (!hasAny) return null;
+
+  return (
+    <div className="mt-2 pt-2 border-t border-border/40 space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {r.weekly_completed_at ? (
+          <Badge variant="outline" className="text-[10px] bg-emerald-500/15 text-emerald-500 border-emerald-500/40">
+            formulaire complet
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-500 border-yellow-500/40">
+            formulaire partiel
+          </Badge>
+        )}
+      </div>
+
+      {r.verbatim && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">Raison du score : </span>
+          &ldquo;{r.verbatim}&rdquo;
+        </div>
+      )}
+      {r.weekly_blocker && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">Blocker : </span>
+          &ldquo;{r.weekly_blocker}&rdquo;
+        </div>
+      )}
+      {r.weekly_next_priority && (
+        <div className="italic text-foreground/90 text-xs">
+          <span className="not-italic text-muted-foreground font-medium">Priorité semaine prochaine : </span>
+          &ldquo;{r.weekly_next_priority}&rdquo;
+        </div>
+      )}
+    </div>
   );
 }

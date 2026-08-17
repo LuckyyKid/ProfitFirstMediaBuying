@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.pulse-frontend]
 verify_jwt = false
+
+[functions.meeting-scheduled]
+verify_jwt = false
+
+[functions.pulse-weekly-scheduler]
+verify_jwt = false

@@ -39,6 +39,7 @@ const DEDUP_DAYS: Record<PulseType, number> = {
   onboarding: 30,
   monthly: 20,
   relational: 0,
+  weekly: 0,
 };
 
 // Fenêtre de détection pour le cron onboarding : ± 12h autour de J-7 pour
@@ -230,6 +231,7 @@ async function sendOnePulse(
     clientCode: client.client_code,
     appUrl: appUrl(),
     language: client.client_language,
+    token,
   });
 
   const sentChannels: string[] = [];
@@ -259,6 +261,7 @@ async function sendOnePulse(
       clientCode: client.client_code,
       appUrl: appUrl(),
       language: client.client_language,
+      token,
     });
     const sms = await sendSms(client.phone, smsBody);
     if (sms.sent) {
@@ -298,9 +301,9 @@ serve(async (req) => {
     }
 
     const rawType = String(body.type ?? "");
-    if (!["onboarding", "monthly", "relational"].includes(rawType)) {
+    if (!["onboarding", "monthly", "relational", "weekly"].includes(rawType)) {
       return new Response(
-        JSON.stringify({ error: "type must be 'onboarding' | 'monthly' | 'relational'" }),
+        JSON.stringify({ error: "type must be 'onboarding' | 'monthly' | 'relational' | 'weekly'" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -317,6 +320,15 @@ serve(async (req) => {
     const createdBy = typeof body.created_by === "string" && body.created_by.trim()
       ? body.created_by.trim()
       : (manual ? "admin_manual" : "cron");
+
+    // weekly = déclenché uniquement par le webhook meeting-scheduled (ou admin
+    // manuel). Pas de cron : pas de trigger générique côté cron loop.
+    if (type === "weekly" && !manual) {
+      return new Response(
+        JSON.stringify({ error: "weekly pulses require manual=true (triggered by meeting-scheduled webhook)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Gate: monthly cron ne s'exécute que le dernier jour ouvrable du mois.
     // Le cron pg_cron tourne quotidiennement pour tolérer un incident de cron,

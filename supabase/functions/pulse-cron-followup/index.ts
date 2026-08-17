@@ -123,6 +123,7 @@ async function sendFollowup(
     clientCode: client.client_code,
     appUrl: appUrl(),
     language: client.client_language,
+    token: survey.token,
   });
 
   if (client.email) {
@@ -150,6 +151,7 @@ async function sendFollowup(
       clientCode: client.client_code,
       appUrl: appUrl(),
       language: client.client_language,
+      token: survey.token,
     });
     const sms = await sendSms(client.phone, smsBody);
     if (sms.sent) {

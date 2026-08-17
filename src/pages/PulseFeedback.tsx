@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, AlertCircle, Heart, Send } from "lucide-react";
+import { MonthlyPulseForm, type MonthlyPrefill } from "@/components/pulse/MonthlyPulseForm";
+import { WeeklyPulseForm, type WeeklyPrefill } from "@/components/pulse/WeeklyPulseForm";
 
-type Step = "enter_code" | "picker" | "picker_communication" | "verbatim" | "done" | "no_open" | "expired";
+type Step = "enter_code" | "picker" | "picker_communication" | "verbatim" | "monthly_form" | "weekly_form" | "done" | "no_open" | "expired";
 
 interface OpenPulse {
   survey_id: string;
-  type: "onboarding" | "monthly" | "relational";
+  type: "onboarding" | "monthly" | "relational" | "weekly";
   expires_at: string;
   previous_score: number | null;
   client_display: string | null;
@@ -24,6 +26,7 @@ const typeLabel: Record<OpenPulse["type"], string> = {
   onboarding: "Onboarding · J+7",
   monthly: "Pulse mensuel",
   relational: "NPS relationnel",
+  weekly: "Pulse hebdo",
 };
 
 function normalizeCode(raw: string): string {
@@ -60,6 +63,10 @@ export default function PulseFeedback() {
   const initialScore = initialScoreParam != null && /^\d+$/.test(initialScoreParam)
     ? Math.min(10, Math.max(0, Number(initialScoreParam)))
     : null;
+  // `t` = token de la survey (envoyé dans les liens email/SMS). Sans lui,
+  // le lookup tombe sur le pulse ouvert le plus récent = risque de collision
+  // si le client a un weekly ET un monthly ouverts en même temps.
+  const initialToken = (params.get("t") ?? "").trim();
 
   const [step, setStep] = useState<Step>("enter_code");
   const [code, setCode] = useState(initialCode);
@@ -72,6 +79,8 @@ export default function PulseFeedback() {
   const [pickingCommScore, setPickingCommScore] = useState<number | null>(null);
   const [verbatim, setVerbatim] = useState("");
   const [verbatimSubmitting, setVerbatimSubmitting] = useState(false);
+  const [monthlyPrefill, setMonthlyPrefill] = useState<MonthlyPrefill | null>(null);
+  const [weeklyPrefill, setWeeklyPrefill] = useState<WeeklyPrefill | null>(null);
   const autoTriggeredRef = useRef(false);
 
   const lang: "fr" | "en" = pulse?.language ?? "fr";
@@ -148,7 +157,13 @@ export default function PulseFeedback() {
         return;
       }
       setCapturedScore(score);
-      setStep(openPulse.type === "onboarding" ? "picker_communication" : "verbatim");
+      if (openPulse.type === "onboarding") {
+        setStep("picker_communication");
+      } else if (openPulse.type === "monthly") {
+        setStep("monthly_form");
+      } else {
+        setStep("verbatim");
+      }
     } catch (e) {
       setError(t.err_network);
       console.error("[pulse-feedback] capture failed", e);
@@ -178,7 +193,7 @@ export default function PulseFeedback() {
     }
   };
 
-  const lookupCode = async (rawCode: string, autoScore: number | null = null) => {
+  const lookupCode = async (rawCode: string, autoScore: number | null = null, token: string | null = null) => {
     const clientCode = normalizeCode(rawCode);
     if (!clientCode) {
       setError(t.err_empty_code);
@@ -188,7 +203,7 @@ export default function PulseFeedback() {
     setLoading(true);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("pulse-frontend", {
-        body: { action: "lookup", client_code: clientCode },
+        body: { action: "lookup", client_code: clientCode, ...(token ? { token } : {}) },
       });
       if (fnErr) {
         setError(t.err_lookup_generic);
@@ -227,9 +242,47 @@ export default function PulseFeedback() {
       };
       setPulse(openPulse);
 
+      // ─── Weekly : pas de capture 0-10, route direct sur le formulaire ─────
+      if (openPulse.type === "weekly") {
+        if (data.response?.weekly_completed_at) {
+          setStep("done");
+          return;
+        }
+        setWeeklyPrefill({
+          weekly_pace_score: data.response?.weekly_pace_score ?? null,
+          verbatim: data.response?.verbatim ?? null,
+          weekly_blocker: data.response?.weekly_blocker ?? null,
+          weekly_next_priority: data.response?.weekly_next_priority ?? null,
+        });
+        setStep("weekly_form");
+        return;
+      }
+
       if (data.response?.score != null) {
         setCapturedScore(data.response.score);
         setVerbatim(data.response.verbatim ?? "");
+        if (openPulse.type === "monthly") {
+          // Monthly complet ? → done. Sinon reprendre le formulaire à la 1re Q vide.
+          if (data.response.monthly_completed_at) {
+            setStep("done");
+          } else {
+            setMonthlyPrefill({
+              nps_score: data.response.nps_score ?? null,
+              confidence_next_month: data.response.confidence_next_month ?? null,
+              collab_health: data.response.collab_health ?? null,
+              verbatim: data.response.verbatim ?? null,
+              improvement_one_thing: data.response.improvement_one_thing ?? null,
+              keep_doing: data.response.keep_doing ?? null,
+              difficulties: data.response.difficulties ?? null,
+              difficulties_other: data.response.difficulties_other ?? null,
+              business_impact: data.response.business_impact ?? null,
+              next_month_priority: data.response.next_month_priority ?? null,
+              next_month_priority_other: data.response.next_month_priority_other ?? null,
+            });
+            setStep("monthly_form");
+          }
+          return;
+        }
         if (data.response.communication_score != null) {
           setCapturedCommScore(data.response.communication_score);
           setStep("verbatim");
@@ -281,7 +334,7 @@ export default function PulseFeedback() {
   useEffect(() => {
     if (initialCode && !autoTriggeredRef.current) {
       autoTriggeredRef.current = true;
-      void lookupCode(initialCode, initialScore);
+      void lookupCode(initialCode, initialScore, initialToken || null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -299,6 +352,8 @@ export default function PulseFeedback() {
     setCapturedScore(null);
     setCapturedCommScore(null);
     setVerbatim("");
+    setMonthlyPrefill(null);
+    setWeeklyPrefill(null);
     setError(null);
   };
 
@@ -456,6 +511,27 @@ export default function PulseFeedback() {
                 <span>{lang === "en" ? "10 = excellent" : "10 = excellent"}</span>
               </div>
             </>
+          )}
+
+          {step === "monthly_form" && pulse && capturedScore != null && (
+            <MonthlyPulseForm
+              lang={lang}
+              clientCode={code}
+              surveyId={pulse.survey_id}
+              satisfactionScore={capturedScore}
+              prefill={monthlyPrefill ?? { verbatim }}
+              onDone={() => setStep("done")}
+            />
+          )}
+
+          {step === "weekly_form" && pulse && (
+            <WeeklyPulseForm
+              lang={lang}
+              clientCode={code}
+              surveyId={pulse.survey_id}
+              prefill={weeklyPrefill ?? undefined}
+              onDone={() => setStep("done")}
+            />
           )}
 
           {step === "verbatim" && pulse && capturedScore != null && (

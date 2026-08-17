@@ -16,7 +16,7 @@ import {
   type ScheduledPulse,
 } from "@/lib/pulseSchedule";
 
-type PulseType = "onboarding" | "monthly" | "relational";
+type PulseType = "onboarding" | "monthly" | "relational" | "weekly";
 
 interface Row {
   id: string;
@@ -33,14 +33,37 @@ interface Row {
   slack_posted_at: string | null;
   clickup_commented_at: string | null;
   response: {
-    score: number;
+    score: number | null;
     communication_score: number | null;
     verbatim: string | null;
     responded_at: string;
     source: string;
+    nps_score: number | null;
+    confidence_next_month: number | null;
+    collab_health: "very_healthy" | "good" | "fragile" | "at_risk" | null;
+    business_impact: number | null;
+    next_month_priority: string | null;
+    monthly_completed_at: string | null;
+    weekly_pace_score: number | null;
+    weekly_blocker: string | null;
+    weekly_next_priority: string | null;
+    weekly_completed_at: string | null;
   } | null;
   client_display: string | null;
 }
+
+const COLLAB_LABEL_SHORT: Record<string, string> = {
+  very_healthy: "sain",
+  good: "bon",
+  fragile: "fragile",
+  at_risk: "à risque",
+};
+const COLLAB_TONE: Record<string, string> = {
+  very_healthy: "bg-emerald-500/15 text-emerald-500 border-emerald-500/40",
+  good: "bg-yellow-500/15 text-yellow-500 border-yellow-500/40",
+  fragile: "bg-orange-500/15 text-orange-500 border-orange-500/40",
+  at_risk: "bg-red-500/15 text-red-500 border-red-500/40",
+};
 
 const TRAJECTORY_DROP = 2;
 
@@ -48,6 +71,7 @@ const typeLabel: Record<PulseType, string> = {
   onboarding: "Onboarding J+7",
   monthly: "Mensuel",
   relational: "NPS relationnel",
+  weekly: "Hebdo (meeting)",
 };
 
 function scoreTone(score: number, previous: number | null): string {
@@ -55,6 +79,12 @@ function scoreTone(score: number, previous: number | null): string {
   if (dropped) return "bg-orange-500/15 text-orange-500 border-orange-500/40";
   if (score <= 6) return "bg-red-500/15 text-red-500 border-red-500/40";
   if (score <= 8) return "bg-yellow-500/15 text-yellow-500 border-yellow-500/40";
+  return "bg-green-500/15 text-green-500 border-green-500/40";
+}
+
+function paceTone(pace: number): string {
+  if (pace <= 2) return "bg-red-500/15 text-red-500 border-red-500/40";
+  if (pace === 3) return "bg-yellow-500/15 text-yellow-500 border-yellow-500/40";
   return "bg-green-500/15 text-green-500 border-green-500/40";
 }
 
@@ -122,7 +152,7 @@ export default function AdminPulseResponses() {
 
       const [respRes, clientRes] = await Promise.all([
         ids.length
-          ? supabase.from("pulse_responses").select("survey_id, score, communication_score, verbatim, responded_at, source").in("survey_id", ids)
+          ? supabase.from("pulse_responses").select("survey_id, score, communication_score, verbatim, responded_at, source, nps_score, confidence_next_month, collab_health, business_impact, next_month_priority, monthly_completed_at, weekly_pace_score, weekly_blocker, weekly_next_priority, weekly_completed_at").in("survey_id", ids)
           : Promise.resolve({ data: [], error: null }),
         codes.length
           ? supabase.from("client_progress").select("client_code, client_name, company_name").in("client_code", codes)
@@ -134,11 +164,21 @@ export default function AdminPulseResponses() {
       const respByS = new Map<string, Row["response"]>();
       for (const r of (respRes as any).data ?? []) {
         respByS.set(r.survey_id, {
-          score: r.score,
+          score: r.score ?? null,
           communication_score: r.communication_score ?? null,
           verbatim: r.verbatim,
           responded_at: r.responded_at,
           source: r.source,
+          nps_score: r.nps_score ?? null,
+          confidence_next_month: r.confidence_next_month ?? null,
+          collab_health: r.collab_health ?? null,
+          business_impact: r.business_impact ?? null,
+          next_month_priority: r.next_month_priority ?? null,
+          monthly_completed_at: r.monthly_completed_at ?? null,
+          weekly_pace_score: r.weekly_pace_score ?? null,
+          weekly_blocker: r.weekly_blocker ?? null,
+          weekly_next_priority: r.weekly_next_priority ?? null,
+          weekly_completed_at: r.weekly_completed_at ?? null,
         });
       }
       const displayByCode = new Map<string, string | null>();
@@ -269,6 +309,7 @@ export default function AdminPulseResponses() {
               <SelectItem value="all">Tous</SelectItem>
               <SelectItem value="onboarding">Onboarding J+7</SelectItem>
               <SelectItem value="monthly">Mensuel</SelectItem>
+              <SelectItem value="weekly">Hebdo (meeting)</SelectItem>
               <SelectItem value="relational">NPS relationnel</SelectItem>
             </SelectContent>
           </Select>
@@ -331,10 +372,20 @@ export default function AdminPulseResponses() {
                   <Badge variant="outline" className="text-[10px]">{typeLabel[r.type]}</Badge>
                   {r.manual && <Badge variant="outline" className="text-[10px]">manuel</Badge>}
                   <Badge variant="outline" className={`text-[10px] ${status.className}`}>{status.label}</Badge>
-                  {r.response && (
+                  {r.response && r.response.score != null && (
                     <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.score, r.previous_score)}`}>
                       {r.response.score}/10
                       {r.previous_score != null && ` (dernier : ${r.previous_score})`}
+                    </Badge>
+                  )}
+                  {r.type === "weekly" && r.response?.weekly_pace_score != null && (
+                    <Badge variant="outline" className={`text-[10px] ${paceTone(r.response.weekly_pace_score)}`}>
+                      pace {r.response.weekly_pace_score}/5
+                    </Badge>
+                  )}
+                  {r.type === "weekly" && r.response && !r.response.weekly_completed_at && (
+                    <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-500 border-yellow-500/40">
+                      formulaire partiel
                     </Badge>
                   )}
                   {r.response?.communication_score != null && (
@@ -345,6 +396,21 @@ export default function AdminPulseResponses() {
                   {r.type === "onboarding" && r.response && r.response.communication_score == null && (
                     <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">
                       com : —
+                    </Badge>
+                  )}
+                  {r.type === "monthly" && r.response?.nps_score != null && (
+                    <Badge variant="outline" className={`text-[10px] ${scoreTone(r.response.nps_score, null)}`}>
+                      NPS {r.response.nps_score}/10
+                    </Badge>
+                  )}
+                  {r.type === "monthly" && r.response?.collab_health && (
+                    <Badge variant="outline" className={`text-[10px] ${COLLAB_TONE[r.response.collab_health] ?? ""}`}>
+                      collab {COLLAB_LABEL_SHORT[r.response.collab_health] ?? r.response.collab_health}
+                    </Badge>
+                  )}
+                  {r.type === "monthly" && r.response && !r.response.monthly_completed_at && (
+                    <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-500 border-yellow-500/40">
+                      formulaire partiel
                     </Badge>
                   )}
                   {r.followup_sent_at && !r.response && (
