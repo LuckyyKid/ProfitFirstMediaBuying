@@ -15,6 +15,7 @@ import {
   type MetaDashboardDataResponse,
   type MetaDashboardKpis,
 } from "@/lib/metaDashboardApi";
+import { CreativeLightbox } from "@/components/CreativeLightbox";
 
 const MONO = "'JetBrains Mono', ui-monospace, monospace";
 const SERIF = "'Instrument Serif', ui-serif, Georgia, serif";
@@ -1155,6 +1156,7 @@ function AdThumbnail({ url, alt }: { url: string | null; alt: string }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     url ? "loading" : "error",
   );
+  const [open, setOpen] = useState(false);
 
   if (!url || status === "error") {
     return (
@@ -1174,32 +1176,51 @@ function AdThumbnail({ url, alt }: { url: string | null; alt: string }) {
   }
 
   return (
-    <img
-      src={url}
-      alt={alt}
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        display: "block",
-        opacity: status === "loaded" ? 1 : 0.6,
-        transition: "opacity .2s",
-      }}
-      onLoad={() => setStatus("loaded")}
-      onError={(e) => {
-        const img = e.currentTarget as HTMLImageElement;
-        // eslint-disable-next-line no-console
-        console.warn("[MetaAds] thumbnail failed to load", {
-          url,
-          alt,
-          currentSrc: img.currentSrc,
-          naturalWidth: img.naturalWidth,
-        });
-        setStatus("error");
-      }}
-    />
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={`Agrandir ${alt}`}
+        style={{
+          all: "unset",
+          boxSizing: "border-box",
+          position: "absolute",
+          inset: 0,
+          cursor: "zoom-in",
+          display: "block",
+        }}
+      >
+        <img
+          src={url}
+          alt={alt}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+            opacity: status === "loaded" ? 1 : 0.6,
+            transition: "opacity .2s",
+          }}
+          onLoad={() => setStatus("loaded")}
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            // eslint-disable-next-line no-console
+            console.warn("[MetaAds] thumbnail failed to load", {
+              url,
+              alt,
+              currentSrc: img.currentSrc,
+              naturalWidth: img.naturalWidth,
+            });
+            setStatus("error");
+          }}
+        />
+      </button>
+      {open && (
+        <CreativeLightbox url={url} name={alt} onClose={() => setOpen(false)} />
+      )}
+    </>
   );
 }
 

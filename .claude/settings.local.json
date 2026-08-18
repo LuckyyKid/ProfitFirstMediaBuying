@@ -90,7 +90,14 @@
       "Bash(watchdog)",
       "Bash(anomaly)",
       "Bash(follow-up\")",
-      "Bash(schedule\")"
+      "Bash(schedule\")",
+      "Bash(node /tmp/test-slack.mjs)",
+      "Bash(node /tmp/test-cron.mjs)",
+      "Bash(node /tmp/test-slack-nps.mjs)",
+      "Bash(npx --no-install eslint src/components/admin/SendManualPulseDialog.tsx src/pages/PulseFeedback.tsx)",
+      "Bash(cd \"C:\\\\\\\\Users\\\\\\\\bafin\\\\\\\\Downloads\\\\\\\\!300\")",
+      "Bash(xargs ls *)",
+      "Bash(find *)"
     ]
   }
 }

@@ -1,17 +1,19 @@
 import { useState, CSSProperties } from "react";
 import { MetaAdsDashboard } from "@/components/portal/MetaAdsDashboard";
+import { PortalReports } from "@/components/portal/PortalReports";
 
 // ============================================================
-// Portail Client TDIA — Performance uniquement
-// Le portail montre les canaux publicitaires connectés côté admin.
-// Pour l'instant : Meta Ads. Google Ads viendra quand l'intégration
-// admin (config Sheet Porter Google) sera en place.
+// Portail Client TDIA — Performance + Rapports
+// Le portail montre les canaux publicitaires connectés côté admin
+// (Meta Ads pour l'instant, Google Ads à venir) et les rapports
+// hebdomadaires rédigés par l'account manager.
 // ============================================================
 
-type ChannelId = "meta";
+type SectionId = "meta" | "reports";
 
-const CHANNELS: { id: ChannelId; label: string }[] = [
+const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "meta", label: "Meta Ads" },
+  { id: "reports", label: "Rapports" },
   // { id: "google", label: "Google Ads" }, // activer quand l'admin aura la config Google
 ];
 
@@ -24,7 +26,7 @@ type PortalClientProps = {
 };
 
 export default function PortalClient({ clientCode, onLogout }: PortalClientProps) {
-  const [channel, setChannel] = useState<ChannelId>("meta");
+  const [section, setSection] = useState<SectionId>("meta");
 
   return (
     <div
@@ -38,8 +40,9 @@ export default function PortalClient({ clientCode, onLogout }: PortalClientProps
     >
       <PulseKeyframes />
       <Header onLogout={onLogout} />
-      <ChannelSelector channel={channel} setChannel={setChannel} />
-      {channel === "meta" && <MetaAdsDashboard clientCode={clientCode} />}
+      <SectionSelector section={section} setSection={setSection} />
+      {section === "meta" && <MetaAdsDashboard clientCode={clientCode} />}
+      {section === "reports" && <PortalReports clientCode={clientCode} />}
     </div>
   );
 }
@@ -129,14 +132,14 @@ function Header({ onLogout }: { onLogout?: () => Promise<void> | void }) {
   );
 }
 
-function ChannelSelector({
-  channel,
-  setChannel,
+function SectionSelector({
+  section,
+  setSection,
 }: {
-  channel: ChannelId;
-  setChannel: (c: ChannelId) => void;
+  section: SectionId;
+  setSection: (s: SectionId) => void;
 }) {
-  if (CHANNELS.length <= 1) return null;
+  if (SECTIONS.length <= 1) return null;
   return (
     <div
       style={{
@@ -147,8 +150,8 @@ function ChannelSelector({
         gap: 8,
       }}
     >
-      {CHANNELS.map((c) => {
-        const active = c.id === channel;
+      {SECTIONS.map((s) => {
+        const active = s.id === section;
         const style: CSSProperties = active
           ? {
               padding: "7px 15px",
@@ -170,8 +173,8 @@ function ChannelSelector({
               cursor: "pointer",
             };
         return (
-          <span key={c.id} style={style} onClick={() => setChannel(c.id)}>
-            {c.label}
+          <span key={s.id} style={style} onClick={() => setSection(s.id)}>
+            {s.label}
           </span>
         );
       })}

@@ -7,6 +7,9 @@ import { ArrowLeft, LogOut, Search } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminClients } from "@/hooks/useAdminClients";
 import { MetaAdsDashboard } from "@/components/portal/MetaAdsDashboard";
+import { AmActivityLogWidget } from "@/components/admin/AmActivityLogWidget";
+import { GenerateReportWizard } from "@/components/admin/reports/GenerateReportWizard";
+import { ReportHistoryDialog } from "@/components/admin/reports/ReportHistoryDialog";
 
 const MetaAdsMonitor = () => {
   const { isAuthed, ready, logout } = useAdminAuth();
@@ -142,9 +145,19 @@ const MetaAdsMonitor = () => {
                       {selected.code}
                     </div>
                   </div>
-                  <Button asChild size="sm" variant="ghost">
-                    <Link to={`/admin/clients/${selected.code}`}>Fiche client</Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <GenerateReportWizard
+                      clientCode={selected.code}
+                      clientLabel={selected.label}
+                    />
+                    <ReportHistoryDialog
+                      clientCode={selected.code}
+                      clientLabel={selected.label}
+                    />
+                    <Button asChild size="sm" variant="ghost">
+                      <Link to={`/admin/clients/${selected.code}`}>Fiche client</Link>
+                    </Button>
+                  </div>
                 </div>
                 <div style={{ background: "#060910" }}>
                   <MetaAdsDashboard clientCode={selected.code} initialPeriod="30j" />
@@ -158,6 +171,11 @@ const MetaAdsMonitor = () => {
           </div>
         </div>
       </div>
+
+      <AmActivityLogWidget
+        clientCode={selected?.code ?? null}
+        clientLabel={selected?.label ?? null}
+      />
     </div>
   );
 };

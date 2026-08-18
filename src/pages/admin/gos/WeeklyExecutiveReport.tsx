@@ -73,13 +73,13 @@ function weekLabel(dateStr: string): string {
 }
 
 const METRICS = [
-  { key: "revenue", label: "Revenue", unit: "€" },
-  { key: "ad_spend", label: "Ad Spend", unit: "€" },
+  { key: "revenue", label: "Revenue", unit: " $" },
+  { key: "ad_spend", label: "Ad Spend", unit: " $" },
   { key: "orders", label: "Orders", unit: "" },
   { key: "roas", label: "ROAS", unit: "x" },
   { key: "mer", label: "MER", unit: "x" },
-  { key: "cac", label: "CAC", unit: "€" },
-  { key: "aov", label: "AOV", unit: "€" },
+  { key: "cac", label: "CAC", unit: " $" },
+  { key: "aov", label: "AOV", unit: " $" },
   { key: "cvr", label: "CVR", unit: "%" },
 ];
 
@@ -365,7 +365,7 @@ export default function WeeklyExecutiveReport() {
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                         {METRICS.map(mm => (
                           <div key={mm.key} style={{ background: BG_DEEP, border: `1px solid ${BORDER}`, borderRadius: 6, padding: 8 }}>
-                            <div style={{ fontSize: 10, color: MUTED, fontWeight: 600 }}>{mm.label.toUpperCase()} ({mm.unit || "-"})</div>
+                            <div style={{ fontSize: 10, color: MUTED, fontWeight: 600 }}>{mm.label.toUpperCase()} ({mm.unit.trim() || "-"})</div>
                             <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
                               <input
                                 style={{ ...inputStyle, padding: "4px 6px", fontSize: 12 }}
